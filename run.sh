@@ -14,3 +14,6 @@ stack runghc Day01.hs
 
 echo "## Running Day02.hs..."
 stack runghc Day02.hs
+
+echo "## Running Day03.hs..."
+stack runghc Day03.hs
