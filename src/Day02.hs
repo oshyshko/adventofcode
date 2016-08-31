@@ -9,7 +9,7 @@ solve1 = sum . map (\ [w,h,l] -> let a = w * h
                                   in (a+b+c) * 2 + minimum [a,b,c])
 
 solve2 :: [[Int]] -> Int
-solve2 = sum . map (\ [w,h,l] -> (w*h*l) + 2 * minimum [w+h, h+l, w+l])
+solve2 = sum . map (\ [w,h,l] -> (w*h*l) + 2 * minimum [w+h, h+l, w+l] )
 
 main :: IO ()
 main = do
