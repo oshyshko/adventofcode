@@ -10,7 +10,7 @@ char2move x = case x of '<' -> (-1,  0)
                         _   ->  error $ "Unexpected character: " ++ [x]
 
 moves2houses :: String -> [(Int, Int)]
-moves2houses = scanl (\ (xa,ya) (x,y) -> (xa+x, ya+y) ) (0, 0)
+moves2houses = scanl (\(xa,ya) (x,y) -> (xa+x, ya+y)) (0, 0)
              . map char2move
 
 solve1 :: String -> Int
@@ -18,12 +18,11 @@ solve1 = length . nub . moves2houses
 
 solve2 :: String -> Int
 solve2 xs = let (santaPairs, robotPairs) = partition (even . fst) $ zip [0..] xs
-                santaMoves = map snd santaPairs
-                robotMoves = map snd robotPairs
-             in length . nub $ moves2houses santaMoves ++ moves2houses robotMoves
+                santaHouses = moves2houses $ map snd santaPairs
+                robotHouses = moves2houses $ map snd robotPairs
+             in length . nub $ santaHouses ++ robotHouses
 
 main :: IO ()
 main = do
-  s <- readFile "Day03.txt"
-  print $ solve1 s
-  print $ solve2 s
+  xs <- readFile "Day03.txt"
+  putStrLn $ show (solve1 xs) ++ " " ++ show (solve2 xs)
