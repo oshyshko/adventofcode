@@ -33,7 +33,7 @@ contains2EqPairs = any (farEnough .  map fst)
 
 isNice2 :: String -> Bool
 isNice2 = and . juxt
-            [ contains2EqPairs                       -- contains 2 non-overallping pairs
+            [ contains2EqPairs                       -- contains 2 non-overlapping pairs
             , any (\ (q,_,p) -> q == p) . triplets ] -- contains one with equal neighbours
 
 solve1 :: [String] -> Int
