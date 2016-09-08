@@ -1,7 +1,6 @@
 module Day05 where
 
-import Data.List (isInfixOf)
-import Util      (juxt)
+import Util (juxt)
 
 pairs :: [a] -> [(a,a)]
 pairs xs = zip xs (drop 1 xs)
@@ -18,13 +17,13 @@ isNice1 = and . juxt
                                , ('p','q')
                                , ('x','y') ]) . pairs ]
 
-contains2EqPairs :: String -> Bool
-contains2EqPairs (a:b:xs) = ([a,b] `isInfixOf` xs) || contains2EqPairs (b:xs)
-contains2EqPairs _        = False
+contains2NonConsPairs :: [(Char,Char)] -> Bool
+contains2NonConsPairs (a:bs@(_:cs)) = a `elem` cs || contains2NonConsPairs bs
+contains2NonConsPairs _             = False
 
 isNice2 :: String -> Bool
 isNice2 = and . juxt
-            [ contains2EqPairs                       -- contains 2 non-overlapping pairs
+            [ contains2NonConsPairs . pairs          -- contains 2 non-consequent pairs
             , any (\ (q,_,p) -> q == p) . triplets ] -- contains one with equal neighbours
 
 solve1 :: [String] -> Int
