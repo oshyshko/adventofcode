@@ -1,5 +1,7 @@
 module Day01 where
 
+import Control.Arrow ((&&&))
+
 char2move :: Char -> Int
 char2move x = case x of '(' ->  1
                         ')' -> -1
@@ -19,4 +21,4 @@ solve2 = fst
 main :: IO ()
 main = do
   xs <- readFile "Day01.txt"
-  putStrLn $ show (solve1 xs) ++ " " ++ show (solve2 xs)
+  print . (solve1 &&& solve2) $ xs

@@ -1,6 +1,7 @@
 module Day03 where
 
-import Data.List (nub, partition)
+import Control.Arrow ((&&&))
+import Data.List     (nub, partition)
 
 char2move :: Char -> (Int, Int)
 char2move x = case x of '<' -> (-1,  0)
@@ -25,4 +26,4 @@ solve2 xs = let (santaPairs, robotPairs) = partition (even . fst) $ zip [0..] xs
 main :: IO ()
 main = do
   xs <- readFile "Day03.txt"
-  putStrLn $ show (solve1 xs) ++ " " ++ show (solve2 xs)
+  print . (solve1 &&& solve2) $ xs

@@ -1,5 +1,6 @@
 module Day02 where
 
+import Control.Arrow   ((&&&))
 import Data.List.Split (splitOn)
 
 solve1 :: [[Int]] -> Int
@@ -13,6 +14,6 @@ solve2 = sum . map (\[w,h,l] -> (w*h*l) + 2 * minimum [w+h, h+l, w+l])
 
 main :: IO ()
 main = do
+  s <- readFile "Day02.txt"
   let lineTo3Ints = map read . splitOn "x"
-  xs <- map lineTo3Ints . lines <$> readFile "Day02.txt"
-  putStrLn $ show (solve1 xs) ++ " " ++ show (solve2 xs)
+  print . (solve1 &&& solve2) . map lineTo3Ints . lines $ s
