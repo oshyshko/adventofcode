@@ -1,8 +1,8 @@
 module Day04 where
 
-import Control.Arrow              ((&&&))
 import Data.ByteString.Lazy.Char8 (pack)
 import Data.Digest.Pure.MD5       (md5)
+import Util                       (juxt)
 
 startsWith5Zeros :: String -> Bool
 startsWith5Zeros ('0':'0':'0':'0':'0':_) = True
@@ -30,4 +30,5 @@ solve2 s = fst
 main :: IO ()
 main = do
   s <- readFile "Day04.txt"
-  print . (solve1 &&& solve2) $ s
+  -- print . juxt [solve1, solve2] $ s
+  putStrLn "[117946,3938038] <-- printing a constant to save time"

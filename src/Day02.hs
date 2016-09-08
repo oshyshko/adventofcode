@@ -1,7 +1,7 @@
 module Day02 where
 
-import Control.Arrow   ((&&&))
 import Data.List.Split (splitOn)
+import Util            (juxt)
 
 solve1 :: [[Int]] -> Int
 solve1 = sum . map (\[w,h,l] -> let a = w * h
@@ -16,4 +16,4 @@ main :: IO ()
 main = do
   s <- readFile "Day02.txt"
   let lineTo3Ints = map read . splitOn "x"
-  print . (solve1 &&& solve2) . map lineTo3Ints . lines $ s
+  print . juxt [solve1, solve2] . map lineTo3Ints . lines $ s
