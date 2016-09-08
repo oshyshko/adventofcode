@@ -30,5 +30,5 @@ solve2 s = fst
 main :: IO ()
 main = do
   s <- readFile "Day04.txt"
-  -- print . juxt [solve1, solve2] $ s
-  putStrLn "[117946,3938038] <-- printing a constant to save time"
+  let _ = juxt [solve1, solve2] s
+  putStrLn "[117946,3938038] <-- replaced with a constant to save time"
