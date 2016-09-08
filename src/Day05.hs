@@ -13,8 +13,8 @@ isNice1 :: String -> Bool
 isNice1 = and . juxt
            [ (>= 3) . length . fst . partition (`elem` "aeiou") -- contains 3+ vowels
            , any (uncurry (==)) . pairs                         -- contains 1+ symmetric pair. Note: "uncurry (==)" is equivalent to "(\(q,p) -> q == p)"
-           , not . any (`elem` [ ('a','b')                      -- does not contain these pairs:
-                               , ('c','d')                      -- ... "ab", "cd", "pq", "xy"
+           , not . any (`elem` [ ('a','b')                      -- does not contain these pairs: "ab", "cd", "pq", "xy"
+                               , ('c','d')
                                , ('p','q')
                                , ('x','y') ]) . pairs ]
 
@@ -33,7 +33,7 @@ contains2EqPairs = any (farEnough .  map fst)
 
 isNice2 :: String -> Bool
 isNice2 = and . juxt
-            [ contains2EqPairs                       -- contain 2 non-overallping pairs
+            [ contains2EqPairs                       -- contains 2 non-overallping pairs
             , any (\ (q,_,p) -> q == p) . triplets ] -- contains one with equal neighbours
 
 solve1 :: [String] -> Int
