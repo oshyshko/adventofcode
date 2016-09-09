@@ -3,7 +3,6 @@ module Day04 where
 import Data.ByteString.Lazy.Char8 (pack)
 import Data.Digest.Pure.MD5       (md5)
 import Data.List                  (isPrefixOf)
-import Util                       (juxt)
 
 solve :: Int -> String -> Int
 solve n s = fst
@@ -15,5 +14,5 @@ solve n s = fst
 main :: IO ()
 main = do
   s <- readFile "Day04.txt"
-  -- print . juxt [solve 5, solve 6] $ s
+  -- print . sequence [solve 5, solve 6] $ s
   putStrLn "[117946,3938038] <-- replaced with a constant to save time"

@@ -1,7 +1,6 @@
 module Day03 where
 
 import Data.List (nub, partition)
-import Util      (juxt)
 
 char2move :: Char -> (Int, Int)
 char2move x = case x of '<' -> (-1,  0)
@@ -26,4 +25,4 @@ solve2 xs = let (santaPairs, robotPairs) = partition (even . fst) $ zip [0..] xs
 main :: IO ()
 main = do
   xs <- readFile "Day03.txt"
-  print . juxt [solve1, solve2] $ xs
+  print . sequence [solve1, solve2] $ xs

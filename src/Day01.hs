@@ -1,7 +1,5 @@
 module Day01 where
 
-import Util (juxt)
-
 char2move :: Char -> Int
 char2move x = case x of '(' ->  1
                         ')' -> -1
@@ -21,4 +19,4 @@ solve2 = fst
 main :: IO ()
 main = do
   xs <- readFile "Day01.txt"
-  print . juxt [solve1, solve2] $ xs
+  print . sequence [solve1, solve2] $ xs
