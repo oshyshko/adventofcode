@@ -1,8 +1,8 @@
 module Day06 where
 
-import           Data.List                     (foldl', find)
+import           Data.List                     (foldl')
 import qualified Data.Map.Strict               as M
-import           Data.Maybe                    (fromMaybe, fromJust)
+import           Data.Maybe                    (fromMaybe)
 import           Text.ParserCombinators.Parsec (ParseError, char, digit, endBy,
                                                 many, parse, space, string, try,
                                                 (<|>))
