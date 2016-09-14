@@ -70,4 +70,4 @@ main = do
   s <- readFile "Day06.txt"
   case parseCommands s of
     Left e   -> error $ show e
-    Right xs -> print . sequence [solve2] $ xs
+    Right xs -> print . sequence [solve1, solve2] $ xs
