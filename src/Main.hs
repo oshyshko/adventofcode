@@ -5,6 +5,7 @@ import qualified Day02
 import qualified Day03
 import qualified Day04
 import qualified Day05
+import qualified Day06
 
 import Control.Monad (zipWithM_)
 import Text.Printf   (printf)
@@ -17,5 +18,6 @@ main = zipWithM_
     , Day03.main
     , Day04.main
     , Day05.main
+    , Day06.main
     ]
     [1..]
