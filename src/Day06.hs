@@ -65,9 +65,6 @@ solve2 = sumApplyCommands (\ op v -> case op of On     -> v + 1
                                                 Off    -> if v > 0 then v - 1 else 0
                                                 Toggle -> v + 2)
 
-find' :: Foldable t => (a -> Bool) -> t a -> a
-find' = (fromJust .) . find
-
 main :: IO ()
 main = do
   s <- readFile "Day06.txt"
