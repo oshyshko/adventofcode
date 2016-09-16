@@ -22,6 +22,7 @@ executable adventofcode-exe
                        -fno-warn-unused-do-bind
                        -fno-warn-type-defaults
   build-depends:       base
+                     , array
                      , bytestring
                      , containers
                      , parsec

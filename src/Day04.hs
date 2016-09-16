@@ -14,5 +14,4 @@ solve n s = fst
 main :: IO ()
 main = do
   s <- readFile "Day04.txt"
-  -- print . sequence [solve 5, solve 6] $ s
-  putStrLn "[117946,3938038] <-- replaced with a constant to save time"
+  print . sequence [solve 5, solve 6] $ s
