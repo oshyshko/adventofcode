@@ -4,7 +4,7 @@ import           Data.List                     (foldl')
 import qualified Data.Map.Strict               as M
 import           Data.Maybe                    (fromMaybe)
 
-import           Text.ParserCombinators.Parsec (ParseError, char, digit, endBy,
+import           Text.ParserCombinators.Parsec (GenParser, ParseError, char, digit, endBy,
                                                 many, parse, space, string, try,
                                                 (<|>))
 
@@ -18,6 +18,7 @@ parseCommands :: String -> Either ParseError [Command]
 parseCommands = parse commands ""
   where
     commands = command `endBy` eol
+    command :: GenParser Char st Command
     command = do
       o <- op
       space
@@ -26,16 +27,19 @@ parseCommands = parse commands ""
       p1 <- xy
       return (o, p0, p1)
 
+    op :: GenParser Char st Op
     op =  try (string "turn on")  *> return On
       <|> try (string "turn off") *> return Off
       <|>      string "toggle"    *> return Toggle
 
+    xy :: GenParser Char st XY
     xy = do
       x <- read <$> many digit
       char ','
       y <- read <$> many digit
       return (x,y)
 
+    eol :: GenParser Char st String
     eol = try (string "\n\r")
       <|> try (string "\r\n")
       <|>      string "\n"
