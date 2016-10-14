@@ -55,12 +55,9 @@ parseDefs = parse defs ""
 
 eval :: Exp -> State (M.Map RefId Exp) Word16
 eval e = case e of Val v   -> return v
-
-                   Ref r   -> do ee <- gets (M.! r)
-                                 v <- eval ee
+                   Ref r   -> do v <- eval =<< gets (M.! r)
                                  modify $ M.insert r (Val v)
                                  return v
-
                    Not x   -> complement <$> eval x
                    And x y -> (.&.)  <$> eval x <*> eval y
                    Or  x y -> (.|.)  <$> eval x <*> eval y
