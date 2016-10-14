@@ -40,11 +40,11 @@ parseDefs = parse defs ""
             <|> Ref <$> many1 letter
 
     ex :: GenParser Char st Exp
-    ex =  try (do          string "NOT ";     x <- rv; return $ Not x)
-      <|> try (do x <- rv; string " OR ";     y <- rv; return $ Or  x y)
-      <|> try (do x <- rv; string " AND ";    y <- rv; return $ And x y)
-      <|> try (do x <- rv; string " LSHIFT "; n <- rv; return $ Lsh x n)
-      <|> try (do x <- rv; string " RSHIFT "; n <- rv; return $ Rsh x n)
+    ex =  try (Not <$>      (string "NOT "      *> rv))
+      <|> try (Or  <$> rv <* string " OR "     <*> rv)
+      <|> try (And <$> rv <* string " AND "    <*> rv)
+      <|> try (Lsh <$> rv <* string " LSHIFT " <*> rv)
+      <|> try (Rsh <$> rv <* string " RSHIFT " <*> rv)
       <|>      rv
 
     eol :: GenParser Char st String
