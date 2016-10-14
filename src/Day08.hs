@@ -12,18 +12,18 @@ unescapeStr :: GenParser Char st String
 unescapeStr = do char '"'; s <- many unescapeChar; char '"'; return s
 
 unescapeChar :: GenParser Char st Char
-unescapeChar = try (do string "\\\\"; return '\\')
-           <|> try (do string "\\\""; return '"')
-           <|> try (do string "\\x"; _ <- hexDigit; _ <- hexDigit; return '#')
-           <|>     noneOf "\""
+unescapeChar = char   '\\' *> (    char  '\\' *> return '\\'
+                               <|> char  '\"' *> return '"'
+                               <|> (char 'x'  >> hexDigit >> hexDigit >> return '#'))
+           <|> noneOf "\""
 
 escapeLines :: GenParser Char st [String]
 escapeLines = escapeStr `endBy` eol
 
 escapeStr :: GenParser Char st String
-escapeStr =  do ss <- many $  try (do char '\\'; return "\\\\")
-                          <|> try (do char '"';  return "\\\"")
-                          <|> try (do s <- noneOf "\n\r"; return [s]);
+escapeStr =  do ss <- many $     char    '\\'   *>  return "\\\\"
+                             <|> char    '"'    *>  return "\\\""
+                             <|> (noneOf "\n\r" >>= return . (:[]))
                 return $ "\"" ++ concat ss ++ "\""
 
 eol :: GenParser Char st String
