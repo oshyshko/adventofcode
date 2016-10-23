@@ -6,7 +6,7 @@ import           Data.Bits                     (complement, shiftL, shiftR,
 import qualified Data.Map.Strict               as M
 import           Data.Word                     (Word16)
 
-import           Text.ParserCombinators.Parsec (GenParser, ParseError, digit,
+import           Text.ParserCombinators.Parsec (ParseError, Parser, digit,
                                                 endBy, letter, many1, parse,
                                                 string, try, (<|>))
 
@@ -21,13 +21,10 @@ data Exp = Val Word16
          | Lsh Exp Exp
          | Rsh Exp Exp deriving Show
 
-parseDefs :: String -> Either ParseError [Def]
-parseDefs = parse defs ""
+defs :: Parser [Def]
+defs = def `endBy` eol
   where
-    defs :: GenParser Char st [Def]
-    defs = def `endBy` eol
-
-    def :: GenParser Char st Def
+    def :: Parser Def
     def = do
       left <- ex
       string " -> "
@@ -35,11 +32,11 @@ parseDefs = parse defs ""
       case right of Ref refId -> return (refId, left)
                     _         -> error $ "Expected Ref, but got: " ++ show right
 
-    rv :: GenParser Char st Exp
+    rv :: Parser Exp
     rv = Val . read <$> many1 digit
             <|> Ref <$> many1 letter
 
-    ex :: GenParser Char st Exp
+    ex :: Parser Exp
     ex =  try (Not <$>      (string "NOT "      *> rv))
       <|> try (Or  <$> rv <* string " OR "     <*> rv)
       <|> try (And <$> rv <* string " AND "    <*> rv)
@@ -47,7 +44,7 @@ parseDefs = parse defs ""
       <|> try (Rsh <$> rv <* string " RSHIFT " <*> rv)
       <|>      rv
 
-    eol :: GenParser Char st String
+    eol :: Parser String
     eol = try (string "\n\r")
       <|> try (string "\r\n")
       <|>      string "\n"
@@ -73,7 +70,7 @@ solve2 m = evalState (eval $ Ref "a") $ M.insert "b" (Val $ solve1 m) m
 main :: IO ()
 main = do
   s <- readFile "Day07.txt"
-  case parseDefs s :: Either ParseError [Def] of
+  case parse defs "defs" s :: Either ParseError [Def] of
     Left e   -> error $ show e
     Right xs -> print . sequence [ solve1
                                  , solve2

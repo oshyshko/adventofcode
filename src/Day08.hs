@@ -1,32 +1,32 @@
 module Day08 where
 
-import           Text.ParserCombinators.Parsec (GenParser, ParseError,
+import           Text.ParserCombinators.Parsec (Parser, ParseError,
                                                 char, endBy, hexDigit, many,
                                                 noneOf, parse, string, try,
                                                 (<|>))
 
-unescapeLines :: GenParser Char st [String]
+unescapeLines :: Parser [String]
 unescapeLines = unescapeStr `endBy` eol
 
-unescapeStr :: GenParser Char st String
+unescapeStr :: Parser String
 unescapeStr = do char '"'; s <- many unescapeChar; char '"'; return s
 
-unescapeChar :: GenParser Char st Char
+unescapeChar :: Parser Char
 unescapeChar = char   '\\' *> (    char  '\\' *> return '\\'
                                <|> char  '\"' *> return '"'
                                <|> (char 'x'  >> hexDigit >> hexDigit >> return '#'))
            <|> noneOf "\""
 
-escapeLines :: GenParser Char st [String]
+escapeLines :: Parser [String]
 escapeLines = escapeStr `endBy` eol
 
-escapeStr :: GenParser Char st String
+escapeStr :: Parser String
 escapeStr =  do ss <- many $     char    '\\'   *>  return "\\\\"
                              <|> char    '"'    *>  return "\\\""
                              <|> (noneOf "\n\r" >>= return . (:[]))
                 return $ "\"" ++ concat ss ++ "\""
 
-eol :: GenParser Char st String
+eol :: Parser String
 eol = try (string "\n\r")
   <|> try (string "\r\n")
   <|>      string "\n"

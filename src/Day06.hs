@@ -4,7 +4,7 @@ import           Data.List                     (foldl')
 import qualified Data.Map.Strict               as M
 import           Data.Maybe                    (fromMaybe)
 
-import           Text.ParserCombinators.Parsec (GenParser, ParseError, char, digit, endBy,
+import           Text.ParserCombinators.Parsec (Parser, ParseError, char, digit, endBy,
                                                 many, parse, space, string, try,
                                                 (<|>))
 
@@ -14,32 +14,24 @@ type Command = (Op, XY, XY)
 data Op      = On | Off | Toggle deriving Show
 type XY      = (Int, Int)
 
-parseCommands :: String -> Either ParseError [Command]
-parseCommands = parse commands ""
+commands :: Parser [Command]
+commands = command `endBy` eol
   where
-    commands = command `endBy` eol
-    command :: GenParser Char st Command
-    command = do
-      o <- op
-      space
-      p0 <- xy
-      string " through "
-      p1 <- xy
-      return (o, p0, p1)
+    command :: Parser Command
+    command = (,,) <$> op <* space
+                   <*> xy <* string " through "
+                   <*> xy
 
-    op :: GenParser Char st Op
+    op :: Parser Op
     op =  try (string "turn on")  *> return On
       <|> try (string "turn off") *> return Off
       <|>      string "toggle"    *> return Toggle
 
-    xy :: GenParser Char st XY
-    xy = do
-      x <- read <$> many digit
-      char ','
-      y <- read <$> many digit
-      return (x,y)
+    xy :: Parser XY
+    xy = (,) <$> (read <$> many digit) <* char ','
+             <*> (read <$> many digit)
 
-    eol :: GenParser Char st String
+    eol :: Parser String
     eol = try (string "\n\r")
       <|> try (string "\r\n")
       <|>      string "\n"
@@ -71,7 +63,7 @@ solve2 op v = case op of On     -> v + 1
 main :: IO ()
 main = do
   s <- readFile "Day06.txt"
-  case parseCommands s :: Either ParseError [Command] of
+  case parse commands "commands" s :: Either ParseError [Command] of
     Left e   -> error $ show e
     Right xs -> print . sequence [ sumApplyCommands solve1
                                  , sumApplyCommands solve2

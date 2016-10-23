@@ -1,8 +1,13 @@
 module Day06Perf where
 
-import Day06         (Command, Op (..), XY, parseCommands, solve1, solve2)
+import           Day06                         (Command, Op (..), XY, commands,
+                                                solve1, solve2)
 
-import Data.Array.IO (IOUArray, getElems, newArray, readArray, writeArray)
+import           Data.Array.IO                 (IOUArray, getElems, newArray,
+                                                readArray, writeArray)
+
+import           Text.ParserCombinators.Parsec (parse)
+
 
 type Matrix = IOUArray Int Int
 
@@ -24,15 +29,15 @@ applyCommand f m (op, (x0,y0), (x1,y1)) =
                   x <- [x0..x1]]
 
 sumApplyCommands :: (Op -> Int -> Int) -> [Command] -> IO Int
-sumApplyCommands f commands = do
+sumApplyCommands f xs = do
   m <- newArray (0, side * side -1) 0
-  mapM_ (applyCommand f m) commands
+  mapM_ (applyCommand f m) xs
   sum . map fromIntegral <$> getElems m
 
 main :: IO ()
 main = do
   s <- readFile "Day06.txt"
-  case parseCommands s of
+  case parse commands "commands" s of
     Left e   -> error $ show e
     Right xs -> print =<< (sequence <$> sequence [ sumApplyCommands solve1
                                                  , sumApplyCommands solve2
