@@ -25,11 +25,11 @@ defs = def `endBy` eol
 
 solve :: [FromToDist] -> [Int]
 solve ftds =
-  let locations      = L.nub      $ concat [ [f,t]        | (f,t,_) <- ftds ]
-      fromTo2dist    = M.fromList $ concat [ [((f,t), d),
-                                              ((t,f), d)] | (f,t,d) <- ftds ]
+  let locations      = L.nub      $ concat [ [a,b]        | (a,b,_) <- ftds ]
+      ab2dist        = M.fromList $ concat [ [((a,b), d),
+                                              ((b,a), d)] | (a,b,d) <- ftds ]
       links     path = zip path (tail path)
-      path2dist path = sum $ map (fromTo2dist M.!) (links path)
+      path2dist path = sum $ map (ab2dist M.!) (links path)
    in map path2dist (L.permutations locations)
 
 main :: IO ()
