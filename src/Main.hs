@@ -9,6 +9,7 @@ import qualified Day05
 import qualified Day06Perf
 import qualified Day07
 import qualified Day08
+import qualified Day09
 
 import Text.Printf (printf)
 
@@ -24,6 +25,7 @@ main = mapM_
      , ("06Perf", Day06Perf.main)
      , ("07",     Day07.main)
      , ("08",     Day08.main)
+     , ("09",     Day09.main)
     ]
     >> putStrLn ""
     >> putStrLn "[*] replaced with a constant to save time"
