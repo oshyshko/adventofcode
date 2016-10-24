@@ -1,9 +1,10 @@
 module Day10 where
 
-import qualified Data.List as L
+import           Control.Monad ((<=<))
+import qualified Data.List     as L
 
 solve :: String -> String
-solve s = concat . concat $ [ [show . length $ x, [head x]] | x <- L.group s]
+solve = concat . sequence [show . length, (:[]) . head] <=< L.group
 
 main :: IO ()
 main = do
