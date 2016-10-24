@@ -26,6 +26,7 @@ main = mapM_
      , ("07",     Day07.main)
      , ("08",     Day08.main)
      , ("09",     Day09.main)
+     , ("10",     Day10.main)
     ]
     >> putStrLn ""
     >> putStrLn "[*] replaced with a constant to save time"
