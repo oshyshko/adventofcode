@@ -1,4 +1,4 @@
-module Day03 where
+module Y2015.D03 where
 
 import Data.List (nub, partition)
 
@@ -22,7 +22,7 @@ solve2 xs = let (santaPairs, robotPairs) = partition (even . fst) $ zip [0..] xs
                 robotHouses = moves2houses $ map snd robotPairs
              in length . nub $ santaHouses ++ robotHouses
 
-main :: IO ()
-main = do
-  xs <- readFile "Day03.txt"
-  print . sequence [solve1, solve2] $ xs
+
+
+solve :: String -> [Int]
+solve = sequence [solve1, solve2]

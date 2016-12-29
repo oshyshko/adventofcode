@@ -1,4 +1,4 @@
-module Day08 where
+module Y2015.D08 where
 
 import           Text.ParserCombinators.Parsec (Parser, ParseError,
                                                 char, endBy, hexDigit, many,
@@ -42,7 +42,5 @@ solve2 s  =   case parse escapeLines "escapeLines" s :: Either ParseError [Strin
     Left e   -> error $ show e
     Right xs -> sum (map length xs) - sum (map length $ lines s)
 
-main :: IO ()
-main = do
-  s <- readFile "Day08.txt"
-  print [solve1 s, solve2 s]
+solve :: String -> [Int]
+solve = sequence [solve1, solve2]

@@ -1,4 +1,4 @@
-module Day02 where
+module Y2015.D02 where
 
 import Data.List.Split (splitOn)
 
@@ -11,8 +11,6 @@ solve1 = sum . map (\[w,h,l] -> let a = w * h
 solve2 :: [[Int]] -> Int
 solve2 = sum . map (\[w,h,l] -> (w*h*l) + 2 * minimum [w+h, h+l, w+l])
 
-main :: IO ()
-main = do
-  s <- readFile "Day02.txt"
-  let lineTo3Ints = map read . splitOn "x"
-  print . sequence [solve1, solve2] . map lineTo3Ints . lines $ s
+solve :: String -> [Int]
+solve = sequence [solve1, solve2] . map lineTo3Ints . lines
+          where lineTo3Ints = map read . splitOn "x"

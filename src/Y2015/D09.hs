@@ -1,4 +1,4 @@
-module Day09 where
+module Y2015.D09 where
 
 import qualified Data.List                     as L
 import qualified Data.Map                      as M
@@ -23,8 +23,8 @@ defs = def `endBy` eol
       <|>      string "\n"
       <|>      string "\r"
 
-solve :: [FromToDist] -> [Int]
-solve ftds =
+solve' :: [FromToDist] -> [Int]
+solve' ftds =
   let locations      = L.nub      $ concat [ [a,b]        | (a,b,_) <- ftds ]
       ab2dist        = M.fromList $ concat [ [((a,b), d),
                                               ((b,a), d)] | (a,b,d) <- ftds ]
@@ -32,11 +32,10 @@ solve ftds =
       path2dist path = sum $ map (ab2dist M.!) (links path)
    in map path2dist (L.permutations locations)
 
-main :: IO ()
-main = do
-  s <- readFile "Day09.txt"
+solve :: String -> [Int]
+solve s =
   case parse defs "defs" s :: Either ParseError [FromToDist] of
     Left e   -> error $ show e
-    Right xs -> print . sequence [ minimum . solve
-                                 , maximum . solve
-                                 ] $ xs
+    Right xs -> sequence [ minimum . solve'
+                         , maximum . solve'
+                         ] xs

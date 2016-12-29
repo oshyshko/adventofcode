@@ -1,4 +1,4 @@
-module Day07 where
+module Y2015.D07 where
 
 import           Control.Monad.State           (State, evalState, gets, modify)
 import           Data.Bits                     (complement, shiftL, shiftR,
@@ -67,11 +67,10 @@ solve1 = evalState (eval $ Ref "a")
 solve2 :: M.Map RefId Exp -> Word16
 solve2 m = evalState (eval $ Ref "a") $ M.insert "b" (Val $ solve1 m) m
 
-main :: IO ()
-main = do
-  s <- readFile "Day07.txt"
+solve :: String -> [Word16]
+solve s =
   case parse defs "defs" s :: Either ParseError [Def] of
     Left e   -> error $ show e
-    Right xs -> print . sequence [ solve1
-                                 , solve2
-                                 ] $ M.fromList xs
+    Right xs -> sequence [ solve1
+                         , solve2
+                         ] $ M.fromList xs

@@ -1,4 +1,4 @@
-module Day06 where
+module Y2015.D06 where
 
 import           Data.List                     (foldl')
 import qualified Data.Map.Strict               as M
@@ -60,11 +60,10 @@ solve2 op v = case op of On     -> v + 1
                          Off    -> if v > 0 then v - 1 else 0
                          Toggle -> v + 2
 
-main :: IO ()
-main = do
-  s <- readFile "Day06.txt"
+solve :: String -> [Int]
+solve s =
   case parse commands "commands" s :: Either ParseError [Command] of
     Left e   -> error $ show e
-    Right xs -> print . sequence [ sumApplyCommands solve1
-                                 , sumApplyCommands solve2
-                                 ] $ xs
+    Right xs -> sequence [ sumApplyCommands solve1
+                         , sumApplyCommands solve2
+                         ] xs

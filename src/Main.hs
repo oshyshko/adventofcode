@@ -1,33 +1,34 @@
 module Main where
 
-import qualified Day01
-import qualified Day02
-import qualified Day03
--- import qualified Day04
-import qualified Day05
--- import qualified Day06
-import qualified Day06Perf
-import qualified Day07
-import qualified Day08
-import qualified Day09
-import qualified Day10
+import           Text.Printf   (printf)
 
-import Text.Printf (printf)
+import qualified Y2015.D01
+import qualified Y2015.D02
+import qualified Y2015.D03
+import qualified Y2015.D04
+import qualified Y2015.D05
+import qualified Y2015.D06
+import qualified Y2015.D06Perf
+import qualified Y2015.D07
+import qualified Y2015.D08
+import qualified Y2015.D09
+import qualified Y2015.D10
 
 main :: IO ()
 main = mapM_
-    (\ (day, ioa) -> printf "Day%-10s: " day >> ioa)
-    [  ("01",     Day01.main)
-     , ("02",     Day02.main)
-     , ("03",     Day03.main)
-     , ("04 *",   putStrLn "[117946,3938038]")
-     , ("05",     Day05.main)
-    --  , ("06",     Day06.main)
-     , ("06Perf", Day06Perf.main)
-     , ("07",     Day07.main)
-     , ("08",     Day08.main)
-     , ("09",     Day09.main)
-     , ("10",     Day10.main)
+    (\(file, day, solve) ->
+      do input <- readFile ("res/" ++ file ++ ".txt")
+         answers <- solve input
+         printf "%-14s: %s\n" day (show answers))
+    [ ("Y2015/D01", "Y2015.D01", return . Y2015.D01.solve)
+    , ("Y2015/D02", "Y2015.D02", return . Y2015.D02.solve)
+    , ("Y2015/D03", "Y2015.D03", return . Y2015.D03.solve)
+    , ("Y2015/D04", "Y2015.D04", return . Y2015.D04.solve)
+    , ("Y2015/D05", "Y2015.D05", return . Y2015.D05.solve)
+    , ("Y2015/D06", "Y2015.D06", return . Y2015.D06.solve)
+    , ("Y2015/D06", "Y2015.D06Perf",      Y2015.D06Perf.solve)
+    , ("Y2015/D07", "Y2015.D07", return . map fromIntegral . Y2015.D07.solve)
+    , ("Y2015/D08", "Y2015.D08", return . Y2015.D08.solve)
+    , ("Y2015/D09", "Y2015.D09", return . Y2015.D09.solve)
+    , ("Y2015/D10", "Y2015.D10", return . Y2015.D10.solve)
     ]
-    >> putStrLn ""
-    >> putStrLn "[*] replaced with a constant to save time"

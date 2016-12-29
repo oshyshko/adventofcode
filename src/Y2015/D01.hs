@@ -1,4 +1,4 @@
-module Day01 where
+module Y2015.D01 where
 
 char2move :: Char -> Int
 char2move x = case x of '(' ->  1
@@ -16,7 +16,5 @@ solve2 = fst
        . scanl (+) 0
        . map char2move
 
-main :: IO ()
-main = do
-  xs <- readFile "Day01.txt"
-  print . sequence [solve1, solve2] $ xs
+solve :: String -> [Int]
+solve = sequence [solve1, solve2]

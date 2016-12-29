@@ -1,4 +1,4 @@
-module Day05 where
+module Y2015.D05 where
 
 pairs :: [a] -> [(a,a)]
 pairs xs = zip xs (drop 1 xs)
@@ -30,7 +30,6 @@ solve1 = length . filter isNice1
 solve2 :: [String] -> Int
 solve2 = length . filter isNice2
 
-main :: IO ()
-main = do
-  xs <- readFile "Day05.txt"
-  print . sequence [solve1, solve2] . lines $ xs
+
+solve :: String -> [Int]
+solve = sequence [solve1, solve2] . lines

@@ -5,6 +5,4 @@ set -xue
 # jump to project directory
 cd "$(dirname $0)/../"
 
-cd src
-
-stack runghc Main.hs
+stack runghc src/Main.hs
