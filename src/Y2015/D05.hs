@@ -24,12 +24,8 @@ isNice2 = and . sequence
             [ contains2NonConsPairs . pairs          -- contains 2 non-consequent pairs
             , any (\ (q,_,p) -> q == p) . triplets ] -- contains one with equal neighbours
 
-solve1 :: [String] -> Int
-solve1 = length . filter isNice1
+solve1 :: String -> Int
+solve1 = length . filter isNice1 . lines
 
-solve2 :: [String] -> Int
-solve2 = length . filter isNice2
-
-
-solve :: String -> [Int]
-solve = sequence [solve1, solve2] . lines
+solve2 :: String -> Int
+solve2 = length . filter isNice2 . lines

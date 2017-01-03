@@ -1,7 +1,7 @@
 module Y2015.D06Perf where
 
-import           Y2015.D06                     (Command, Op (..), XY, commands,
-                                                solve1, solve2)
+import           Y2015.D06                     (Command, Op (..), XY, apply1,
+                                                apply2, commands)
 
 import           Data.Array.IO                 (IOUArray, getElems, newArray,
                                                 readArray, writeArray)
@@ -34,11 +34,12 @@ sumApplyCommands f xs = do
   mapM_ (applyCommand f m) xs
   sum . map fromIntegral <$> getElems m
 
+solve1 :: String -> IO Int
+solve1 s = either (error . show)
+                  (sumApplyCommands apply1)
+                  (parse commands "commands" s)
 
-solve :: String -> IO [Int]
-solve s =
-  case parse commands "commands" s of
-    Left e   -> error $ show e
-    Right xs -> sequence <$> sequence [ sumApplyCommands solve1
-                                      , sumApplyCommands solve2
-                                      ] $ xs
+solve2 :: String -> IO Int
+solve2 s = either (error . show)
+                  (sumApplyCommands apply2)
+                  (parse commands "commands" s)

@@ -21,8 +21,3 @@ solve2 xs = let (santaPairs, robotPairs) = partition (even . fst) $ zip [0..] xs
                 santaHouses = moves2houses $ map snd santaPairs
                 robotHouses = moves2houses $ map snd robotPairs
              in length . nub $ santaHouses ++ robotHouses
-
-
-
-solve :: String -> [Int]
-solve = sequence [solve1, solve2]

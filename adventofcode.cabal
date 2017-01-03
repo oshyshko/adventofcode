@@ -19,18 +19,23 @@ executable adventofcode-exe
   -- ghc-options:         -threaded -with-rtsopts=-N -rtsopts -O2 -optc-O3
   -- ghc-options:         -rtsopts -O2 -optc-O3
   ghc-options:         -Wall
-                       -fno-warn-unused-do-bind
+                    --    -Werror
+                       -fwarn-incomplete-patterns
                        -fno-warn-type-defaults
+                       -fno-warn-unused-do-bind
+                    --    -fno-warn-unused-imports
+                       -O2 -optc-O3
                     --    -rtsopts -eventlog
-                    --    -O2 -optc-O3
   build-depends:       base
                      , array
                      , bytestring
                      , containers
+                     , deepseq
                      , mtl
                      , parsec
                      , pureMD5
                      , split
+                     , time
   default-language:    Haskell2010
 
 test-suite adventofcode-test

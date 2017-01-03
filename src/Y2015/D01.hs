@@ -12,9 +12,6 @@ solve2 :: String -> Int
 solve2 = fst
        . head
        . dropWhile (\(_, x) -> x >= 0)
-       . zip [1..]
+       . zip [0..]
        . scanl (+) 0
        . map char2move
-
-solve :: String -> [Int]
-solve = sequence [solve1, solve2]

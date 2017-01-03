@@ -11,5 +11,8 @@ solve' n s = fst
           . map (\x -> (x, show . md5 . pack $ s ++ show x))
           $ [1..]
 
-solve :: String -> [Int]
-solve = sequence [solve' 5, solve' 6]
+solve1 :: String -> Int
+solve1 = solve' 5
+
+solve2 :: String -> Int
+solve2 = solve' 6

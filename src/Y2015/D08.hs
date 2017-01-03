@@ -1,9 +1,8 @@
 module Y2015.D08 where
 
-import           Text.ParserCombinators.Parsec (Parser, ParseError,
-                                                char, endBy, hexDigit, many,
-                                                noneOf, parse, string, try,
-                                                (<|>))
+import           Text.ParserCombinators.Parsec (Parser, char, endBy, hexDigit,
+                                                many, noneOf, parse, string,
+                                                try, (<|>))
 
 unescapeLines :: Parser [String]
 unescapeLines = unescapeStr `endBy` eol
@@ -33,14 +32,11 @@ eol = try (string "\n\r")
   <|>      string "\r"
 
 solve1 :: String -> Int
-solve1 s  =   case parse unescapeLines "unescapeLines" s :: Either ParseError [String] of
-    Left e   -> error $ show e
-    Right xs -> sum (map length $ lines s) - sum (map length xs)
+solve1 s  = either (error . show)
+                   (\xs -> sum (map length $ lines s) - sum (map length xs))
+                   (parse unescapeLines "escapeLines" s)
 
 solve2 :: String -> Int
-solve2 s  =   case parse escapeLines "escapeLines" s :: Either ParseError [String] of
-    Left e   -> error $ show e
-    Right xs -> sum (map length xs) - sum (map length $ lines s)
-
-solve :: String -> [Int]
-solve = sequence [solve1, solve2]
+solve2 s  = either (error . show)
+                   (\xs -> sum (map length xs) - sum (map length $ lines s))
+                   (parse escapeLines "escapeLines" s)

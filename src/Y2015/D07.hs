@@ -6,7 +6,7 @@ import           Data.Bits                     (complement, shiftL, shiftR,
 import qualified Data.Map.Strict               as M
 import           Data.Word                     (Word16)
 
-import           Text.ParserCombinators.Parsec (ParseError, Parser, digit,
+import           Text.ParserCombinators.Parsec (Parser, digit,
                                                 endBy, letter, many1, parse,
                                                 string, try, (<|>))
 
@@ -61,16 +61,18 @@ eval e = case e of Val v   -> return v
                    Lsh x n -> shiftL <$> eval x <*> (fromIntegral <$> eval n)
                    Rsh x n -> shiftR <$> eval x <*> (fromIntegral <$> eval n)
 
-solve1 :: M.Map RefId Exp -> Word16
-solve1 = evalState (eval $ Ref "a")
+apply1 :: M.Map RefId Exp -> Word16
+apply1 = evalState (eval $ Ref "a")
 
-solve2 :: M.Map RefId Exp -> Word16
-solve2 m = evalState (eval $ Ref "a") $ M.insert "b" (Val $ solve1 m) m
+apply2 :: M.Map RefId Exp -> Word16
+apply2 m = evalState (eval $ Ref "a") $ M.insert "b" (Val $ apply1 m) m
 
-solve :: String -> [Word16]
-solve s =
-  case parse defs "defs" s :: Either ParseError [Def] of
-    Left e   -> error $ show e
-    Right xs -> sequence [ solve1
-                         , solve2
-                         ] $ M.fromList xs
+solve1 :: String -> Int
+solve1 s = either (error . show)
+                  (fromIntegral . apply1)
+                  (M.fromList <$> parse defs "defs" s)
+
+solve2 :: String -> Int
+solve2 s = either (error . show)
+                  (fromIntegral . apply2)
+                  (M.fromList <$> parse defs "defs" s)

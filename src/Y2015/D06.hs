@@ -4,7 +4,7 @@ import           Data.List                     (foldl')
 import qualified Data.Map.Strict               as M
 import           Data.Maybe                    (fromMaybe)
 
-import           Text.ParserCombinators.Parsec (Parser, ParseError, char, digit, endBy,
+import           Text.ParserCombinators.Parsec (Parser, char, digit, endBy,
                                                 many, parse, space, string, try,
                                                 (<|>))
 
@@ -50,20 +50,22 @@ sumApplyCommands f = sum
                    . M.toList
                    . foldl' (applyCommand f) M.empty
 
-solve1 :: Op -> Int -> Int
-solve1 op v = case op of On     -> 1
+apply1 :: Op -> Int -> Int
+apply1 op v = case op of On     -> 1
                          Off    -> 0
                          Toggle -> if v == 1 then 0 else 1
 
-solve2 :: Op -> Int -> Int
-solve2 op v = case op of On     -> v + 1
+apply2 :: Op -> Int -> Int
+apply2 op v = case op of On     -> v + 1
                          Off    -> if v > 0 then v - 1 else 0
                          Toggle -> v + 2
 
-solve :: String -> [Int]
-solve s =
-  case parse commands "commands" s :: Either ParseError [Command] of
-    Left e   -> error $ show e
-    Right xs -> sequence [ sumApplyCommands solve1
-                         , sumApplyCommands solve2
-                         ] xs
+solve1 :: String -> Int
+solve1 s = either (error . show)
+                  (sumApplyCommands apply1)
+                  (parse commands "commands" s)
+
+solve2 :: String -> Int
+solve2 s = either (error . show)
+                  (sumApplyCommands apply2)
+                  (parse commands "commands" s)
