@@ -1,4 +1,4 @@
-module Y2015.D01 where
+module Y15.D01 where
 
 char2move :: Char -> Int
 char2move x = case x of '(' ->  1

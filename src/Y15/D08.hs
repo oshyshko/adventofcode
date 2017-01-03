@@ -1,4 +1,4 @@
-module Y2015.D08 where
+module Y15.D08 where
 
 import           Text.ParserCombinators.Parsec (Parser, char, endBy, hexDigit,
                                                 many, noneOf, parse, string,

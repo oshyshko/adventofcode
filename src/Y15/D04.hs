@@ -1,4 +1,4 @@
-module Y2015.D04 where
+module Y15.D04 where
 
 import Data.ByteString.Lazy.Char8 (pack)
 import Data.Digest.Pure.MD5       (md5)

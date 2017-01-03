@@ -1,4 +1,4 @@
-module Y2015.D05 where
+module Y15.D05 where
 
 pairs :: [a] -> [(a,a)]
 pairs xs = zip xs (drop 1 xs)

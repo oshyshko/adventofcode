@@ -1,4 +1,4 @@
-module Y2015.D06 where
+module Y15.D06 where
 
 import           Data.List                     (foldl')
 import qualified Data.Map.Strict               as M

@@ -1,4 +1,4 @@
-module Y2015.D09 where
+module Y15.D09 where
 
 import qualified Data.List                     as L
 import qualified Data.Map                      as M

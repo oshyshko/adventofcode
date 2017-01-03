@@ -1,4 +1,4 @@
-module Y2015.D03 where
+module Y15.D03 where
 
 import Data.List (nub, partition)
 

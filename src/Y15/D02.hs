@@ -1,4 +1,4 @@
-module Y2015.D02 where
+module Y15.D02 where
 
 import Data.List.Split (splitOn)
 

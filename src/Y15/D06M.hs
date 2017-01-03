@@ -1,6 +1,6 @@
-module Y2015.D06Perf where
+module Y15.D06M where
 
-import           Y2015.D06                     (Command, Op (..), XY, apply1,
+import           Y15.D06                       (Command, Op (..), XY, apply1,
                                                 apply2, commands)
 
 import           Data.Array.IO                 (IOUArray, getElems, newArray,

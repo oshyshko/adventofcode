@@ -1,4 +1,4 @@
-module Y2015.D10 where
+module Y15.D10 where
 
 import           Control.Monad ((<=<))
 import qualified Data.List     as L

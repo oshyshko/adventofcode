@@ -1,4 +1,4 @@
-module Y2015.D07 where
+module Y15.D07 where
 
 import           Control.Monad.State           (State, evalState, gets, modify)
 import           Data.Bits                     (complement, shiftL, shiftR,
