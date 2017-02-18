@@ -1,14 +1,5 @@
 module Main where
 
-import           Control.DeepSeq       (force, NFData)
-import           Control.Exception     (evaluate)
-import           Data.List             (intercalate)
-import           Data.List.Split       (splitOn)
-import           Data.Ratio            (numerator)
-import           Data.Time.Clock.POSIX (getPOSIXTime)
-import           Text.Printf           (printf)
-import           System.IO             (hFlush, stdout)
-
 import qualified Y15.D01
 import qualified Y15.D02
 import qualified Y15.D03
@@ -20,6 +11,15 @@ import qualified Y15.D07
 import qualified Y15.D08
 import qualified Y15.D09
 import qualified Y15.D10
+
+import           Control.DeepSeq       (NFData, force)
+import           Control.Exception     (evaluate)
+import           Data.List             (intercalate)
+import           Data.List.Split       (splitOn)
+import           Data.Ratio            (numerator)
+import           Data.Time.Clock.POSIX (getPOSIXTime)
+import           System.IO             (hFlush, stdout)
+import           Text.Printf           (printf)
 
 -- $ ./scripts/build-exec.sh
 -- + stack exec adventofcode-exe
@@ -35,17 +35,23 @@ import qualified Y15.D10
 -- Y15.D09  --> [117,909]            solved within [95,88] ms
 -- Y15.D10  --> [360154,5103798]     solved within [124,1815] ms
 
+replace :: Eq a => [a] -> [a] -> [a] -> [a]
+replace from to = intercalate to . splitOn from
+
 main :: IO ()
 main = mapM_
-    (\(name, solvers) ->
-      do input <- readFile ("res/" ++ (intercalate "/" . splitOn "." $ take 7 name) ++ ".txt")
-         printf "%-8s --> " name
-         hFlush stdout
-         at <- mapM (\solve -> timeOf (solve input)) solvers
-         printf "%-20s solved within %s ms\n"
-                (show . map fst $ at)
-                (show . map snd $ at))
-    days
+         (\(name, solvers) ->
+           do input <- readFile ("res/"
+                                ++ replace "." "/" (take 7 name)
+                                ++ ".txt")
+              printf "%-8s --> " name
+              hFlush stdout
+              at <- mapM (\solve -> timeOf (solve input)) solvers
+              printf "%-20s solved within %s ms\n"
+                     (show . map fst $ at)
+                     (show . map snd $ at))
+
+         days
 
 days :: [(String, [String -> IO Int])]
 days = [ ("Y15.D01", mr [Y15.D01.solve1,  Y15.D01.solve2])
