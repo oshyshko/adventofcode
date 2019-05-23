@@ -1,13 +1,16 @@
+{-# LANGUAGE LambdaCase #-}
+
 module Y15.D03 where
 
-import Data.List (nub, partition)
+import           Data.List (nub, partition)
 
 char2move :: Char -> (Int, Int)
-char2move x = case x of '<' -> (-1,  0)
-                        '^' -> ( 0, -1)
-                        '>' -> ( 1,  0)
-                        'v' -> ( 0,  1)
-                        _   ->  error $ "Unexpected character: " ++ [x]
+char2move = \case
+    '<' -> (-1,  0)
+    '^' -> ( 0, -1)
+    '>' -> ( 1,  0)
+    'v' -> ( 0,  1)
+    x   ->  error $ "Unexpected character: " ++ [x]
 
 moves2houses :: String -> [(Int, Int)]
 moves2houses = scanl (\(xa,ya) (x,y) -> (xa+x, ya+y)) (0, 0)

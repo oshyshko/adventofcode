@@ -17,10 +17,10 @@ defs = def `endBy` eol
                <*> (read <$> many digit)
 
     eol :: Parser String
-    eol = try (string "\n\r")
-      <|> try (string "\r\n")
-      <|>      string "\n"
-      <|>      string "\r"
+    eol =   try (string "\n\r")
+        <|> try (string "\r\n")
+        <|>      string "\n"
+        <|>      string "\r"
 
 solve' :: [FromToDist] -> [Int]
 solve' ftds =
@@ -32,11 +32,13 @@ solve' ftds =
    in map path2dist (L.permutations locations)
 
 solve1 :: String -> Int
-solve1 s = either (error . show)
-                  (minimum . solve')
-                  (parse defs "defs" s)
+solve1 s = either
+    (error . show)
+    (minimum . solve')
+    (parse defs "defs" s)
 
 solve2 :: String -> Int
-solve2 s = either (error . show)
-                  (maximum . solve')
-                  (parse defs "defs" s)
+solve2 s = either
+    (error . show)
+    (maximum . solve')
+    (parse defs "defs" s)

@@ -1,11 +1,11 @@
 module Y15.D02 where
 
-import Data.List.Split (splitOn)
+import           Data.List.Split (splitOn)
 
 parse :: String -> [(Int, Int, Int)]
 parse = map whl . lines
-          where whl s = let [w, h, l] = map read . splitOn "x" $ s
-                         in (w, h, l)
+  where whl s = let [w, h, l] = map read . splitOn "x" $ s
+                 in (w, h, l)
 
 solve1 :: String -> Int
 solve1 = sum

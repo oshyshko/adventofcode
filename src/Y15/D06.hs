@@ -1,5 +1,6 @@
 module Y15.D06 where
 
+import           Data.Functor                  (($>))
 import           Data.List                     (foldl')
 import qualified Data.Map.Strict               as M
 import           Data.Maybe                    (fromMaybe)
@@ -23,19 +24,20 @@ commands = command `endBy` eol
                    <*> xy
 
     op :: Parser Op
-    op =  try (string "turn on")  *> return On
-      <|> try (string "turn off") *> return Off
-      <|>      string "toggle"    *> return Toggle
+    op =    try (string "turn on")  $> On
+        <|> try (string "turn off") $> Off
+        <|>      string "toggle"    $> Toggle
 
     xy :: Parser XY
-    xy = (,) <$> (read <$> many digit) <* char ','
+    xy = (,) <$> (read <$> many digit)
+             <* char ','
              <*> (read <$> many digit)
 
     eol :: Parser String
-    eol = try (string "\n\r")
-      <|> try (string "\r\n")
-      <|>      string "\n"
-      <|>      string "\r"
+    eol =   try (string "\n\r")
+        <|> try (string "\r\n")
+        <|>      string "\n"
+        <|>      string "\r"
 
 applyCommand :: (Op -> Int -> Int) -> Matrix -> Command -> Matrix
 applyCommand f mm (op, (x0,y0), (x1,y1)) =
@@ -51,21 +53,25 @@ sumApplyCommands f = sum
                    . foldl' (applyCommand f) M.empty
 
 apply1 :: Op -> Int -> Int
-apply1 op v = case op of On     -> 1
-                         Off    -> 0
-                         Toggle -> if v == 1 then 0 else 1
+apply1 op v = case op of
+    On     -> 1
+    Off    -> 0
+    Toggle -> if v == 1 then 0 else 1
 
 apply2 :: Op -> Int -> Int
-apply2 op v = case op of On     -> v + 1
-                         Off    -> if v > 0 then v - 1 else 0
-                         Toggle -> v + 2
+apply2 op v = case op of
+    On     -> v + 1
+    Off    -> if v > 0 then v - 1 else 0
+    Toggle -> v + 2
 
 solve1 :: String -> Int
-solve1 s = either (error . show)
-                  (sumApplyCommands apply1)
-                  (parse commands "commands" s)
+solve1 s = either
+    (error . show)
+    (sumApplyCommands apply1)
+    (parse commands "commands" s)
 
 solve2 :: String -> Int
-solve2 s = either (error . show)
-                  (sumApplyCommands apply2)
-                  (parse commands "commands" s)
+solve2 s = either
+    (error . show)
+    (sumApplyCommands apply2)
+    (parse commands "commands" s)
