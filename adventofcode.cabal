@@ -16,6 +16,8 @@ cabal-version:       >=1.22.5
 executable adventofcode-exe
   hs-source-dirs:      src
   main-is:             Main.hs
+  -- extensions:          Strict
+  -- extensions:          LambdaCase
   -- ghc-options:         -threaded -with-rtsopts=-N -rtsopts -O2 -optc-O3
   -- ghc-options:         -rtsopts -O2 -optc-O3
   ghc-options:         -Wall
