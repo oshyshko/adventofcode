@@ -8,6 +8,8 @@ import           Text.ParserCombinators.Parsec (Parser, digit, endBy, letter,
 
 type FromToDist = (String, String, Int)
 
+-- Faerun to Tristram = 65
+-- Faerun to Tambi = 129
 defs :: Parser [FromToDist]
 defs = def `endBy` eol
   where

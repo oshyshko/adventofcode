@@ -6,27 +6,31 @@ import           Text.ParserCombinators.Parsec (Parser, char, endBy, hexDigit,
                                                 many, noneOf, parse, string,
                                                 try, (<|>))
 
+-- "sjdivfriyaaqa\xd2v\"k\"mpcu\"yyu\"en"
+-- "vcqc"
 unescapeLines :: Parser [String]
-unescapeLines = unescapeStr `endBy` eol
+unescapeLines =
+    unescapeStr `endBy` eol
+  where
+    unescapeStr :: Parser String
+    unescapeStr = char '"' *> many unescapeChar <* char '"'
 
-unescapeStr :: Parser String
-unescapeStr = do char '"'; s <- many unescapeChar; char '"'; return s
-
-unescapeChar :: Parser Char
-unescapeChar = char '\\' *> (    char  '\\' $> '\\'
-                             <|> char  '\"' $> '"'
-                             <|> (char 'x'  >> hexDigit >> hexDigit >> return '#'))
-           <|> noneOf "\""
+    unescapeChar :: Parser Char
+    unescapeChar = char '\\' *> (    char  '\\' $> '\\'
+                                 <|> char  '\"' $> '"'
+                                 <|> (char 'x'  >> hexDigit >> hexDigit >> return '#'))
+               <|> noneOf "\""
 
 escapeLines :: Parser [String]
-escapeLines = escapeStr `endBy` eol
-
-escapeStr :: Parser String
-escapeStr =  do
-    ss <- many $     char    '\\'   $> "\\\\"
-                 <|> char    '"'    $> "\\\""
-                 <|> (noneOf "\n\r" >>= return . (:[]))
-    return $ "\"" ++ concat ss ++ "\""
+escapeLines =
+    escapeStr `endBy` eol
+  where
+    escapeStr :: Parser String
+    escapeStr =  do
+        ss <- many $     char    '\\'   $> "\\\\"
+                     <|> char    '"'    $> "\\\""
+                     <|> ((:[]) <$> noneOf "\n\r")
+        return $ "\"" ++ concat ss ++ "\""
 
 eol :: Parser String
 eol =   try (string "\n\r")
