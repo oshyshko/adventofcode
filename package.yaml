@@ -1,0 +1,41 @@
+name:                adventofcode
+version:             0.1.0.0
+homepage:            https://github.com/oshyshko/adventofcode
+license:             BSD3
+license-file:        LICENSE
+author:              Oleksandr Shyshko
+maintainer:          oshyshko@gmail.com
+copyright:           2016 Oleksandr Shyshko
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+executables:
+  adventofcode-exe:
+    main:           Main.hs
+    source-dirs:    src
+    ghc-options:
+    - -Wall
+    - -fwarn-incomplete-patterns
+    - -fno-warn-type-defaults
+    - -fno-warn-unused-do-bind
+    - -fno-warn-unused-imports
+    - -O2
+    - -optc-O3
+    dependencies:
+    - base
+    - aeson
+    - array
+    - bytestring
+    - containers
+    - deepseq
+    - hashable
+    - lens
+    - mtl
+    - parsec
+    - pureMD5
+    - scientific
+    - split
+    - time
+    - unordered-containers
