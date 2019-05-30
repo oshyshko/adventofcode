@@ -23,6 +23,12 @@ data Exp = Val Word16
          | Lsh Exp Exp
          | Rsh Exp Exp deriving Show
 
+-- 44430 -> b
+-- NOT dq -> dr
+-- eg AND ei -> ej
+-- ep OR eo -> eq
+-- lf RSHIFT 2 -> lg
+-- kf LSHIFT 15 -> kj
 defs :: Parser [Def]
 defs = def `endBy` eol
   where

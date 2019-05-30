@@ -12,6 +12,7 @@ char2move = \case
     'v' -> ( 0,  1)
     x   ->  error $ "Unexpected character: " ++ [x]
 
+-- ^^<<v<<v><v^^<><>^^ ...
 moves2houses :: String -> [(Int, Int)]
 moves2houses = scanl (\(xa,ya) (x,y) -> (xa+x, ya+y)) (0, 0)
              . map char2move

@@ -2,8 +2,10 @@ module Y15.D02 where
 
 import           Data.List.Split (splitOn)
 
-parse :: String -> [(Int, Int, Int)]
-parse = map whl . lines
+-- 29x13x26
+-- 11x11x14
+parseWHL :: String -> [(Int, Int, Int)]
+parseWHL = map whl . lines
   where whl s = let [w, h, l] = map read . splitOn "x" $ s
                  in (w, h, l)
 
@@ -13,9 +15,9 @@ solve1 = sum
                                 b = h * l
                                 c = w * l
                             in (a + b + c) * 2 + minimum [a, b, c])
-       . parse
+       . parseWHL
 
 solve2 :: String -> Int
 solve2 = sum
        . map (\(w, h, l) -> (w*h*l) + 2 * minimum [w+h, h+l, w+l])
-       . parse
+       . parseWHL
