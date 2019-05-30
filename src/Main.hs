@@ -58,6 +58,9 @@ days =
     , ("Y15.D08",  i2ios   [Y15.D08.solve1,   Y15.D08.solve2])
     , ("Y15.D09",  i2ios   [Y15.D09.solve1,   Y15.D09.solve2])
     , ("Y15.D10",  i2ios   [Y15.D10.solve1,   Y15.D10.solve2])
+    , ("Y15.D11",  s2ios   [Y15.D11.solve1,   Y15.D11.solve2])
+    , ("Y15.D12",  i2ios   [Y15.D12.solve1,   Y15.D12.solve2])
+    , ("Y15.D13",  i2ios   [Y15.D13.solve1,   Y15.D13.solve2])
     ]
   where s2ios :: [a -> b] -> [a -> IO b]
         s2ios   = fmap (return .)
