@@ -17,7 +17,7 @@
 #  location: "./custom-snapshot.yaml"
 
 # GHC 8.6.5
-resolver: lts-13.22
+resolver: lts-13.23
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
