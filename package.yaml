@@ -13,8 +13,8 @@ copyright:           2016 Oleksandr Shyshko
 
 executables:
   adventofcode-exe:
-    main:           Main.hs
-    source-dirs:    src
+    main: Main.hs
+    source-dirs: src
     ghc-options:
     - -Wall
     - -fwarn-incomplete-patterns
