@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 module Main where
 
 import qualified Y15.D01
@@ -19,8 +20,10 @@ import qualified Y15.D13
 import           Control.DeepSeq       (NFData, force)
 import           Control.Exception     (evaluate)
 import           Control.Monad         (void)
-import           Data.List             (intercalate)
+import           Data.Char             (isSpace)
+import           Data.List             (intercalate, isPrefixOf, null)
 import           Data.List.Split       (splitOn)
+import qualified Data.Map.Strict       as M
 import           Data.Ratio            (numerator)
 import           Data.Time.Clock.POSIX (getPOSIXTime)
 import           System.IO             (hFlush, stdout)
@@ -29,20 +32,47 @@ import           Text.Printf           (printf)
 replace :: Eq a => [a] -> [a] -> [a] -> [a]
 replace from to = intercalate to . splitOn from
 
+-- s <- readInput "Y15.D01"
 readInput :: String -> IO String
 readInput name = readFile $ "res/" ++ replace "." "/" (take 7 name) ++ ".txt"
 
+-- # day     answer-1  answer-2
+-- Y15.D01   138       1771
+-- Y15.D02   1586300   3737498
+parseAnswers :: String -> M.Map String [String]
+parseAnswers =
+    M.fromList
+    . map (\case
+            day:answers -> (day, answers)
+            x -> error $ "Couldn't parse answers: " ++ show x)
+    . map (filter (/= "") . splitOn " ")
+    . filter (not . isPrefixOf "#")
+    . lines
+
 main :: IO ()
-main = mapM_
-    (\ (name, solvers) -> do
-        input <- readInput name
-        printf "%-9s --> " name
-        hFlush stdout
-        at <- mapM (\solve -> timeOf (solve input)) solvers
-        printf "%-18s -- solved within %s ms\n"
-            (intercalate ", " $ map fst at)
-            (intercalate ", " $ map (show . snd) at))
-    days
+main = do
+    let answersPath = "res/answers.txt"
+
+    day2snwers <- parseAnswers <$> readFile answersPath
+
+    mapM_
+        (\ (name, solvers) -> do
+            input <- readInput name
+            printf "%-9s --> " name
+            hFlush stdout
+            at <- mapM (\solve -> timeOf (solve input)) solvers
+            let actual   = map fst at
+                actualMs = map (show . snd) at
+            printf "%-18s -- %s ms%s\n"
+                (intercalate ", " actual)
+                (intercalate ", " actualMs)
+                (case M.lookup name day2snwers of
+                    Nothing -> " <-- couldn't find entry " ++ show name ++ " in " ++ show answersPath
+                    Just expected ->
+                        if expected /= actual
+                        then " <-- got wrong answers, expected: " ++ intercalate ", " expected
+                        else ""))
+        days
 
 days :: [(String, [String -> IO String])]
 days =
