@@ -16,6 +16,7 @@ import qualified Y15.D10
 import qualified Y15.D11
 import qualified Y15.D12
 import qualified Y15.D13
+import qualified Y15.D14
 
 import           Control.DeepSeq       (NFData, force)
 import           Control.Exception     (evaluate)
@@ -32,7 +33,9 @@ import           Text.Printf           (printf)
 replace :: Eq a => [a] -> [a] -> [a] -> [a]
 replace from to = intercalate to . splitOn from
 
+-- Examples:
 -- s <- readInput "Y15.D01"
+-- Y15.D14.solve1 <$> readInput "Y15.D14"
 readInput :: String -> IO String
 readInput name = readFile $ "res/" ++ replace "." "/" (take 7 name) ++ ".txt"
 
@@ -91,6 +94,7 @@ days =
     , ("Y15.D11",  s2ios   [Y15.D11.solve1,   Y15.D11.solve2])
     , ("Y15.D12",  i2ios   [Y15.D12.solve1,   Y15.D12.solve2])
     , ("Y15.D13",  i2ios   [Y15.D13.solve1,   Y15.D13.solve2])
+    , ("Y15.D14",  i2ios   [Y15.D14.solve1,   Y15.D14.solve2])
     ]
   where s2ios :: [a -> b] -> [a -> IO b]
         s2ios   = fmap (return .)
