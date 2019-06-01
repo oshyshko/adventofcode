@@ -51,7 +51,7 @@ tick r = case state r of
     Resting 1 -> r { state = Running (runTime . spec $ r) }
     Resting n -> r { state = Resting (n - 1)}
 
-race :: Int -> [Racer] -> [Racer]
+race :: Seconds -> [Racer] -> [Racer]
 race n = head . drop n . iterate tickAll
   where
     tickAll :: [Racer] -> [Racer]
@@ -67,7 +67,7 @@ solveBy distanceOrPoints str = either
     (distanceOrPoints
         . head
         . sortOn (Down . distanceOrPoints)
-        . race 2503
+        . race 2503 -- 2503 seconds to race
         . map (\s -> Racer s (Running $ runTime s) 0 0))
     (parse specs "specs" str)
 
