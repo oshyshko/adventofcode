@@ -7,10 +7,10 @@ import           Data.Bits                     (complement, shiftL, shiftR,
                                                 (.&.), (.|.))
 import qualified Data.Map.Strict               as M
 import           Data.Word                     (Word16)
-
 import           Text.ParserCombinators.Parsec (Parser, digit, endBy, letter,
                                                 many1, parse, string, try,
                                                 (<|>))
+import           Util
 
 type RefId = String
 type Def = (RefId, Exp)
@@ -52,12 +52,6 @@ defs = def `endBy` eol
         <|> try (Rsh <$> rv <* string " RSHIFT " <*> rv)
         <|> rv
 
-    eol :: Parser String
-    eol =   try (string "\n\r")
-        <|> try (string "\r\n")
-        <|>      string "\n"
-        <|>      string "\r"
-
 eval :: Exp -> State (M.Map RefId Exp) Word16
 eval = \case
     Val v   -> return v
@@ -77,13 +71,7 @@ apply2 :: M.Map RefId Exp -> Word16
 apply2 m = evalState (eval $ Ref "a") $ M.insert "b" (Val $ apply1 m) m
 
 solve1 :: String -> Int
-solve1 s = either
-    (error . show)
-    (fromIntegral . apply1)
-    (M.fromList <$> parse defs "defs" s)
+solve1 = fromIntegral . apply1 . M.fromList <$> parseOrDie defs
 
 solve2 :: String -> Int
-solve2 s = either
-    (error . show)
-    (fromIntegral . apply2)
-    (M.fromList <$> parse defs "defs" s)
+solve2 = fromIntegral . apply2 . M.fromList <$> parseOrDie defs

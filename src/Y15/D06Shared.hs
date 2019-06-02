@@ -6,6 +6,7 @@ import           Text.Parsec.Error             (ParseError)
 import           Text.ParserCombinators.Parsec (Parser, char, digit, endBy,
                                                 many, parse, space, string, try,
                                                 (<|>))
+import           Util
 
 side :: Int -- TODO determine sides from input?
 side = 1000
@@ -35,12 +36,6 @@ commands = command `endBy` eol
              <* char ','
              <*> (read <$> many digit)
 
-    eol :: Parser String
-    eol =   try (string "\n\r")
-        <|> try (string "\r\n")
-        <|>      string "\n"
-        <|>      string "\r"
-
 {-# INLINE apply1 #-}
 apply1 :: Op -> Int -> Int
 apply1 op v = case op of
@@ -54,9 +49,6 @@ apply2 op v = case op of
     On     -> v + 1
     Off    -> if v > 0 then v - 1 else 0
     Toggle -> v + 2
-
-parseCommands :: String -> Either ParseError [Command]
-parseCommands = parse commands "commands"
 
 {-# INLINE applyCommand #-}
 applyCommand :: MArray a t m => (Op -> t -> t) -> a Int t -> Command -> m ()

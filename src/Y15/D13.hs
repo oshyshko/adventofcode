@@ -4,12 +4,12 @@ module Y15.D13 where
 
 import           Data.Hashable                 (Hashable)
 import qualified Data.HashMap.Strict           as M
-import           Text.ParserCombinators.Parsec (Parser, digit, endBy, letter,
-                                                many, parse, string, try, (<|>))
-
 import           Data.List                     (nub, permutations, sort)
 import           Data.List.Split               (divvy)
 import           Data.Maybe                    (fromMaybe)
+import           Text.ParserCombinators.Parsec (Parser, digit, endBy, letter,
+                                                many, parse, string, try, (<|>))
+import           Util
 
 type Guest = String
 type Attr = ((Guest, Guest), Int) -- (from, to), attractiveness)
@@ -32,12 +32,6 @@ attrs =
         "gain" -> 1
         "lose" -> -1
         x      -> error $ "Unknown sign: " ++ x
-
-    eol :: Parser String
-    eol =   try (string "\n\r")
-        <|> try (string "\r\n")
-        <|>      string "\n"
-        <|>      string "\r"
 
 attrs2guests :: [Attr] -> [Guest]
 attrs2guests = sort . nub . map (fst . fst)
@@ -62,15 +56,12 @@ maxHappiness ms =
         (M.lookup k m)
 
 solve1 :: String -> Int
-solve1 s = either
-    (error . show)
-    maxHappiness
-    (parse attrs "attrs" s)
+solve1 = maxHappiness . parseOrDie attrs
 
 solve2 :: String -> Int
-solve2 s = either
-    (error . show)
-    (\ms -> maxHappiness -- same as before, but add self everywhere
-        (ms ++ map (\g -> (("Me", g), 0)) (attrs2guests ms)
-            ++ map (\g -> ((g, "Me"), 0)) (attrs2guests ms)))
-    (parse attrs "attrs" s)
+solve2 = maxHappiness . addSelf . parseOrDie attrs
+  where
+    addSelf ms =
+        ms ++ map (\g -> (("Me", g), 0)) (attrs2guests ms)
+           ++ map (\g -> ((g, "Me"), 0)) (attrs2guests ms)
+

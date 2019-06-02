@@ -4,6 +4,7 @@ import           Data.List                     (sortOn, (!!))
 import           Data.Ord                      (Down (..))
 import           Text.ParserCombinators.Parsec (Parser, digit, endBy, letter,
                                                 many, parse, string, try, (<|>))
+import           Util
 
 type KmS     = Int
 type Km      = Int
@@ -38,12 +39,6 @@ specs =
         <*> (read <$> many digit) <* string " seconds, but then must rest for "
         <*> (read <$> many digit) <* string " seconds."
 
-    eol :: Parser String
-    eol =   try (string "\n\r")
-        <|> try (string "\r\n")
-        <|>      string "\n"
-        <|>      string "\r"
-
 tick :: Racer -> Racer
 tick r = case state r of
     Running 1 -> r { state = Resting (restTime . spec $ r), distance = distance r + (speed . spec) r }
@@ -62,14 +57,13 @@ race n = head . drop n . iterate tickAll
                         ranRs
 
 solveBy :: (Racer -> Int) -> String -> Int
-solveBy distanceOrPoints str = either
-    (error . show)
-    (distanceOrPoints
-        . head
-        . sortOn (Down . distanceOrPoints)
-        . race 2503 -- 2503 seconds to race
-        . map (\s -> Racer s (Running $ runTime s) 0 0))
-    (parse specs "specs" str)
+solveBy distanceOrPoints =
+    distanceOrPoints
+    . head
+    . sortOn (Down . distanceOrPoints)
+    . race 2503 -- 2503 seconds to race
+    . map (\s -> Racer s (Running $ runTime s) 0 0)
+    . parseOrDie specs
 
 solve1 :: String -> Int
 solve1 = solveBy distance

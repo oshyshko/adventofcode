@@ -1,6 +1,7 @@
 module Y15.D06IO where
 
 import           Data.Array.IO (IOUArray, getElems, newArray)
+import           Util
 import           Y15.D06Shared
 
 sumApplyCommands :: (Op -> Int -> Int) -> [Command] -> IO Int
@@ -10,13 +11,7 @@ sumApplyCommands f xs = do
     sum <$> getElems m
 
 solve1 :: String -> IO Int
-solve1 s = either
-    (error . show)
-    (sumApplyCommands apply1)
-    (parseCommands s)
+solve1 = sumApplyCommands apply1 . parseOrDie commands
 
 solve2 :: String -> IO Int
-solve2 s = either
-    (error . show)
-    (sumApplyCommands apply2)
-    (parseCommands s)
+solve2 = sumApplyCommands apply2 . parseOrDie commands

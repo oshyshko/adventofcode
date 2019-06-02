@@ -4,7 +4,7 @@ import           Control.Monad      (mapM_)
 import           Control.Monad.ST   (ST)
 import           Data.Array.ST      (STUArray, newArray, runSTUArray)
 import           Data.Array.Unboxed (UArray, assocs)
-
+import           Util
 import           Y15.D06Shared
 
 sumApplyCommands :: (Op -> Int -> Int) -> [Command] -> Int
@@ -17,13 +17,7 @@ sumApplyCommands f xs =
     in  sum [v | (_, v) <- assocs a]
 
 solve1 :: String -> Int
-solve1 s = either
-    (error . show)
-    (sumApplyCommands apply1)
-    (parseCommands s)
+solve1 = sumApplyCommands apply1 . parseOrDie commands
 
 solve2 :: String -> Int
-solve2 s = either
-    (error . show)
-    (sumApplyCommands apply2)
-    (parseCommands s)
+solve2 = sumApplyCommands apply2 . parseOrDie commands
