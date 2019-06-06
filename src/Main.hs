@@ -27,6 +27,7 @@ import           Data.List.Split       (splitOn)
 import qualified Data.Map.Strict       as M
 import           Data.Ratio            (numerator)
 import           Data.Time.Clock.POSIX (getPOSIXTime)
+import           System.Environment    (getArgs)
 import           System.IO             (hFlush, stdout)
 import           Text.Printf           (printf)
 
@@ -42,6 +43,7 @@ readInput name = readFile $ "res/" ++ replace "." "/" (take 7 name) ++ ".txt"
 -- # day     answer-1  answer-2
 -- Y15.D01   138       1771
 -- Y15.D02   1586300   3737498
+{-# ANN module "HLint: ignore Use map once" #-}
 parseAnswers :: String -> M.Map String [String]
 parseAnswers =
     M.fromList
@@ -54,6 +56,12 @@ parseAnswers =
 
 main :: IO ()
 main = do
+    args <- getArgs
+    let daysPred = case args of
+            []  -> const True
+            [x] -> (x ==)
+            _   -> error $ "Don't know how to interpret args: " ++ show args
+
     let answersPath = "res/answers.txt"
 
     day2snwers <- parseAnswers <$> readFile answersPath
@@ -75,7 +83,7 @@ main = do
                         if expected /= actual
                         then " <-- got wrong answers, expected: " ++ intercalate ", " expected
                         else ""))
-        days
+        (filter (daysPred . fst) days)
 
 days :: [(String, [String -> IO String])]
 days =

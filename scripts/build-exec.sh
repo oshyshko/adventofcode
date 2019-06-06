@@ -6,4 +6,4 @@ set -xue
 cd "$(dirname $0)/../"
 
 stack build
-stack exec adventofcode-exe
+stack exec adventofcode-exe $@
