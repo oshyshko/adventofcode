@@ -1,7 +1,7 @@
 module Util where
 
-import           Text.ParserCombinators.Parsec (Parser, parse, string, try,
-                                                (<|>))
+import           Text.ParserCombinators.Parsec (Parser, endBy, parse, string,
+                                                try, (<|>))
 
 eol :: Parser String
 eol =   try (string "\n\r")

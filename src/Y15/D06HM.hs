@@ -1,6 +1,6 @@
 module Y15.D06HM where
 
-import           Data.List       (foldl')
+import           Data.Foldable   (foldl')
 import qualified Data.Map.Strict as M
 import           Data.Maybe      (fromMaybe)
 import           Util

@@ -6,7 +6,7 @@ import           Y15.D06Shared
 
 sumApplyCommands :: (Op -> Int -> Int) -> [Command] -> IO Int
 sumApplyCommands f xs = do
-    m <- newArray (0, side * side -1) 0 :: IO (IOUArray Int Int)
+    m <- newArray (0, side * side - 1) 0 :: IO (IOUArray Int Int)
     mapM_ (applyCommand f m) xs
     sum <$> getElems m
 
