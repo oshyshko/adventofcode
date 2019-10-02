@@ -47,7 +47,7 @@ tick r = case state r of
     Resting n -> r { state = Resting (n - 1)}
 
 race :: Seconds -> [Racer] -> [Racer]
-race n = head . drop n . iterate tickAll
+race n racers = iterate tickAll racers !! n
   where
     tickAll :: [Racer] -> [Racer]
     tickAll rs = let ranRs@(lead:_) = sortOn (Down . distance) . map tick $ rs

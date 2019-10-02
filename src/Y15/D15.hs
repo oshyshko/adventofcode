@@ -43,10 +43,10 @@ score ingrs quantities =
             ++ (show . length $ ingrs) ++ " vs "
             ++ (show . length $ quantities)
         else
-          (max 0 $ sum (zipWith (\i x -> x * capacity    i) ingrs quantities))
-        * (max 0 $ sum (zipWith (\i x -> x * durability  i) ingrs quantities))
-        * (max 0 $ sum (zipWith (\i x -> x * flavor     i ) ingrs quantities))
-        * (max 0 $ sum (zipWith (\i x -> x * texture    i ) ingrs quantities))
+          max 0 (sum (zipWith (\i x -> x * capacity    i) ingrs quantities))
+        * max 0 (sum (zipWith (\i x -> x * durability  i) ingrs quantities))
+        * max 0 (sum (zipWith (\i x -> x * flavor     i ) ingrs quantities))
+        * max 0 (sum (zipWith (\i x -> x * texture    i ) ingrs quantities))
 
 caloriesScore :: [Ingredient] -> [Int] -> Int
 caloriesScore ingrs quantities =

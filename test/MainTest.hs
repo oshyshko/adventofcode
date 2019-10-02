@@ -7,13 +7,13 @@ import           Util
 import           Y15.D15
 
 main :: IO ()
-main = hspec $ do
+main = hspec $
   describe "Y15.D15" $ do
     let input = "Butterscotch: capacity -1, durability -2, flavor  6, texture  3, calories 8\n"
              ++ "Cinnamon:     capacity  2, durability  3, flavor -2, texture -1, calories 3\n"
         ingrs = parseOrDie Y15.D15.ingredients input
 
-    it "parseOrDie ingradients" $ do
+    it "parseOrDie ingradients" $
         ingrs `shouldBe` --             cap dur flv txt cal
             [ Ingredient "Butterscotch" (-1)(-2)  6   3   8
             , Ingredient "Cinnamon"       2   3 (-2)(-1)  3]
