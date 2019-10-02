@@ -30,6 +30,7 @@ import qualified Y15.D11
 import qualified Y15.D12
 import qualified Y15.D13
 import qualified Y15.D14
+import qualified Y15.D15
 
 days :: [(String, [String -> IO String])]
 days =
@@ -49,6 +50,7 @@ days =
     , ("Y15.D12",  i2ios   [Y15.D12.solve1,   Y15.D12.solve2])
     , ("Y15.D13",  i2ios   [Y15.D13.solve1,   Y15.D13.solve2])
     , ("Y15.D14",  i2ios   [Y15.D14.solve1,   Y15.D14.solve2])
+    , ("Y15.D15",  i2ios   [Y15.D15.solve1,   Y15.D15.solve2])
     ]
   where s2ios :: [a -> b] -> [a -> IO b]
         s2ios   = fmap (return .)

@@ -1,4 +1,5 @@
 .idea
 .stack-work
 *.iml
+*.lock
 adventofcode.cabal
