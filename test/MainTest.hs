@@ -31,22 +31,22 @@ main = hspec $
         score [Ingredient "Cinnamon" 2 3 (-2)(-1) 3] [1] `shouldBe` 0
 
         evaluate (score [] [2]) `shouldThrow`
-            errorCall "ingrs and quantites counts don't match: 0 vs 1"
+            errorCall "ingrs and mix counts expected to match, but they didn't: 0 vs 1"
 
-    it "genRecipes" $ do
-        genRecipes 0 0 `shouldBe` []
-        genRecipes 0 1 `shouldBe` []
+    it "genMixes" $ do
+        genMixes 0 0 `shouldBe` []
+        genMixes 0 1 `shouldBe` []
 
-        genRecipes 1 0 `shouldBe` [[0]]
-        genRecipes 1 1 `shouldBe` [[1]]
-        genRecipes 1 2 `shouldBe` [[2]]
+        genMixes 1 0 `shouldBe` [[0]]
+        genMixes 1 1 `shouldBe` [[1]]
+        genMixes 1 2 `shouldBe` [[2]]
 
-        genRecipes 2 0 `shouldBe` [[0,0]]
-        genRecipes 2 1 `shouldBe` [[0,1],[1,0]]
-        genRecipes 2 2 `shouldBe` [[0,2],[1,1],[2,0]]
-        genRecipes 2 3 `shouldBe` [[0,3],[1,2],[2,1],[3,0]]
+        genMixes 2 0 `shouldBe` [[0,0]]
+        genMixes 2 1 `shouldBe` [[0,1],[1,0]]
+        genMixes 2 2 `shouldBe` [[0,2],[1,1],[2,0]]
+        genMixes 2 3 `shouldBe` [[0,3],[1,2],[2,1],[3,0]]
 
-        genRecipes 3 0 `shouldBe` [[0,0,0]]
-        genRecipes 3 1 `shouldBe` [[0,0,1],[0,1,0],[1,0,0]]
-        genRecipes 3 2 `shouldBe` [[0,0,2],[0,1,1],[0,2,0],[1,0,1],[1,1,0],[2,0,0]]
-        genRecipes 3 3 `shouldBe` [[0,0,3],[0,1,2],[0,2,1],[0,3,0],[1,0,2],[1,1,1],[1,2,0],[2,0,1],[2,1,0],[3,0,0]]
+        genMixes 3 0 `shouldBe` [[0,0,0]]
+        genMixes 3 1 `shouldBe` [[0,0,1],[0,1,0],[1,0,0]]
+        genMixes 3 2 `shouldBe` [[0,0,2],[0,1,1],[0,2,0],[1,0,1],[1,1,0],[2,0,0]]
+        genMixes 3 3 `shouldBe` [[0,0,3],[0,1,2],[0,2,1],[0,3,0],[1,0,2],[1,1,1],[1,2,0],[2,0,1],[2,1,0],[3,0,0]]
