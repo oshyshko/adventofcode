@@ -37,16 +37,16 @@ main = hspec $
         genMixes 0 0 `shouldBe` []
         genMixes 0 1 `shouldBe` []
 
-        genMixes 1 0 `shouldBe` [[0]]
+        genMixes 1 0 `shouldBe` [[0]]       -- TODO don't generate
         genMixes 1 1 `shouldBe` [[1]]
         genMixes 1 2 `shouldBe` [[2]]
 
-        genMixes 2 0 `shouldBe` [[0,0]]
+        genMixes 2 0 `shouldBe` [[0,0]]     -- TODO don't generate
         genMixes 2 1 `shouldBe` [[0,1],[1,0]]
         genMixes 2 2 `shouldBe` [[0,2],[1,1],[2,0]]
         genMixes 2 3 `shouldBe` [[0,3],[1,2],[2,1],[3,0]]
 
-        genMixes 3 0 `shouldBe` [[0,0,0]]
+        genMixes 3 0 `shouldBe` [[0,0,0]]   -- TODO don't generate
         genMixes 3 1 `shouldBe` [[0,0,1],[0,1,0],[1,0,0]]
         genMixes 3 2 `shouldBe` [[0,0,2],[0,1,1],[0,2,0],[1,0,1],[1,1,0],[2,0,0]]
         genMixes 3 3 `shouldBe` [[0,0,3],[0,1,2],[0,2,1],[0,3,0],[1,0,2],[1,1,1],[1,2,0],[2,0,1],[2,1,0],[3,0,0]]
