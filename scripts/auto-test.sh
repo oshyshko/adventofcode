@@ -8,4 +8,4 @@ cd "$(dirname $0)/../"
 # taken from https://www.parsonsmatt.org/2018/05/19/ghcid_for_the_win.html
 ghcid -W \
     --command "stack ghci adventofcode:lib adventofcode:adventofcode-test" \
-    --test "Main.main"
+    --test "Main.main $@"
