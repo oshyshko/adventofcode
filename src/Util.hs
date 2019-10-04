@@ -1,7 +1,8 @@
 module Util where
 
-import           Text.ParserCombinators.Parsec (Parser, endBy, parse, string,
-                                                try, (<|>))
+import qualified Debug.Trace                   as Trace
+import           Text.ParserCombinators.Parsec (Parser, parse, string, try,
+                                                (<|>))
 
 eol :: Parser String
 eol =   try (string "\n\r")
@@ -16,3 +17,13 @@ parseOrDie p s = either
     (error . show)
     id
     (parse p "parseOrDie" s)
+
+-- trace
+trace :: String -> a -> a
+trace = Trace.trace
+
+traceShow :: Show a => a -> b -> b
+traceShow = Trace.traceShow
+
+traceShowId :: Show a => a -> a
+traceShowId = Trace.traceShowId

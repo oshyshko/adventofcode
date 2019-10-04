@@ -2,8 +2,7 @@ module Y15.D08 where
 
 import           Data.Functor                  (($>))
 import           Text.ParserCombinators.Parsec (Parser, char, endBy, hexDigit,
-                                                many, noneOf, parse, string,
-                                                try, (<|>))
+                                                many, noneOf, (<|>))
 import           Util
 
 -- "sjdivfriyaaqa\xd2v\"k\"mpcu\"yyu\"en"

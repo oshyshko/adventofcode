@@ -3,7 +3,7 @@ module Y15.D09 where
 import qualified Data.List                     as L
 import qualified Data.Map                      as M
 import           Text.ParserCombinators.Parsec (Parser, digit, endBy, letter,
-                                                many, parse, string, try, (<|>))
+                                                many, string)
 import           Util
 
 type FromToDist = (String, String, Int)

@@ -13,12 +13,10 @@ copyright:           Oleksandr Shyshko
 
 ghc-options:
 - -Wall
-- -fwarn-incomplete-patterns
-- -fno-warn-type-defaults
 - -fno-warn-unused-do-bind
-- -fno-warn-unused-imports
 - -O2
 - -optc-O3
+# Note: adding flags for extensions like -XLambdaCase breaks `stack test` and Atom (ghcmod)
 
 library:
   source-dirs: src

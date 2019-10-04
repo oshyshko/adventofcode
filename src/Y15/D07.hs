@@ -8,8 +8,7 @@ import           Data.Bits                     (complement, shiftL, shiftR,
 import qualified Data.Map.Strict               as M
 import           Data.Word                     (Word16)
 import           Text.ParserCombinators.Parsec (Parser, digit, endBy, letter,
-                                                many1, parse, string, try,
-                                                (<|>))
+                                                many1, string, try, (<|>))
 import           Util
 
 type RefId = String

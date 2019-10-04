@@ -3,7 +3,7 @@ module Y15.D14 where
 import           Data.List                     (sortOn, (!!))
 import           Data.Ord                      (Down (..))
 import           Text.ParserCombinators.Parsec (Parser, digit, endBy, letter,
-                                                many, parse, string, try, (<|>))
+                                                many, string)
 import           Util
 
 type KmS     = Int

@@ -2,10 +2,8 @@ module Y15.D06Shared where
 
 import           Data.Array.MArray             (MArray, readArray, writeArray)
 import           Data.Functor                  (($>))
-import           Text.Parsec.Error             (ParseError)
 import           Text.ParserCombinators.Parsec (Parser, char, digit, endBy,
-                                                many, parse, space, string, try,
-                                                (<|>))
+                                                many, space, string, try, (<|>))
 import           Util
 
 side :: Int -- TODO determine sides from input?

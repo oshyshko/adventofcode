@@ -1,10 +1,8 @@
 module Y15.D15 where
 
-import           Data.Foldable                 (maximumBy)
-import           Data.Ord                      (comparing)
 import           Text.ParserCombinators.Parsec (Parser, char, digit, endBy,
-                                                letter, many, parse, space,
-                                                string, try, (<|>))
+                                                letter, many, space, string,
+                                                (<|>))
 import           Util
 
 data Ingredient = Ingredient

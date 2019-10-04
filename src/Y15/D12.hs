@@ -5,7 +5,7 @@ module Y15.D12 where
 import           Data.Aeson                 (Object, Value (..), decode)
 import qualified Data.ByteString.Lazy.Char8 as BL
 import           Data.HashMap.Strict        (elems)
-import           Data.Maybe                 (fromJust, fromMaybe, maybeToList)
+import           Data.Maybe                 (fromJust, maybeToList)
 import           Data.Scientific            (toBoundedInteger)
 
 solve :: (Object -> Bool) -> String -> Int

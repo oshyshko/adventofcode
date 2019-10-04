@@ -8,7 +8,7 @@ import           Data.List                     (nub, permutations, sort)
 import           Data.List.Split               (divvy)
 import           Data.Maybe                    (fromMaybe)
 import           Text.ParserCombinators.Parsec (Parser, digit, endBy, letter,
-                                                many, parse, string, try, (<|>))
+                                                many, string)
 import           Util
 
 type Guest = String

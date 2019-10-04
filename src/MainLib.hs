@@ -4,8 +4,7 @@ module MainLib where
 import           Control.DeepSeq       (NFData, force)
 import           Control.Exception     (evaluate)
 import           Control.Monad         (void)
-import           Data.Char             (isSpace)
-import           Data.List             (intercalate, isPrefixOf, null)
+import           Data.List             (intercalate, isPrefixOf)
 import           Data.List.Split       (splitOn)
 import qualified Data.Map.Strict       as M
 import           Data.Ratio            (numerator)
@@ -31,6 +30,7 @@ import qualified Y15.D12
 import qualified Y15.D13
 import qualified Y15.D14
 import qualified Y15.D15
+import qualified Y15.D16
 
 days :: [(String, [String -> IO String])]
 days =
