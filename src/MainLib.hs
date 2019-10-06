@@ -3,7 +3,7 @@ module MainLib where
 
 import           Control.DeepSeq       (NFData, force)
 import           Control.Exception     (evaluate)
-import           Control.Monad         (void)
+import           Control.Monad         (void, when)
 import           Data.List             (intercalate, isPrefixOf)
 import           Data.List.Split       (splitOn)
 import qualified Data.Map.Strict       as M
@@ -31,6 +31,7 @@ import qualified Y15.D13
 import qualified Y15.D14
 import qualified Y15.D15
 import qualified Y15.D16
+import qualified Y15.D17
 
 days :: [(String, [String -> IO String])]
 days =
@@ -52,6 +53,7 @@ days =
     , ("Y15.D14",  i2ios   [Y15.D14.solve1,   Y15.D14.solve2])
     , ("Y15.D15",  i2ios   [Y15.D15.solve1,   Y15.D15.solve2])
     , ("Y15.D16",  i2ios   [Y15.D16.solve1,   Y15.D16.solve2])
+    , ("Y15.D17",  i2ios   [Y15.D17.solve1,   Y15.D17.solve2])
     ]
   where s2ios :: [a -> b] -> [a -> IO b]
         s2ios   = fmap (return .)
@@ -85,16 +87,23 @@ parseAnswers =
 
 main :: IO ()
 main = do
+    -- select day(s)
     args <- getArgs
     let daysPred = case args of
             []  -> const True
             [x] -> (x ==)
             _   -> error $ "Don't know how to interpret args: " ++ show args
 
-    let answersPath = "res/answers.txt"
+    let daysSelected = filter (daysPred . fst) days
+    when (null daysSelected) $
+        error $ "Couldn't find day " ++ (show . head) args
+            ++ ".\nAvailable days are: " ++ intercalate ", " (map fst days) ++ ".\n"
 
+    -- answers.txt
+    let answersPath = "res/answers.txt"
     day2snwers <- parseAnswers <$> readFile answersPath
 
+    -- run
     mapM_
         (\ (name, solvers) -> do
             input <- readInput name
@@ -112,7 +121,7 @@ main = do
                         if expected /= actual
                         then " <-- got wrong answers, expected: " ++ intercalate ", " expected
                         else ""))
-        (filter (daysPred . fst) days)
+        daysSelected
 
 timeOf :: NFData a => IO a -> IO (a, Integer)
 timeOf ioa = do
