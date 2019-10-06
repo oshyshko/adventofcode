@@ -32,6 +32,9 @@ spec = describe "Y15.D15" $ do
         evaluate (score [] [2]) `shouldThrow`
             errorCall "ingrs and mix counts expected to match, but they didn't: 0 vs 1"
 
+    it "calsIn" $
+        calsIn ingrs [44, 56] `shouldBe` 520
+
     it "genMixes" $ do
         genMixes 0 0 `shouldBe` []
         genMixes 0 1 `shouldBe` []

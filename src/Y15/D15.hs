@@ -39,8 +39,8 @@ score ingrs mix =
         * max 0 (sum (zipWith (\i x -> x * flavor     i ) ingrs mix))
         * max 0 (sum (zipWith (\i x -> x * texture    i ) ingrs mix))
 
-mixCals :: [Ingredient] -> [Int] -> Int
-mixCals ingrs mix =
+calsIn :: [Ingredient] -> [Int] -> Int
+calsIn ingrs mix =
     assertSameLengths "ingrs and mix" ingrs mix $
         sum (zipWith (\i x -> x * calories i) ingrs mix)
 
@@ -56,14 +56,18 @@ genMixes :: Int -> Int -> [[Int]]
 genMixes 0 _ = []
 genMixes 1 spoonsLeft = [[spoonsLeft]]
 genMixes ingrsLeft spoonsLeft =
-    [x : rest
-        | x    <- [0..spoonsLeft]
-        , rest <- genMixes (ingrsLeft - 1) (spoonsLeft - x)]
+    [x:rest | x    <- [0..spoonsLeft]
+            , rest <- genMixes (ingrsLeft - 1) (spoonsLeft - x)]
+
+    -- alternatives:
+    -- do x    <- [0..spoonsLeft]
+    --    rest <- genMixes (ingrsLeft - 1) (spoonsLeft - x)
+    --    return (x:rest)
     --
-    -- same as:
-    -- [0..spoonsLeft] >>= (\x -> [x : rest | rest <- genMixes (ingrsLeft - 1) (spoonsLeft - x)])
+    -- [0..spoonsLeft]
+    --     >>= (\x -> genMixes (ingrsLeft - 1) (spoonsLeft - x)
+    --                 >>= (\x rest -> return (x:rest)))
     --
-    -- same as:
     -- concatMap
     --     (\x -> [x : rest | rest <- genMixes (ingrsLeft - 1) (spoonsLeft - x)])
     --     [0..spoonsLeft]

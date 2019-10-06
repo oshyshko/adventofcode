@@ -50,7 +50,7 @@ sue2clues =
 exactlyOneOrDie :: Show a => [a] -> a
 exactlyOneOrDie = \case
     [x] -> x
-    xs  -> error $ "Expected exactly one element a list but found "
+    xs  -> error $ "Expected a list with exactly one element, but got with "
         ++ (show . length $ xs) ++ ": " ++ show xs
 
 solve1 :: String -> Int

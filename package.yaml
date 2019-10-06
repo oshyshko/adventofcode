@@ -21,6 +21,7 @@ ghc-options:
 library:
   source-dirs: src
   dependencies:
+  - hspec
   - base
   - aeson
   - array
