@@ -82,6 +82,6 @@ solve2 :: String -> Int
 solve2 s =
     let ingrs = parseOrDie ingredients s
         mixes = filter
-                    (\mix -> mixCals ingrs mix == 500)
+                    (\mix -> calsIn ingrs mix == 500)
                     (genMixes (length ingrs) 100)
     in maximum $ score ingrs <$> mixes
