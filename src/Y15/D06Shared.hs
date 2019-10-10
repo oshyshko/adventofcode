@@ -1,17 +1,24 @@
 module Y15.D06Shared where
 
+import           Control.Monad                 (forM_)
 import           Data.Array.MArray             (MArray, readArray, writeArray)
+import           Data.Foldable                 (foldl')
 import           Data.Functor                  (($>))
+import           Data.Ix                       (range)
+import qualified Data.Map.Strict               as M
+import           Data.Maybe                    (fromMaybe)
 import           Text.ParserCombinators.Parsec (Parser, char, digit, endBy,
                                                 many, space, string, try, (<|>))
+
 import           Util
 
 side :: Int -- TODO determine sides from input?
 side = 1000
 
-type Command = (Op, XY, XY)
-data Op      = On | Off | Toggle deriving Show
-type XY      = (Int, Int)
+type XY         = (Int, Int)
+type Brightness = Int
+data Op         = On | Off | Toggle deriving Show
+type Command    = (Op, XY, XY)
 
 -- turn off 199,133 through 461,193
 -- toggle 322,558 through 977,958
@@ -35,32 +42,32 @@ commands = command `endBy` eol
              <*> (read <$> many digit)
 
 {-# INLINE apply1 #-}
-apply1 :: Op -> Int -> Int
+apply1 :: Op -> Brightness -> Brightness
 apply1 op v = case op of
     On     -> 1
     Off    -> 0
     Toggle -> if v == 1 then 0 else 1
 
 {-# INLINE apply2 #-}
-apply2 :: Op -> Int -> Int
+apply2 :: Op -> Brightness -> Brightness
 apply2 op v = case op of
     On     -> v + 1
-    Off    -> if v > 0 then v - 1 else 0
+    Off    -> max 0 (v -1)
     Toggle -> v + 2
 
-{-# INLINE applyCommand #-}
-applyCommand :: MArray a t m => (Op -> t -> t) -> a Int t -> Command -> m ()
-applyCommand f m (op, (x0,y0), (x1,y1)) =
-    mapM_ (\ xy -> do
-              v <- get m xy
-              set m xy (f op v))
+{-# INLINE applyCommandArray #-}
+applyCommandArray :: MArray a e m => (Op -> e -> e) -> a XY e -> Command -> m ()
+applyCommandArray f a (op, xy0, xy1) =
+    forM_ (range (xy0, xy1))
+        (\xy -> do
+            v <- readArray a xy
+            writeArray a xy (f op v))
 
-          [ (x,y) | y <- [y0..y1],
-                    x <- [x0..x1]]
-  where
-    get :: MArray a e m => a Int e -> XY -> m e
-    get a (x,y) = readArray a (x + y * side)
-
-    set :: MArray a e m => a Int e -> XY -> e -> m ()
-    set a (x,y) = writeArray a (x + y * side)
-
+-- TODO combine with applyCommandArray?
+{-# INLINE applyCommandMap #-}
+applyCommandMap :: (Op -> Brightness -> Brightness) -> M.Map XY Brightness -> Command -> M.Map XY Brightness
+applyCommandMap f mm (op, (x0,y0), (x1,y1)) =
+    foldl' (\m xy -> M.insert xy (f op (fromMaybe 0 $ M.lookup xy m)) m)
+           mm
+           [ (x,y) | x <- [x0..x1],
+                     y <- [y0..y1] ]
