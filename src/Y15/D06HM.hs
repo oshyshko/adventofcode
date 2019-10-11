@@ -6,7 +6,7 @@ import qualified Data.Map.Strict as M
 import           Util
 import           Y15.D06Shared
 
-sumApplyCommands :: (Op -> Brightness -> Brightness) -> [Command] -> Int
+sumApplyCommands :: (Brightness -> Op -> Brightness) -> [Command] -> Brightness
 sumApplyCommands f = sum
                    . map snd
                    . M.toList

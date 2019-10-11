@@ -6,7 +6,7 @@ import           Data.Array.IO (IOUArray, getElems, newArray)
 import           Util
 import           Y15.D06Shared
 
-sumApplyCommands :: (Op -> Brightness -> Brightness) -> [Command] -> IO Int
+sumApplyCommands :: (Brightness -> Op -> Brightness) -> [Command] -> IO Brightness
 sumApplyCommands f xs = do
     m <- newArray ((0,0), (side-1,side-1)) 0 :: IO (IOUArray XY Brightness)
     forM_ xs $ applyCommandArray f m

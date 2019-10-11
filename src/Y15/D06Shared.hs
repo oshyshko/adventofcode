@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 module Y15.D06Shared where
 
 import           Control.Monad                 (forM_)
@@ -42,32 +43,32 @@ commands = command `endBy` eol
              <*> (read <$> many digit)
 
 {-# INLINE apply1 #-}
-apply1 :: Op -> Brightness -> Brightness
-apply1 op v = case op of
+apply1 :: Brightness-> Op -> Brightness
+apply1 v = \case
     On     -> 1
     Off    -> 0
     Toggle -> if v == 1 then 0 else 1
 
 {-# INLINE apply2 #-}
-apply2 :: Op -> Brightness -> Brightness
-apply2 op v = case op of
+apply2 :: Brightness -> Op -> Brightness
+apply2 v = \case
     On     -> v + 1
     Off    -> max 0 (v -1)
     Toggle -> v + 2
 
 {-# INLINE applyCommandArray #-}
-applyCommandArray :: MArray a e m => (Op -> e -> e) -> a XY e -> Command -> m ()
+applyCommandArray :: MArray a e m => (e ->  Op -> e) -> a XY e -> Command -> m ()
 applyCommandArray f a (op, xy0, xy1) =
     forM_ (range (xy0, xy1))
         (\xy -> do
             v <- readArray a xy
-            writeArray a xy (f op v))
+            writeArray a xy (f v op))
 
 -- TODO combine with applyCommandArray?
 {-# INLINE applyCommandMap #-}
-applyCommandMap :: (Op -> Brightness -> Brightness) -> M.Map XY Brightness -> Command -> M.Map XY Brightness
+applyCommandMap :: Num e => (e -> Op -> e) -> M.Map XY e -> Command -> M.Map XY e
 applyCommandMap f mm (op, (x0,y0), (x1,y1)) =
-    foldl' (\m xy -> M.insert xy (f op (fromMaybe 0 $ M.lookup xy m)) m)
+    foldl' (\m xy -> M.insert xy (f (fromMaybe 0 $ M.lookup xy m) op) m)
            mm
            [ (x,y) | x <- [x0..x1],
                      y <- [y0..y1] ]
