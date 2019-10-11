@@ -57,6 +57,7 @@ apply2 v = \case
     Toggle -> v + 2
 
 {-# INLINE applyCommandArray #-}
+-- NOTE using (Int, Int) vs Int as array index didn't show a noticeable time difference
 applyCommandArray :: MArray a e m => (e ->  Op -> e) -> a XY e -> Command -> m ()
 applyCommandArray f a (op, xy0, xy1) =
     forM_ (range (xy0, xy1))
@@ -65,10 +66,12 @@ applyCommandArray f a (op, xy0, xy1) =
             writeArray a xy (f v op))
 
 -- TODO combine with applyCommandArray?
+-- NOTE using (Int, Int) vs Int as map key showed 16/22s vs 11/12s difference
+-- TODO consider using Data.Strict.Tuple or own ADT
 {-# INLINE applyCommandMap #-}
-applyCommandMap :: Num e => (e -> Op -> e) -> M.Map XY e -> Command -> M.Map XY e
+applyCommandMap :: Num e => (e -> Op -> e) -> M.Map Int e -> Command -> M.Map Int e
 applyCommandMap f mm (op, (x0,y0), (x1,y1)) =
-    foldl' (\m xy -> M.insert xy (f (fromMaybe 0 $ M.lookup xy m) op) m)
+    foldl' (\m i -> M.insert i (f (fromMaybe 0 $ M.lookup i m) op) m)
            mm
-           [ (x,y) | x <- [x0..x1],
-                     y <- [y0..y1] ]
+           [ x*side + y | x <- [x0..x1],
+                          y <- [y0..y1] ]
