@@ -1,4 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
 module MainLib where
 
 import           Control.DeepSeq       (NFData, force)

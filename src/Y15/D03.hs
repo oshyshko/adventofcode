@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 module Y15.D03 where
 
 import           Data.List (nub, partition)

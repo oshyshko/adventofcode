@@ -1,4 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
 module Y15.D16 where
 
 import           Data.Function                 ((&))

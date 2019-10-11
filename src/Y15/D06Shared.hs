@@ -1,4 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
 module Y15.D06Shared where
 
 import           Control.Monad                 (forM_)

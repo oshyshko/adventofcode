@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 module Y15.D07 where
 
 import           Control.Monad.State           (State, evalState, gets, modify)

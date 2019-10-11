@@ -16,7 +16,12 @@ ghc-options:
 - -fno-warn-unused-do-bind
 - -O2
 - -optc-O3
-# Note: adding flags for extensions like -XLambdaCase breaks `stack test` and Atom (ghcmod)
+
+default-extensions:
+- LambdaCase
+- MultiWayIf
+- OverloadedStrings
+- ScopedTypeVariables
 
 library:
   source-dirs: src

@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 module Y15.D11 where
 
 import           Data.Char (isAsciiLower)

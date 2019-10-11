@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 module Y15.D13 where
 
 import           Data.Hashable                 (Hashable)

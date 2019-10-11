@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 module Y15.D01 where
 
 char2move :: Char -> Int

@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase, OverloadedStrings #-}
-
 module Y15.D12 where
 
 import           Data.Aeson                 (Object, Value (..), decode)
