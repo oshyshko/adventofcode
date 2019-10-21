@@ -1,7 +1,13 @@
-module Y15.D06Shared where
+module Y15.D06 where
 
 import           Control.Monad                 (forM_)
-import           Data.Array.MArray             (MArray, readArray, writeArray)
+import           Control.Monad.ST              (ST)
+import           Data.Array.IArray             (elems)
+import           Data.Array.IO                 (IOUArray)
+import           Data.Array.MArray             (MArray, getElems, newArray,
+                                                readArray, writeArray)
+import           Data.Array.ST                 (STUArray, runSTUArray)
+import           Data.Array.Unboxed            (UArray)
 import           Data.Foldable                 (foldl')
 import           Data.Functor                  (($>))
 import           Data.Ix                       (range)
@@ -57,7 +63,7 @@ apply2 v = \case
 
 {-# INLINE applyCommandArray #-}
 -- NOTE using (Int, Int) vs Int as array index didn't show a noticeable time difference
-applyCommandArray :: MArray a e m => (e ->  Op -> e) -> a XY e -> Command -> m ()
+applyCommandArray :: MArray a e m => (e -> Op -> e) -> a XY e -> Command -> m ()
 applyCommandArray f a (op, xy0, xy1) =
     forM_ (range (xy0, xy1))
         (\xy -> do
@@ -67,10 +73,53 @@ applyCommandArray f a (op, xy0, xy1) =
 -- TODO combine with applyCommandArray?
 -- NOTE using (Int, Int) vs Int as map key showed 16/22s vs 11/12s difference
 -- TODO consider using Data.Strict.Tuple or own ADT
-{-# INLINE applyCommandMap #-}
-applyCommandMap :: Num e => (e -> Op -> e) -> M.Map Int e -> Command -> M.Map Int e
-applyCommandMap f mm (op, (x0,y0), (x1,y1)) =
+{-# INLINE applyCommandHM #-}
+applyCommandHM :: Num e => (e -> Op -> e) -> M.Map Int e -> Command -> M.Map Int e
+applyCommandHM f mm (op, (x0,y0), (x1,y1)) =
     foldl' (\m i -> M.insert i (f (fromMaybe 0 $ M.lookup i m) op) m)
            mm
            [ x*side + y | x <- [x0..x1],
                           y <- [y0..y1] ]
+
+-- Data.Map.Strict
+sumApplyCommandsMS :: (Brightness -> Op -> Brightness) -> [Command] -> Brightness
+sumApplyCommandsMS f =
+      sum
+    . map snd
+    . M.toList
+    . foldl' (applyCommandHM f) M.empty
+
+solve1MS :: String -> Int
+solve1MS = sumApplyCommandsMS apply1 . parseOrDie commands
+
+solve2MS :: String -> Int
+solve2MS = sumApplyCommandsMS apply2 . parseOrDie commands
+
+-- Data.Array.IO.IOUArray
+sumApplyCommandsIO :: (Brightness -> Op -> Brightness) -> [Command] -> IO Brightness
+sumApplyCommandsIO f xs = do
+    m <- newArray ((0,0), (side-1,side-1)) 0 :: IO (IOUArray XY Brightness)
+    forM_ xs $ applyCommandArray f m
+    sum <$> getElems m
+
+solve1IO :: String -> IO Int
+solve1IO = sumApplyCommandsIO apply1 . parseOrDie commands
+
+solve2IO :: String -> IO Int
+solve2IO = sumApplyCommandsIO apply2 . parseOrDie commands
+
+-- Data.Array.ST.STUArray
+sumApplyCommandsST :: (Brightness -> Op -> Brightness) -> [Command] -> Int
+sumApplyCommandsST f xs =
+    let a :: UArray XY Brightness
+        a = runSTUArray $ do
+            m <- newArray ((0,0), (side-1,side-1)) 0 :: ST s (STUArray s XY Brightness)
+            forM_ xs (applyCommandArray f m)
+            return m
+    in  sum . elems $ a
+
+solve1ST :: String -> Int
+solve1ST = sumApplyCommandsST apply1 . parseOrDie commands
+
+solve2ST :: String -> Int
+solve2ST = sumApplyCommandsST apply2 . parseOrDie commands

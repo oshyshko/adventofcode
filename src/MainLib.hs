@@ -17,9 +17,7 @@ import qualified Y15.D02
 import qualified Y15.D03
 import qualified Y15.D04
 import qualified Y15.D05
-import qualified Y15.D06HM
-import qualified Y15.D06IO
-import qualified Y15.D06ST
+import qualified Y15.D06
 import qualified Y15.D07
 import qualified Y15.D08
 import qualified Y15.D09
@@ -39,9 +37,9 @@ days =
     , ("Y15.D03",  i2ios   [Y15.D03.solve1,   Y15.D03.solve2])
     , ("Y15.D04",  i2ios   [Y15.D04.solve1,   Y15.D04.solve2])
     , ("Y15.D05",  i2ios   [Y15.D05.solve1,   Y15.D05.solve2])
-    , ("Y15.D06HM",i2ios   [Y15.D06HM.solve1, Y15.D06HM.solve2]) -- Data.Map.Strict
-    , ("Y15.D06IO",ioi2ios [Y15.D06IO.solve1, Y15.D06IO.solve2]) -- Data.Array.IO
-    , ("Y15.D06ST",i2ios   [Y15.D06ST.solve1, Y15.D06ST.solve2]) -- Data.Array.ST
+    , ("Y15.D06MS",i2ios   [Y15.D06.solve1MS, Y15.D06.solve2MS])
+    , ("Y15.D06IO",ioi2ios [Y15.D06.solve1IO, Y15.D06.solve2IO])
+    , ("Y15.D06ST",i2ios   [Y15.D06.solve1ST, Y15.D06.solve2ST])
     , ("Y15.D07",  i2ios   [Y15.D07.solve1,   Y15.D07.solve2])
     , ("Y15.D08",  i2ios   [Y15.D08.solve1,   Y15.D08.solve2])
     , ("Y15.D09",  i2ios   [Y15.D09.solve1,   Y15.D09.solve2])
