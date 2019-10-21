@@ -2,7 +2,7 @@ module MainLib where
 
 import           Control.DeepSeq       (NFData, force)
 import           Control.Exception     (evaluate)
-import           Control.Monad         (void, when)
+import           Control.Monad         (void)
 import           Data.List             (intercalate, isPrefixOf)
 import           Data.List.Split       (splitOn)
 import qualified Data.Map.Strict       as M
@@ -11,6 +11,8 @@ import           Data.Time.Clock.POSIX (getPOSIXTime)
 import           System.Environment    (getArgs)
 import           System.IO             (hFlush, stdout)
 import           Text.Printf           (printf)
+
+import           Util
 
 import qualified Y15.D01
 import qualified Y15.D02
@@ -59,15 +61,6 @@ days =
         ioi2ios :: [a -> IO Int] -> [a -> IO String]
         ioi2ios = fmap (fmap show .)
 
-replace :: Eq a => [a] -> [a] -> [a] -> [a]
-replace from to = intercalate to . splitOn from
-
--- Examples:
--- s <- readInput "Y15.D01"
--- Y15.D14.solve1 <$> readInput "Y15.D14"
-readInput :: String -> IO String
-readInput name = readFile $ "res/" ++ replace "." "/" (take 7 name) ++ ".txt"
-
 -- # day     answer-1  answer-2
 -- Y15.D01   138       1771
 -- Y15.D02   1586300   3737498
@@ -88,13 +81,17 @@ main = do
     args <- getArgs
     let daysPred = case args of
             []  -> const True
-            [x] -> (x ==)
+            [x] -> (x `isPrefixOf`)
             _   -> error $ "Don't know how to interpret args: " ++ show args
 
     let daysSelected = filter (daysPred . fst) days
-    when (null daysSelected) $
-        error $ "Couldn't find day " ++ (show . head) args
+    if null daysSelected
+        then error $ "Couldn't find day " ++ (show . head) args
             ++ ".\nAvailable days are: " ++ intercalate ", " (map fst days) ++ ".\n"
+        else putStrLn $ "Running "
+            ++ (show . length $ daysSelected)
+            ++ "/" ++ (show . length $ days)
+            ++ " days..."
 
     -- answers.txt
     let answersPath = "res/answers.txt"
