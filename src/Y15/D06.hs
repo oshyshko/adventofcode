@@ -89,12 +89,6 @@ sumApplyCommandsMS f =
     . M.toList
     . foldl' (applyCommandHM f) M.empty
 
-solve1MS :: String -> Int
-solve1MS = sumApplyCommandsMS apply1 . parseOrDie commands
-
-solve2MS :: String -> Int
-solve2MS = sumApplyCommandsMS apply2 . parseOrDie commands
-
 -- Data.Array.IO.IOUArray
 sumApplyCommandsIO :: (Brightness -> Op -> Brightness) -> [Command] -> IO Brightness
 sumApplyCommandsIO f xs = do
@@ -102,24 +96,24 @@ sumApplyCommandsIO f xs = do
     forM_ xs $ applyCommandArray f m
     sum <$> getElems m
 
-solve1IO :: String -> IO Int
-solve1IO = sumApplyCommandsIO apply1 . parseOrDie commands
-
-solve2IO :: String -> IO Int
-solve2IO = sumApplyCommandsIO apply2 . parseOrDie commands
-
 -- Data.Array.ST.STUArray
 sumApplyCommandsST :: (Brightness -> Op -> Brightness) -> [Command] -> Int
 sumApplyCommandsST f xs =
-    let a :: UArray XY Brightness
-        a = runSTUArray $ do
+    let res :: UArray XY Brightness
+        res = runSTUArray $ do
             m <- newArray ((0,0), (side-1,side-1)) 0 :: ST s (STUArray s XY Brightness)
             forM_ xs (applyCommandArray f m)
             return m
-    in  sum . elems $ a
+    in  sum . elems $ res
 
-solve1ST :: String -> Int
+solve1MS, solve2MS :: String -> Int
+solve1MS = sumApplyCommandsMS apply1 . parseOrDie commands
+solve2MS = sumApplyCommandsMS apply2 . parseOrDie commands
+
+solve1IO, solve2IO :: String -> IO Int
+solve1IO = sumApplyCommandsIO apply1 . parseOrDie commands
+solve2IO = sumApplyCommandsIO apply2 . parseOrDie commands
+
+solve1ST, solve2ST :: String -> Int
 solve1ST = sumApplyCommandsST apply1 . parseOrDie commands
-
-solve2ST :: String -> Int
 solve2ST = sumApplyCommandsST apply2 . parseOrDie commands
