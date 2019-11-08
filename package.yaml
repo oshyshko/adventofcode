@@ -50,6 +50,8 @@ executables:
     dependencies:
     - base
     - adventofcode
+    ghc-options:
+    - -rtsopts
 
 tests:
   adventofcode-test:

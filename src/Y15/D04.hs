@@ -1,18 +1,24 @@
 module Y15.D04 where
 
-import           Data.ByteString.Lazy.Char8 (pack)
-import           Data.Digest.Pure.MD5       (md5)
-import           Data.List                  (isPrefixOf)
+import           Data.Bits                  ((.&.))
+import qualified Data.ByteString            as B
+import qualified Data.ByteString.Lazy.Char8 as L
+import           Data.Digest.Pure.MD5       (md5, md5DigestBytes)
 
-solve :: Int -> String -> Int
-solve n s = fst
-          . head
-          . filter (isPrefixOf (replicate n '0') . snd)
-          . map (\x -> (x, show . md5 . pack $ s ++ show x))
-          $ [1..]
+solve :: (B.ByteString -> Bool) -> String -> Int
+solve startsWithZeros s =
+      head
+    . filter (\x -> startsWithZeros . md5DigestBytes . md5 $ L.pack s <> L.pack (show x))
+    $ [1..]
 
 solve1 :: String -> Int
-solve1 = solve 5
+solve1 = solve
+    (\bs -> 0 == B.index bs 0
+         && 0 == B.index bs 1
+         && 0 == B.index bs 2 .&. 0xF0)
 
 solve2 :: String -> Int
-solve2 = solve 6
+solve2 = solve
+    (\bs -> 0 == B.index bs 0
+         && 0 == B.index bs 1
+         && 0 == B.index bs 2)

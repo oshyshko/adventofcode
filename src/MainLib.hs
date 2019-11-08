@@ -90,8 +90,7 @@ main = do
             ++ ".\nAvailable days are: " ++ intercalate ", " (map fst days) ++ ".\n"
         else putStrLn $ "Running "
             ++ (show . length $ daysSelected)
-            ++ "/" ++ (show . length $ days)
-            ++ " days..."
+            ++ " days (out of " ++ (show . length $ days) ++ ")"
 
     -- answers.txt
     let answersPath = "res/answers.txt"
