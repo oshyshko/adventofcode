@@ -16,17 +16,30 @@ ghc-options:
 - -fno-warn-unused-do-bind
 - -O2
 - -optc-O3
+#  from https://kowainik.github.io/posts/2019-02-06-style-guide#general-recommendations
+- -Wcompat
+- -Widentities
+# - -Wincomplete-uni-patterns
+- -Wincomplete-record-updates
+- -Wpartial-fields
+- -Wredundant-constraints
+# - -Wmissing-export-lists
+# - -Wmissing-deriving-strategies   <--  8.8.1
+- -fhide-source-paths
+- -freverse-errors
 
 default-extensions:
+- DeriveGeneric
+- FlexibleContexts
 - LambdaCase
 - MultiWayIf
 - OverloadedStrings
 - ScopedTypeVariables
+- StrictData
 
 library:
   source-dirs: src
   dependencies:
-  - hspec
   - base
   - aeson
   - array
@@ -34,6 +47,7 @@ library:
   - containers
   - deepseq
   - hashable
+  - hspec
   - lens
   - mtl
   - parsec
@@ -48,8 +62,13 @@ executables:
     main: MainExe.hs
     source-dirs: src.exe
     dependencies:
-    - base
     - adventofcode
+    - base
+    - bytestring
+    - byteunits
+    - containers
+    - process
+    - split
     ghc-options:
     - -rtsopts
 

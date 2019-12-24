@@ -177,7 +177,7 @@ steps:
       #   `{-#LANGUAGE #-}'.
       #
       # Default: vertical.
-      style: vertical
+      style: compact
 
       # Align affects alignment of closing pragma brackets.
       #
@@ -229,7 +229,10 @@ newline: native
 #
 # No language extensions are enabled by default.
 language_extensions:
+- DeriveGeneric
+- FlexibleContexts
 - LambdaCase
 - MultiWayIf
 - OverloadedStrings
 - ScopedTypeVariables
+- StrictData
