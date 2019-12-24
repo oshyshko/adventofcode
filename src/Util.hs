@@ -1,8 +1,14 @@
 module Util where
 
+import           Control.DeepSeq               (NFData, force)
+import           Control.Exception             (evaluate)
+import           Control.Monad                 (void)
+import           Data.Function                 (fix)
 import           Data.List                     (intercalate)
 import           Data.List.Split               (splitOn)
+import           Data.Time.Clock.POSIX         (getPOSIXTime)
 import qualified Debug.Trace                   as Trace
+import           Numeric                       (showFFloat)
 import           Text.ParserCombinators.Parsec (Parser, parse, string, try,
                                                 (<|>))
 
@@ -38,3 +44,20 @@ traceShow = Trace.traceShow
 
 traceShowId :: Show a => a -> a
 traceShowId = Trace.traceShowId
+
+timeOf :: NFData a => IO a -> IO (a, Integer)
+timeOf ioa = do
+    start <- timeInMillis
+    a <- force <$> ioa
+    void $ evaluate a
+    end <- timeInMillis
+    pure (a, end - start)
+  where
+    timeInMillis = ceiling . (1000 *) <$> getPOSIXTime
+
+size2humanSize :: Integer -> String
+size2humanSize i =
+    flip fix (fromIntegral i::Float, "BKMGTPEZY") $ \l (n, u:units) ->
+        if n <= 999.9 || null units
+            then showFFloat (Just $ if u == 'B' then 0 else 1) n [u]
+            else l (n / 1024, units)
