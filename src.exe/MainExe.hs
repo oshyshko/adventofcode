@@ -85,7 +85,7 @@ main = do
         ["runday", dayKey, dayNs] ->
             case M.lookup dayKey days of
                 Nothing      -> error $ "Couldn't find day " ++ dayKey ++ ", solver " ++ dayNs
-                Just solvers -> readInput dayKey >>= (solvers !! read dayNs) >>= putStr
+                Just solvers -> getContents >>= (solvers !! read dayNs) >>= putStr
 
         _ -> do
             -- select day(s)
