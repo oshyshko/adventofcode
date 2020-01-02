@@ -39,9 +39,11 @@ days = M.fromList
     , ("Y15.D03",  i2ios   [Y15.D03.solve1,   Y15.D03.solve2])
     , ("Y15.D04",  i2ios   [Y15.D04.solve1,   Y15.D04.solve2])
     , ("Y15.D05",  i2ios   [Y15.D05.solve1,   Y15.D05.solve2])
-    , ("Y15.D06IO",ioi2ios [Y15.D06.solve1IO, Y15.D06.solve2IO])
+    , ("Y15.D06MH",i2ios   [Y15.D06.solve1MH, Y15.D06.solve2MH])
+    , ("Y15.D06MI",i2ios   [Y15.D06.solve1MI, Y15.D06.solve2MI])
     , ("Y15.D06MS",i2ios   [Y15.D06.solve1MS, Y15.D06.solve2MS])
-    , ("Y15.D06ST",i2ios   [Y15.D06.solve1ST, Y15.D06.solve2ST])
+    , ("Y15.D06AI",ioi2ios [Y15.D06.solve1AI, Y15.D06.solve2AI])
+    , ("Y15.D06AS",i2ios   [Y15.D06.solve1AS, Y15.D06.solve2AS])
     , ("Y15.D07",  i2ios   [Y15.D07.solve1,   Y15.D07.solve2])
     , ("Y15.D08",  i2ios   [Y15.D08.solve1,   Y15.D08.solve2])
     , ("Y15.D09",  i2ios   [Y15.D09.solve1,   Y15.D09.solve2])
@@ -58,9 +60,9 @@ days = M.fromList
     ]
   where s2ios :: [a -> b] -> [a -> IO b]
         s2ios   = fmap (return .)
-        i2ios :: [a -> Int] -> [a -> IO String]
+        i2ios :: Show b => [a -> b] -> [a -> IO String]
         i2ios   = fmap ((return . show) .)
-        ioi2ios :: [a -> IO Int] -> [a -> IO String]
+        ioi2ios :: Show b => [a -> IO b] -> [a -> IO String]
         ioi2ios = fmap (fmap show .)
 
 -- # day     answer-1  answer-2
@@ -85,7 +87,7 @@ main = do
         ["runday", dayKey, dayNs] ->
             case M.lookup dayKey days of
                 Nothing      -> error $ "Couldn't find day " ++ dayKey ++ ", solver " ++ dayNs
-                Just solvers -> getContents >>= (solvers !! read dayNs) >>= putStr
+                Just solvers -> readInput dayKey >>= (solvers !! read dayNs) >>= putStr
 
         _ -> do
             -- select day(s)
@@ -107,7 +109,7 @@ main = do
 
             -- read answers.txt
             let answersPath = "res/answers.txt"
-            day2snwers <- parseAnswers <$> readFile answersPath
+            day2answers <- parseAnswers <$> readFile answersPath
 
             -- run
             forM_ daysSelected
@@ -125,7 +127,7 @@ main = do
                                 (msReal r)
                                 (size2humanSize . bytesAllocated $ r)
                                 (size2humanSize . bytesPeak $ r))
-                        (case M.lookup dayKey day2snwers of
+                        (case M.lookup (take 7 dayKey) day2answers of
                             Nothing -> " <-- couldn't find entry " ++ show dayKey ++ " in " ++ show answersPath
                             Just expected ->
                                 if expected /= (results <&> output)
@@ -160,7 +162,7 @@ runDayViaExec :: String -> String -> Int -> IO ExecResult
 runDayViaExec input dayKey dayN  = do
     selfPath <- getExecutablePath
 
-    (ec, out, err) <- readProcessWithExitCode
+    (_, out, err) <- readProcessWithExitCode
         selfPath
         ["runday", dayKey, show dayN, "+RTS", "-t", "--machine-readable", "-RTS"]
         input

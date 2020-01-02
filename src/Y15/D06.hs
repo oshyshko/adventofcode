@@ -1,30 +1,34 @@
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, MultiParamTypeClasses #-}
+
 module Y15.D06 where
 
 import           Control.Monad                 (forM_)
-import           Control.Monad.ST              (ST)
-import           Data.Array.IArray             (elems)
+import           Control.Monad.ST              (ST, runST)
 import           Data.Array.IO                 (IOUArray)
 import           Data.Array.MArray             (MArray, getElems, newArray,
                                                 readArray, writeArray)
-import           Data.Array.ST                 (STUArray, runSTUArray)
-import           Data.Array.Unboxed            (UArray)
+import           Data.Array.ST                 (STUArray)
 import           Data.Foldable                 (foldl')
 import           Data.Functor                  (($>))
-import           Data.Ix                       (range)
-import qualified Data.Map.Strict               as M
+import qualified Data.HashMap.Strict           as HM
+import qualified Data.IntMap.Strict            as IM
+import qualified Data.Map.Strict               as SM
 import           Data.Maybe                    (fromMaybe)
 import           Text.ParserCombinators.Parsec (Parser, char, digit, endBy,
                                                 many, space, string, try, (<|>))
-
 import           Util
 
-side :: Int -- TODO determine sides from input?
-side = 1000
-
-type XY         = (Int, Int)
-type Brightness = Int
+type Side       = Int -- Word32
+type Brightness = Int -- Int32
 data Op         = On | Off | Toggle deriving Show
-type Command    = (Op, XY, XY)
+type Command    = (Op, (Side, Side), (Side, Side))
+
+-- TODO find a way to migrate L1/L2 to a newtype + have MArray instances
+type L1 = Bool
+type L2 = Int -- Int16
+
+side :: Side -- TODO determine sides from input?
+side = 1000
 
 -- turn off 199,133 through 461,193
 -- toggle 322,558 through 977,958
@@ -34,7 +38,7 @@ commands = command `endBy` eol
   where
     command :: Parser Command
     command = (,,) <$> op <* space
-                   <*> xy <* string " through "
+                   <*> xy <* string " through " -- TODO many1 space ...
                    <*> xy
 
     op :: Parser Op
@@ -42,78 +46,110 @@ commands = command `endBy` eol
         <|> try (string "turn off") $> Off
         <|>      string "toggle"    $> Toggle
 
-    xy :: Parser XY
+    xy :: Parser (Side, Side)
     xy = (,) <$> (read <$> many digit)
              <* char ','
              <*> (read <$> many digit)
 
-{-# INLINE apply1 #-}
-apply1 :: Brightness-> Op -> Brightness
-apply1 v = \case
-    On     -> 1
-    Off    -> 0
-    Toggle -> if v == 1 then 0 else 1
+class Light a where
+    initial    :: a
+    brightness :: a -> Brightness
+    operate    :: a -> Op -> a
 
-{-# INLINE apply2 #-}
-apply2 :: Brightness -> Op -> Brightness
-apply2 v = \case
-    On     -> v + 1
-    Off    -> max 0 (v -1)
-    Toggle -> v + 2
+instance Light L1 where
+    initial      = False
+    brightness v = if v then 1 else 0
+    operate v    = \case
+        On     -> True
+        Off    -> False
+        Toggle -> not v
 
-{-# INLINE applyCommandArray #-}
--- NOTE using (Int, Int) vs Int as array index didn't show a noticeable time difference
-applyCommandArray :: MArray a e m => (e -> Op -> e) -> a XY e -> Command -> m ()
-applyCommandArray f a (op, xy0, xy1) =
-    forM_ (range (xy0, xy1))
-        (\xy -> do
-            v <- readArray a xy
-            writeArray a xy (f v op))
+instance Light L2 where
+    initial      = 0
+    brightness v = v
+    operate v    = \case
+        On     -> v + 1
+        Off    -> max 0 (v - 1)
+        Toggle -> v + 2
 
--- TODO combine with applyCommandArray?
--- NOTE using (Int, Int) vs Int as map key showed 16/22s vs 11/12s difference
--- TODO consider using Data.Strict.Tuple or own ADT
-{-# INLINE applyCommandHM #-}
-applyCommandHM :: Num e => (e -> Op -> e) -> M.Map Int e -> Command -> M.Map Int e
-applyCommandHM f mm (op, (x0,y0), (x1,y1)) =
-    foldl' (\m i -> M.insert i (f (fromMaybe 0 $ M.lookup i m) op) m)
-           mm
-           [ x*side + y | x <- [x0..x1],
-                          y <- [y0..y1] ]
+-- map based implementations
+class Storage s k v where
+    empty  :: s k v
+    alter  :: (Maybe v -> Maybe v) -> k -> s k v -> s k v
+    foldlS :: (a -> v -> a) -> a -> s k v -> a
+    elems  :: s k v -> [v]
 
--- Data.Map.Strict
-sumApplyCommandsMS :: (Brightness -> Op -> Brightness) -> [Command] -> Brightness
-sumApplyCommandsMS f =
-      sum
-    . map snd
-    . M.toList
-    . foldl' (applyCommandHM f) M.empty
+instance Storage SM.Map Side v where
+    empty  = SM.empty
+    alter  = SM.alter
+    foldlS = SM.foldl'
+    elems  = SM.elems
 
--- Data.Array.IO.IOUArray
-sumApplyCommandsIO :: (Brightness -> Op -> Brightness) -> [Command] -> IO Brightness
-sumApplyCommandsIO f xs = do
-    m <- newArray ((0,0), (side-1,side-1)) 0 :: IO (IOUArray XY Brightness)
-    forM_ xs $ applyCommandArray f m
-    sum <$> getElems m
+instance Storage HM.HashMap Side v where
+    empty  = HM.empty
+    alter  = HM.alter
+    foldlS = HM.foldl'
+    elems  = HM.elems
 
--- Data.Array.ST.STUArray
-sumApplyCommandsST :: (Brightness -> Op -> Brightness) -> [Command] -> Int
-sumApplyCommandsST f xs =
-    let res :: UArray XY Brightness
-        res = runSTUArray $ do
-            m <- newArray ((0,0), (side-1,side-1)) 0 :: ST s (STUArray s XY Brightness)
-            forM_ xs (applyCommandArray f m)
-            return m
-    in  sum . elems $ res
+newtype IntMap' k v = IntMap (IM.IntMap v) -- TODO get rid of this phantom type
+instance Storage IntMap' Side v where
+    empty                 = IntMap IM.empty
+    alter  f k (IntMap m) = IntMap $ IM.alter f k m
+    foldlS f i (IntMap m) = IM.foldl' f i m
+    elems      (IntMap m) = IM.elems m
 
-solve1MS, solve2MS :: String -> Int
-solve1MS = sumApplyCommandsMS apply1 . parseOrDie commands
-solve2MS = sumApplyCommandsMS apply2 . parseOrDie commands
 
-solve1IO, solve2IO :: String -> IO Int
-solve1IO = sumApplyCommandsIO apply1 . parseOrDie commands
-solve2IO = sumApplyCommandsIO apply2 . parseOrDie commands
+applyCommandsAndSum :: (Light v, Storage s Side v) => s Side v -> [Command] -> Brightness
+applyCommandsAndSum s cs =
+    getSum $ foldl' applyCommand s cs
+  where
+    getSum :: (Light v, Storage s Side v) => s Side v -> Brightness
+    getSum = foldlS (\a v -> a + brightness v) 0
 
-solve1ST, solve2ST :: String -> Int
-solve1ST = sumApplyCommandsST apply1 . parseOrDie commands
-solve2ST = sumApplyCommandsST apply2 . parseOrDie commands
+    applyCommand :: (Light v, Storage s Side v) => s Side v -> Command -> s Side v
+    applyCommand ss (op, (x0,y0), (x1,y1)) =
+        foldl' (flip $ alter (\mv ->
+                                let x = operate (fromMaybe initial mv) op
+                                in  x `seq` Just x))
+            ss
+            [x * side + y | x <- [x0..x1]
+                          , y <- [y0..y1]]
+
+solve1MH, solve2MH :: String -> Brightness
+solve1MH = applyCommandsAndSum (empty :: HM.HashMap Side L1) . parseOrDie commands
+solve2MH = applyCommandsAndSum (empty :: HM.HashMap Side L2) . parseOrDie commands
+
+solve1MS, solve2MS :: String -> Brightness
+solve1MS = applyCommandsAndSum (empty :: SM.Map Side L1) . parseOrDie commands
+solve2MS = applyCommandsAndSum (empty :: SM.Map Side L2) . parseOrDie commands
+
+solve1MI, solve2MI :: String -> Brightness
+solve1MI = applyCommandsAndSum (empty :: IntMap' Side L1) . parseOrDie commands
+solve2MI = applyCommandsAndSum (empty :: IntMap' Side L2) . parseOrDie commands
+
+-- array based implementations
+applyCommandsAndSumArray :: (Light e, MArray a e m) => [Command] -> a Side e -> m Brightness
+applyCommandsAndSumArray cs arr = do
+    forM_ cs $ applyCommand arr
+    sum . map brightness <$> getElems arr
+  where
+    applyCommand :: (Light e, MArray a e m) => a Side e -> Command -> m ()
+    applyCommand a (op, (x0,y0), (x1,y1)) =
+        forM_
+            [x * side + y | x <- [x0..x1]
+                          , y <- [y0..y1]]
+            (\i -> do
+
+                v <- readArray a i
+                writeArray a i (operate v op))
+
+newArr :: (Light e, MArray a e m) => m (a Side e)
+newArr = newArray (0, side * side - 1) initial
+
+solve1AI, solve2AI :: String -> IO Brightness
+solve1AI s = applyCommandsAndSumArray (parseOrDie commands s) =<< (newArr :: IO (IOUArray Side L1))
+solve2AI s = applyCommandsAndSumArray (parseOrDie commands s) =<< (newArr :: IO (IOUArray Side L2))
+
+solve1AS, solve2AS :: String -> Brightness
+solve1AS s = runST $ applyCommandsAndSumArray (parseOrDie commands s) =<< (newArr :: ST s (STUArray s Side L1))
+solve2AS s = runST $ applyCommandsAndSumArray (parseOrDie commands s) =<< (newArr :: ST s (STUArray s Side L2))
