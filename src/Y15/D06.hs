@@ -77,27 +77,22 @@ class Storage s k v where
     empty  :: s k v
     alter  :: (Maybe v -> Maybe v) -> k -> s k v -> s k v
     foldlS :: (a -> v -> a) -> a -> s k v -> a
-    elems  :: s k v -> [v]
 
 instance Storage SM.Map Side v where
     empty  = SM.empty
     alter  = SM.alter
     foldlS = SM.foldl'
-    elems  = SM.elems
 
 instance Storage HM.HashMap Side v where
     empty  = HM.empty
     alter  = HM.alter
     foldlS = HM.foldl'
-    elems  = HM.elems
 
 newtype IntMap' k v = IntMap (IM.IntMap v) -- TODO get rid of this phantom type
 instance Storage IntMap' Side v where
     empty                 = IntMap IM.empty
     alter  f k (IntMap m) = IntMap $ IM.alter f k m
     foldlS f i (IntMap m) = IM.foldl' f i m
-    elems      (IntMap m) = IM.elems m
-
 
 applyCommandsAndSum :: (Light v, Storage s Side v) => s Side v -> [Command] -> Brightness
 applyCommandsAndSum s cs =
