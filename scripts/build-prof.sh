@@ -7,7 +7,7 @@ cd "$(dirname $0)/../"
 
 stack --work-dir .stack-work-profile build --executable-profiling --no-library-profiling
 stack --work-dir .stack-work-profile exec  --executable-profiling --no-library-profiling \
-   -- adventofcode-exe +RTS -p -T --RTS $@
+   -- adventofcode-exe +RTS -xc -p -T --RTS $@
 
 # run profiteur, if installed
 if [ -x "$(command -v profiteur)" ]; then
