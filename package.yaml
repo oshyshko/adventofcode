@@ -47,15 +47,17 @@ library:
   - containers
   - deepseq
   - hashable
-  - hspec
+  - hspec # needed to make Atom happy
   - lens
   - mtl
   - parsec
+  - primitive
   - pureMD5
   - scientific
   - split
   - time
   - unordered-containers
+  - vector
 
 executables:
   adventofcode-exe:

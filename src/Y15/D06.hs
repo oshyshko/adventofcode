@@ -3,20 +3,34 @@
 module Y15.D06 where
 
 import           Control.Monad                 (forM_)
-import           Control.Monad.ST              (ST, runST)
+import           Control.Monad.Primitive       (PrimMonad, PrimState)
+import           Control.Monad.ST              (RealWorld, ST, runST)
 import           Data.Array.IO                 (IOUArray)
 import           Data.Array.MArray             (MArray, getElems, newArray,
                                                 readArray, writeArray)
 import           Data.Array.ST                 (STUArray)
 import           Data.Foldable                 (foldl')
 import           Data.Functor                  (($>))
-import qualified Data.HashMap.Strict           as HM
-import qualified Data.IntMap.Strict            as IM
-import qualified Data.Map.Strict               as SM
+import qualified Data.HashMap.Strict           as MH
+import           Data.Int                      (Int16)
+import qualified Data.IntMap.Strict            as MI
+import qualified Data.Map.Strict               as MS
 import           Data.Maybe                    (fromMaybe)
+import qualified Data.Vector.Unboxed           as V
+import           Data.Vector.Unboxed.Mutable   (MVector, Unbox)
+import qualified Data.Vector.Unboxed.Mutable   as VM
+-- import           Data.Word                     (Word32)
 import           Text.ParserCombinators.Parsec (Parser, char, digit, endBy,
                                                 many, space, string, try, (<|>))
 import           Util
+
+-- AI -- Data.Array.IO.IOUArray
+-- AS -- Data.Array.ST.STUArray
+-- MH -- Data.HashMap.Strict
+-- MI -- Data.IntMap.Strict
+-- MS -- Data.Map.Strict
+-- VI -- Data.Vector.Unboxed.Mutable.MVector + IO
+-- VS -- Data.Vector.Unboxed.Mutable.MVector + ST
 
 type Side       = Int -- Word32
 type Brightness = Int -- Int32
@@ -25,7 +39,7 @@ type Command    = (Op, (Side, Side), (Side, Side))
 
 -- TODO find a way to migrate L1/L2 to a newtype + have MArray instances
 type L1 = Bool
-type L2 = Int -- Int16
+type L2 = Int16
 
 side :: Side -- TODO determine sides from input?
 side = 1000
@@ -66,7 +80,7 @@ instance Light L1 where
 
 instance Light L2 where
     initial      = 0
-    brightness v = v
+    brightness   = fromIntegral
     operate v    = \case
         On     -> v + 1
         Off    -> max 0 (v - 1)
@@ -78,21 +92,21 @@ class Storage s k v where
     alter  :: (Maybe v -> Maybe v) -> k -> s k v -> s k v
     foldlS :: (a -> v -> a) -> a -> s k v -> a
 
-instance Storage SM.Map Side v where
-    empty  = SM.empty
-    alter  = SM.alter
-    foldlS = SM.foldl'
+instance Storage MS.Map Side v where
+    empty  = MS.empty
+    alter  = MS.alter
+    foldlS = MS.foldl'
 
-instance Storage HM.HashMap Side v where
-    empty  = HM.empty
-    alter  = HM.alter
-    foldlS = HM.foldl'
+instance Storage MH.HashMap Side v where
+    empty  = MH.empty
+    alter  = MH.alter
+    foldlS = MH.foldl'
 
-newtype IntMap' k v = IntMap (IM.IntMap v) -- TODO get rid of this phantom type
+newtype IntMap' k v = IntMap (MI.IntMap v) -- TODO get rid of this phantom type
 instance Storage IntMap' Side v where
-    empty                 = IntMap IM.empty
-    alter  f k (IntMap m) = IntMap $ IM.alter f k m
-    foldlS f i (IntMap m) = IM.foldl' f i m
+    empty                 = IntMap MI.empty
+    alter  f k (IntMap m) = IntMap $ MI.alter f k m
+    foldlS f i (IntMap m) = MI.foldl' f i m
 
 applyCommandsAndSum :: (Light v, Storage s Side v) => s Side v -> [Command] -> Brightness
 applyCommandsAndSum s cs =
@@ -111,12 +125,12 @@ applyCommandsAndSum s cs =
                           , y <- [y0..y1]]
 
 solve1MH, solve2MH :: String -> Brightness
-solve1MH = applyCommandsAndSum (empty :: HM.HashMap Side L1) . parseOrDie commands
-solve2MH = applyCommandsAndSum (empty :: HM.HashMap Side L2) . parseOrDie commands
+solve1MH = applyCommandsAndSum (empty :: MH.HashMap Side L1) . parseOrDie commands
+solve2MH = applyCommandsAndSum (empty :: MH.HashMap Side L2) . parseOrDie commands
 
 solve1MS, solve2MS :: String -> Brightness
-solve1MS = applyCommandsAndSum (empty :: SM.Map Side L1) . parseOrDie commands
-solve2MS = applyCommandsAndSum (empty :: SM.Map Side L2) . parseOrDie commands
+solve1MS = applyCommandsAndSum (empty :: MS.Map Side L1) . parseOrDie commands
+solve2MS = applyCommandsAndSum (empty :: MS.Map Side L2) . parseOrDie commands
 
 solve1MI, solve2MI :: String -> Brightness
 solve1MI = applyCommandsAndSum (empty :: IntMap' Side L1) . parseOrDie commands
@@ -148,3 +162,29 @@ solve2AI s = applyCommandsAndSumArray (parseOrDie commands s) =<< (newArr :: IO 
 solve1AS, solve2AS :: String -> Brightness
 solve1AS s = runST $ applyCommandsAndSumArray (parseOrDie commands s) =<< (newArr :: ST s (STUArray s Side L1))
 solve2AS s = runST $ applyCommandsAndSumArray (parseOrDie commands s) =<< (newArr :: ST s (STUArray s Side L2))
+
+-- vector based implementations
+-- see https://wiki.haskell.org/Numeric_Haskell:_A_Vector_Tutorial
+-- see https://tech.fpcomplete.com/haskell/library/vector
+newVec :: (Light e, PrimMonad m, Unbox e) => m (MVector (PrimState m) e)
+newVec = VM.replicate (side * side - 1) initial
+
+applyCommandsAndSumVector :: (Light e, PrimMonad m, Unbox e) => [Command] -> MVector (PrimState m) e -> m Brightness
+applyCommandsAndSumVector cs vv = do
+    forM_ cs $ applyCommand vv
+    V.foldl' (\a x -> a + brightness x) 0 <$> V.freeze vv
+  where
+    applyCommand :: (Light e, PrimMonad m, Unbox e) => MVector (PrimState m) e -> Command -> m ()
+    applyCommand v (op, (x0,y0), (x1,y1)) =
+        forM_
+            [x * side + y | x <- [x0..x1]
+                          , y <- [y0..y1]]
+            (VM.modify v (`operate` op))
+
+solve1VI, solve2VI :: String -> IO Brightness
+solve1VI s = applyCommandsAndSumVector (parseOrDie commands s) =<< (newVec :: IO (MVector RealWorld L1))
+solve2VI s = applyCommandsAndSumVector (parseOrDie commands s) =<< (newVec :: IO (MVector RealWorld L2))
+
+solve1VS, solve2VS :: String -> Brightness
+solve1VS s = runST $ applyCommandsAndSumVector (parseOrDie commands s) =<< (newVec :: ST s (MVector s L1))
+solve2VS s = runST $ applyCommandsAndSumVector (parseOrDie commands s) =<< (newVec :: ST s (MVector s L2))
