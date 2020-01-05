@@ -4,3 +4,4 @@
 *.lock
 *.prof*
 adventofcode.cabal
+adventofcode-exe.*

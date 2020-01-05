@@ -1,14 +1,14 @@
 module Y15.D04 where
 
-import           Data.Bits                  ((.&.))
-import qualified Data.ByteString            as B
-import qualified Data.ByteString.Lazy.Char8 as L
-import           Data.Digest.Pure.MD5       (md5, md5DigestBytes)
+import           Crypto.Hash.MD5       (hash)
+import           Data.Bits             ((.&.))
+import qualified Data.ByteString       as B
+import qualified Data.ByteString.Char8 as BC
 
 solve :: (B.ByteString -> Bool) -> String -> Int
 solve startsWithZeros s =
       head
-    . filter (\x -> startsWithZeros . md5DigestBytes . md5 $ L.pack s <> L.pack (show x))
+    . filter (\x -> startsWithZeros . hash $ BC.pack s <> BC.pack (show x))
     $ [1..]
 
 solve1 :: String -> Int
