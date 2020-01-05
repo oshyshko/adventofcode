@@ -8,7 +8,7 @@ import qualified Data.ByteString.Char8 as BC
 solve :: (B.ByteString -> Bool) -> String -> Int
 solve startsWithZeros s =
       head
-    . filter (\x -> startsWithZeros . hash $ BC.pack s <> BC.pack (show x))
+    . filter (startsWithZeros . hash . (BC.pack s <>) . BC.pack . show)
     $ [1..]
 
 solve1 :: String -> Int
