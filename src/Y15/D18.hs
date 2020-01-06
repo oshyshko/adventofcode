@@ -1,14 +1,13 @@
 module Y15.D18 where
 
 import           Control.Monad                 (join, when)
-import           Data.Array.IArray             (elems)
-import           Data.Array.IO                 (IOUArray)
+import           Control.Monad.ST              (ST, runST)
+import           Data.Array                    (Ix)
 import           Data.Array.MArray             (MArray, getAssocs, getBounds,
                                                 getElems, newArray,
                                                 newListArray, readArray,
                                                 writeArray)
-import           Data.Array.ST                 (runSTUArray)
-import           Data.Array.Unboxed            (UArray)
+import           Data.Array.ST                 (STUArray)
 import           Data.Functor                  (($>))
 import           Data.List.Split               (chunksOf)
 import           Text.ParserCombinators.Parsec (Parser, char, endBy, many,
@@ -16,7 +15,7 @@ import           Text.ParserCombinators.Parsec (Parser, char, endBy, many,
 
 import           Util
 
-type YX = (Int, Int)
+data YX = YX !Int !Int deriving (Eq, Ord, Show, Read, Bounded, Ix)
 
 -- :: (bounds) -> YX -> alive? -> neighbors-alive -> alive?
 type TickFn = (YX, YX) -> YX -> Bool -> Int -> Bool
@@ -36,27 +35,27 @@ mkLights :: MArray a Bool m => [[Bool]] -> m (a YX Bool)
 mkLights xs =
     let h = length xs
         w = length . head $ xs
-    in newListArray ((0,0), (h-1,w-1)) $ join xs
+    in newListArray (YX 0 0, YX (h-1) (w-1)) $ join xs
 
 unLights :: MArray a Bool m => a YX Bool -> m [[Bool]]
 unLights m = do
-    ((_, xa), (_, xz)) <- getBounds m -- NOTE no # of rows check
+    (YX _ xa, YX _ xz) <- getBounds m -- NOTE no # of rows check
     chunksOf (xz-xa+1) <$> getElems m
 
 getOr :: MArray a e m => e -> a YX e -> (YX, YX) -> YX -> m e
-getOr orV m ((ax,ay),(zx,zy)) yx@(y,x) =
-    if     x < ax || y < ay
-        || x > zx || y > zy
+getOr orV m (YX ay ax, YX zx zy) yx@(YX y x) =
+    if     y < ay || y > zy
+        || x < ax || x > zx
         then return orV
         else readArray m yx
 
 -- neighborsOnAround :: IOUArray YX Bool -> (YX, YX) -> YX -> IO Int
 neighborsOnAround :: MArray a Bool m => a YX Bool -> (YX, YX) -> YX -> m Int
-neighborsOnAround m yxaz (y,x) =
+neighborsOnAround m yxaz (YX y x) =
     length . filter id <$> mapM (getOr False m yxaz)
-        [ (y-1, x-1), (y-1, x), (y-1, x+1)
-        , (y  , x-1),           (y  , x+1)
-        , (y+1, x-1), (y+1, x), (y+1, x+1)
+        [ YX (y-1) (x-1), YX (y-1) x, YX (y-1) (x+1)
+        , YX  y    (x-1),             YX  y    (x+1)
+        , YX (y+1) (x-1), YX (y+1) x, YX (y+1) (x+1)
         ]
 
 -- A light which is on  stays on when 2 or 3 neighbors are on,  and turns off otherwise.
@@ -68,7 +67,7 @@ tick1 _ _ v n =
 
 -- four lights, one in each corner, are stuck on and can't be turned off.
 tick2 :: TickFn
-tick2 yxaz@((y0,x0), (yz,xz)) yx@(y,x) v n =
+tick2 yxaz@(YX y0 x0, YX yz xz) yx@(YX y x) v n =
        ((y == y0 || y == yz) && (x == x0 || x == xz))
     || tick1 yxaz yx v n
 
@@ -93,25 +92,12 @@ tickTimes tick a n = do
         tickLights tick yxaz src dst
         stepTimes_ (i-1) yxaz dst src
 
-solveIO :: TickFn -> String -> IO Int
-solveIO tick s = do
-    m <- mkLights (parseOrDie lights s) :: IO (IOUArray YX Bool)
-    tickTimes tick m 100
-    length . filter id <$> getElems m
+solve :: TickFn -> String -> Int
+solve tick s = runST $ do
+    a <- mkLights (parseOrDie lights s) :: ST s (STUArray s YX Bool)
+    tickTimes tick a 100
+    length . filter id <$> getElems a
 
-solveST :: TickFn -> String -> Int
-solveST tick s =
-    let res :: UArray YX Bool
-        res = runSTUArray $ do
-            m <- mkLights (parseOrDie lights s)
-            tickTimes tick m 100
-            return m
-    in length . filter id . elems $ res
-
-solve1IO, solve2IO :: String -> IO Int
-solve1IO = solveIO tick1
-solve2IO = solveIO tick2
-
-solve1ST, solve2ST :: String -> Int
-solve1ST = solveST tick1
-solve2ST = solveST tick2
+solve1, solve2 :: String -> Int
+solve1 = solve tick1
+solve2 = solve tick2
