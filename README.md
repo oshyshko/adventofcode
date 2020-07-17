@@ -33,8 +33,11 @@ $ ./scripts/build-exec.sh
  Y15.D17   | 1638, 17           |    28ms  55.8M  70.7K |    27ms  56.0M  72.0K
  Y15.D18   | 1061, 1006         |   302ms 705.9M 755.2K |   308ms 705.8M 755.1K
 -----------+--------------------+-----------------------+-----------------------
- Darwin x86_64 i386
- ```
+ Platform: darwin, x86_64, v10.15.2, MacBookPro12,1
+ CPU:      Intel(R) Core(TM) i7-5557U CPU @ 3.10GHz, 2 cores
+ RAM:      16.0G @ ?MHz
+ Compiler: ghc-8.6
+```
 
 To run tasks with a particular prefix in name:
 ```

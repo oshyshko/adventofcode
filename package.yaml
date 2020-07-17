@@ -1,15 +1,11 @@
 name:                adventofcode
 version:             0.1.0.0
-homepage:            https://github.com/oshyshko/adventofcode
+github:              "oshyshko/adventofcode"
 license:             BSD3
 license-file:        LICENSE
 author:              Oleksandr Shyshko
 maintainer:          oshyshko@gmail.com
 copyright:           Oleksandr Shyshko
-
-# Metadata used when publishing your package
-# synopsis:            Short description of your package
-# category:            Web
 
 ghc-options:
 - -Wall
@@ -17,16 +13,20 @@ ghc-options:
 - -O2
 - -optc-O3
 #  from https://kowainik.github.io/posts/2019-02-06-style-guide#general-recommendations
-- -Wcompat
 - -Widentities
 # - -Wincomplete-uni-patterns
 - -Wincomplete-record-updates
-- -Wpartial-fields
-- -Wredundant-constraints
 # - -Wmissing-export-lists
 # - -Wmissing-deriving-strategies   <--  8.8.1
+# exclude these for etlas:
+- -Wcompat
+- -Wredundant-constraints
+- -Wpartial-fields
 - -fhide-source-paths
 - -freverse-errors
+# stan
+#- -fwrite-ide-info
+#- -hiedir=.hie
 
 default-extensions:
 - DeriveGeneric
@@ -34,6 +34,7 @@ default-extensions:
 - LambdaCase
 - MultiWayIf
 - OverloadedStrings
+- RecordWildCards
 - ScopedTypeVariables
 - StrictData
 
@@ -46,9 +47,9 @@ library:
   - bytestring
   - containers
   - deepseq
+  - exceptions
   - hashable
   - hspec # needed to make Atom happy
-  - lens
   - mtl
   - parsec
   - primitive
@@ -81,3 +82,5 @@ tests:
     - base
     - adventofcode
     - hspec
+    ghc-options:
+    - -rtsopts

@@ -1,8 +1,11 @@
-module Main where
+module Main
+       ( main
+       , mainArgs
+       ) where
 
 import           Control.Monad      (forM, forM_, when)
 import           Data.Functor       ((<&>))
-import           Data.List          (intercalate, isPrefixOf)
+import           Data.List          (intercalate, isPrefixOf, isSuffixOf)
 import           Data.List.Split    (splitOn)
 import qualified Data.Map.Strict    as M
 import           Data.Maybe         (fromMaybe)
@@ -11,6 +14,7 @@ import           System.IO          (hFlush, stdout)
 import           System.Process     (readProcessWithExitCode)
 import           Text.Printf        (printf)
 
+import           SystemInfo         (SystemInfo (..), getSystemInfo)
 import           Util
 
 import qualified Y15.D01
@@ -81,9 +85,10 @@ parseAnswers =
     . lines
 
 main :: IO ()
-main = do
-    args <- getArgs
+main = getArgs >>= mainArgs
 
+mainArgs :: [String] -> IO ()
+mainArgs args =
     case args of
         ["runday", dayKey, dayNs] ->
             case M.lookup dayKey days of
@@ -126,57 +131,81 @@ main = do
                         (intercalate " | " $ results <&> \r ->
                             printf "%5dms %6s %6s"
                                 (msReal r)
-                                (size2humanSize . bytesAllocated $ r)
-                                (size2humanSize . bytesPeak $ r))
+                                (maybe "?" size2humanSize $ bytesAllocated r)
+                                (maybe "?" size2humanSize $ bytesPeak r))
                         (case M.lookup (take 7 dayKey) day2answers of
                             Nothing -> " <-- couldn't find entry " ++ show dayKey ++ " in " ++ show answersPath
                             Just expected ->
-                                if expected /= (results <&> output)
-                                then " <-- got wrong answers, expected: " ++ intercalate ", " expected
-                                    ++ ", but got: " ++ intercalate ", " (output <$> results)
-                                else ""))
+                                if expected /= (results <&> output) then
+                                    " <-- got wrong answers, expected: "
+                                        ++ intercalate ", " expected
+                                        ++ ", but got: "
+                                        ++ intercalate ", " (output <$> results)
+                                 else
+                                    ""))
 
             -- footer
             putStrLn "-----------+--------------------+-----------------------+-----------------------"
-            -- TODO check exit code
-            -- TODO check if windows -> use different command
-            (_, out, _) <- readProcessWithExitCode "uname" ["-s", "-m", "-p"] ""
-            putStrLn $ " " ++ out
+            putStrLn . unlines . map (" " ++) . lines . showSI =<< getSystemInfo
 
+showSI :: SystemInfo -> String
+showSI SystemInfo{..} =
+    let fm = fromMaybe "?"
+    in intercalate ""
+        [   "Platform: ", fm osName, ", "
+                        , fm osArch, ", v"
+                        , fm osVersion, ", "
+                        , fm hwModel
+        , "\nCPU:      ", fm cpuModel, ", "
+                        , fm $ show <$> cpuCores, " cores"
+        , "\nRAM:      ", fm $ size2humanSize . fromIntegral <$> ramTotal, " @ "
+                        , fm $ show <$> ramSpeed, "MHz"
+        , "\nCompiler: ", fm compiler, " ("
+                        , fm compilerArch, ")"
+        ]
 
 
 data ExecResult = ExecResult
     { output         :: String
     , msReal         :: Integer
-    , bytesAllocated :: Integer
-    , bytesPeak      :: Integer
+    , bytesAllocated :: Maybe Integer
+    , bytesPeak      :: Maybe Integer
     } deriving (Show)
 
--- TODO report failures
-runDayViaDirectCall :: String -> String -> Int -> IO ExecResult
-runDayViaDirectCall input dayKey dayN = do
-    let ioa = fromMaybe (error $ "Couldn't find day: " ++ dayKey) (M.lookup dayKey days) !! dayN
-    (out, ms) <- timeOf $ ioa input
-    return $ ExecResult out ms 0 0
+type DayInput  = String
+type DayKey    = String
+type DayIndex  = Int
 
-runDayViaExec :: String -> String -> Int -> IO ExecResult
-runDayViaExec input dayKey dayN  = do
+-- TODO report failures
+runDayViaDirectCall :: DayInput -> DayKey -> DayIndex -> IO ExecResult
+runDayViaDirectCall input dayKey dayIndex = do
+    let ioa = fromMaybe (error $ "Couldn't find day: " ++ dayKey) (M.lookup dayKey days) !! dayIndex
+    (out, ms) <- timeOf $ ioa input
+    return $ ExecResult out ms Nothing Nothing
+
+runDayViaExec :: DayInput -> DayKey -> DayIndex -> IO ExecResult
+runDayViaExec input dayKey dayIndex  = do
     selfPath <- getExecutablePath
 
-    (_, out, err) <- readProcessWithExitCode
-        selfPath
-        ["runday", dayKey, show dayN, "+RTS", "-t", "--machine-readable", "-RTS"]
-        input
+    if "ghc" `isSuffixOf` selfPath
+        -- fallback to direct call if we are in a REPL
+        then runDayViaDirectCall input dayKey dayIndex
+        else do
+            (_, out, err) <- readProcessWithExitCode
+                selfPath
+                ["runday", dayKey, show dayIndex, "+RTS", "-t", "--machine-readable", "-RTS"]
+                input
 
-    -- TODO assert exit code
-    -- TODO parse err
+            -- TODO assert exit code
+            -- TODO parse err
 
-    let s = M.fromList $ read err
+            let s :: M.Map String String = M.fromList $ read err
 
-    -- total_cpu_seconds, total_wall_seconds
-    --   mut_cpu_seconds,   mut_wall_seconds
-    return $ ExecResult out
-        (fromMaybe (-1) $ ceiling . (* 1000)
-                      <$> (read :: String -> Double) <$> M.lookup ("total_wall_seconds"::String) s)
-        (fromMaybe (-1) $ read <$> M.lookup "allocated_bytes" s)
-        (fromMaybe (-1) $ read <$> M.lookup "max_live_bytes" s )
+            -- total_cpu_seconds, total_wall_seconds
+            --   mut_cpu_seconds,   mut_wall_seconds
+            return $ ExecResult
+                out
+                (maybe (-1) (ceiling . (* 1000))
+                    (M.lookup "total_wall_seconds" s <&> (read :: String -> Double)))
+                (M.lookup "allocated_bytes" s <&> read)
+                (M.lookup "max_live_bytes" s  <&> read)

@@ -1,7 +1,9 @@
+.DS_Store
 .idea
 .stack-work*
+.hie
 *.iml
 *.lock
 *.prof*
-adventofcode.cabal
-adventofcode-exe.*
+*.cabal
+*-exe.*
