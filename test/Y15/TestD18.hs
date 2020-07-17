@@ -114,11 +114,11 @@ spec = describe "Y15.D18" $ do
             xz = pred . length . head $ state0
 
         sequence (getOr undefined m yxaz
-            <$> [(yy,xx) | yy <- [0..yz] , xx <- [0..xz]])
+            <$> [YX yy xx | yy <- [0..yz] , xx <- [0..xz]])
                 >>= (`shouldBe` join state0)
 
-        getOr True  m yxaz (yz+1, xz+1) >>= (`shouldBe` True)
-        getOr False m yxaz (yz+1, xz+1) >>= (`shouldBe` False)
+        getOr True  m yxaz (YX (yz+1) (xz+1)) >>= (`shouldBe` True)
+        getOr False m yxaz (YX (yz+1) (xz+1)) >>= (`shouldBe` False)
 
     it "neighboursOnAround" $ do
         m <- mkLights [ [x, x, x]
@@ -128,7 +128,7 @@ spec = describe "Y15.D18" $ do
         yxaz <- getBounds m
 
         sequence (neighborsOnAround m yxaz
-            <$> [(yy,xx) | yy <- [-1..3], xx <- [-1..3]])
+            <$> [YX yy xx | yy <- [-1..3], xx <- [-1..3]])
                 >>= (`shouldBe` join [ [1, 2, 3, 2, 1]
                                      , [1, 2, 3, 2, 1]
                                      , [1, 4, 4, 4, 1]
