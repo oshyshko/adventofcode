@@ -1,6 +1,6 @@
 module Y15.D14 where
 
-import           Data.List                     (sortOn, (!!))
+import           Data.List                     (sortOn)
 import           Data.Ord                      (Down (..))
 import           Text.ParserCombinators.Parsec (Parser, digit, endBy, letter,
                                                 many, string)
