@@ -35,7 +35,14 @@ import           Util
 type Side       = Int -- Word32
 type Brightness = Int -- Int32
 data Op         = On | Off | Toggle deriving Show
-type Command    = (Op, (Side, Side), (Side, Side))
+
+data Command = Command
+             { op ::Op
+             , x0 :: Side
+             , y0 :: Side
+             , x1 :: Side
+             , y1 :: Side
+             } deriving Show
 
 -- TODO find a way to migrate L1/L2 to a newtype + have MArray instances
 type L1 = Bool
@@ -51,19 +58,18 @@ commands :: Parser [Command]
 commands = command `endBy` eol
   where
     command :: Parser Command
-    command = (,,) <$> op <* space
-                   <*> xy <* string " through " -- TODO many1 space ...
-                   <*> xy
+    command = Command
+        <$> op <* space
+        <*> (read <$> many digit) <* char ','
+        <*> (read <$> many digit)
+        <* string " through " -- TODO many1 space ...
+        <*> (read <$> many digit) <* char ','
+        <*> (read <$> many digit)
 
     op :: Parser Op
     op =    try (string "turn on")  $> On
         <|> try (string "turn off") $> Off
         <|>      string "toggle"    $> Toggle
-
-    xy :: Parser (Side, Side)
-    xy = (,) <$> (read <$> many digit)
-             <* char ','
-             <*> (read <$> many digit)
 
 class Light a where
     initial    :: a
@@ -108,6 +114,11 @@ instance Storage IntMap' Side v where
     alter  f k (IntMap m) = IntMap $ MI.alter f k m
     foldlS f i (IntMap m) = MI.foldl' f i m
 
+command2indexes :: Command -> [Side]
+command2indexes Command{..} =
+    [x * side + y | x <- [x0..x1]
+                  , y <- [y0..y1]]
+
 applyCommandsAndSum :: (Light v, Storage s Side v) => s Side v -> [Command] -> Brightness
 applyCommandsAndSum s cs =
     getSum $ foldl' applyCommand s cs
@@ -116,13 +127,12 @@ applyCommandsAndSum s cs =
     getSum = foldlS (\a v -> a + brightness v) 0
 
     applyCommand :: (Light v, Storage s Side v) => s Side v -> Command -> s Side v
-    applyCommand ss (op, (x0,y0), (x1,y1)) =
+    applyCommand ss c =
         foldl' (flip $ alter (\mv ->
-                                let x = operate (fromMaybe initial mv) op
+                                let x = operate (fromMaybe initial mv) (op c)
                                 in  x `seq` Just x))
             ss
-            [x * side + y | x <- [x0..x1]
-                          , y <- [y0..y1]]
+            (command2indexes c)
 
 solve1MH, solve2MH :: String -> Brightness
 solve1MH = applyCommandsAndSum (empty :: MH.HashMap Side L1) . parseOrDie commands
@@ -143,14 +153,12 @@ applyCommandsAndSumArray cs arr = do
     sum . map brightness <$> getElems arr
   where
     applyCommand :: (Light e, MArray a e m) => a Side e -> Command -> m ()
-    applyCommand a (op, (x0,y0), (x1,y1)) =
+    applyCommand a c =
         forM_
-            [x * side + y | x <- [x0..x1]
-                          , y <- [y0..y1]]
+            (command2indexes c)
             (\i -> do
-
                 v <- readArray a i
-                writeArray a i (operate v op))
+                writeArray a i (operate v $ op c))
 
 newArr :: (Light e, MArray a e m) => m (a Side e)
 newArr = newArray (0, side * side - 1) initial
@@ -175,11 +183,7 @@ applyCommandsAndSumVector cs vv = do
     V.foldl' (\a x -> a + brightness x) 0 <$> V.freeze vv
   where
     applyCommand :: (Light e, PrimMonad m, Unbox e) => MVector (PrimState m) e -> Command -> m ()
-    applyCommand v (op, (x0,y0), (x1,y1)) =
-        forM_
-            [x * side + y | x <- [x0..x1]
-                          , y <- [y0..y1]]
-            (VM.modify v (`operate` op))
+    applyCommand v c = forM_ (command2indexes c) (VM.modify v (`operate` op c))
 
 solve1VI, solve2VI :: String -> IO Brightness
 solve1VI s = applyCommandsAndSumVector (parseOrDie commands s) =<< (newVec :: IO (MVector RealWorld L1))
