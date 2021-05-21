@@ -1,52 +1,57 @@
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, MultiParamTypeClasses #-}
-
+{-# OPTIONS_GHC -Wno-redundant-constraints #-}
 module Y15.D06 where
 
 import           Control.Monad                 (forM_)
-import           Control.Monad.Primitive       (PrimMonad, PrimState)
-import           Control.Monad.ST              (RealWorld, ST, runST)
+import           Control.Monad.Primitive       (PrimMonad (..))
+import           Control.Monad.ST              (ST, runST)
 import           Data.Array.IO                 (IOUArray)
-import           Data.Array.MArray             (MArray, getElems, newArray,
-                                                readArray, writeArray)
-import           Data.Array.ST                 (STUArray)
+import           Data.Array.MArray             (MArray)
+import qualified Data.Array.MArray             as A
+import           Data.Bool                     (bool)
 import           Data.Foldable                 (foldl')
+import           Data.Function                 ((&))
 import           Data.Functor                  (($>))
 import qualified Data.HashMap.Strict           as MH
-import           Data.Int                      (Int16)
 import qualified Data.IntMap.Strict            as MI
 import qualified Data.Map.Strict               as MS
 import           Data.Maybe                    (fromMaybe)
-import qualified Data.Vector.Unboxed           as V
-import           Data.Vector.Unboxed.Mutable   (MVector, Unbox)
-import qualified Data.Vector.Unboxed.Mutable   as VM
--- import           Data.Word                     (Word32)
+import qualified Data.Vector                   as V
+import qualified Data.Vector.Generic.Mutable   as G
+import qualified Data.Vector.Mutable           as VM
+import qualified Data.Vector.Storable          as VS
+import qualified Data.Vector.Storable.Mutable  as VSM
+import qualified Data.Vector.Unboxed           as VU
+import qualified Data.Vector.Unboxed.Mutable   as VUM
+import           Data.Word                     (Word16)
 import           Text.ParserCombinators.Parsec (Parser, char, digit, endBy,
                                                 many, space, string, try, (<|>))
 import           Util
 
--- AI -- Data.Array.IO.IOUArray
--- AS -- Data.Array.ST.STUArray
--- MH -- Data.HashMap.Strict
--- MI -- Data.IntMap.Strict
--- MS -- Data.Map.Strict
--- VI -- Data.Vector.Unboxed.Mutable.MVector + IO
--- VS -- Data.Vector.Unboxed.Mutable.MVector + ST
+-- AI - Data.Array.IO.IOUArray
+-- MH - Data.HashMap.Strict
+-- MI - Data.IntMap.Strict
+-- MS - Data.Map.Strict
+-- VB - Data.VectorMutable + IO
+-- VR - Data.Vector.Storable.Mutable + IO
+-- VS - Data.Vector.Unboxed.Mutable  + ST
+-- VU - Data.Vector.Unboxed.Mutable  + IO
 
-type Side       = Int -- Word32
-type Brightness = Int -- Int32
+type Side       = Int
+type Brightness = Word16
+type Solution   = Int
 data Op         = On | Off | Toggle deriving Show
 
 data Command = Command
-             { op ::Op
-             , x0 :: Side
-             , y0 :: Side
-             , x1 :: Side
-             , y1 :: Side
-             } deriving Show
+    { op :: Op
+    , x0 :: Side
+    , y0 :: Side
+    , x1 :: Side
+    , y1 :: Side
+    } deriving Show
 
 -- TODO find a way to migrate L1/L2 to a newtype + have MArray instances
 type L1 = Bool
-type L2 = Int16
+type L2 = Word16
 
 side :: Side -- TODO determine sides from input?
 side = 1000
@@ -74,121 +79,136 @@ commands = command `endBy` eol
 class Light a where
     initial    :: a
     brightness :: a -> Brightness
-    operate    :: a -> Op -> a
+    operate    :: Op -> a -> a
 
 instance Light L1 where
-    initial      = False
-    brightness v = if v then 1 else 0
-    operate v    = \case
-        On     -> True
-        Off    -> False
-        Toggle -> not v
+    initial     = False
+    brightness  = bool 0 1
+    operate     = \case
+        On     -> const True
+        Off    -> const False
+        Toggle -> not
 
 instance Light L2 where
-    initial      = 0
-    brightness   = fromIntegral
-    operate v    = \case
-        On     -> v + 1
-        Off    -> max 0 (v - 1)
-        Toggle -> v + 2
+    initial     = 0
+    brightness  = id
+    operate     = \case
+        On     -> (+1)
+        Off    -> \v -> bool (v-1) 0 (v==0)
+        Toggle -> (+2)
 
--- map based implementations
-class Storage s k v where
-    empty  :: s k v
-    alter  :: (Maybe v -> Maybe v) -> k -> s k v -> s k v
-    foldlS :: (a -> v -> a) -> a -> s k v -> a
-
-instance Storage MS.Map Side v where
-    empty  = MS.empty
-    alter  = MS.alter
-    foldlS = MS.foldl'
-
-instance Storage MH.HashMap Side v where
-    empty  = MH.empty
-    alter  = MH.alter
-    foldlS = MH.foldl'
-
-newtype IntMap' k v = IntMap (MI.IntMap v) -- TODO get rid of this phantom type
-instance Storage IntMap' Side v where
-    empty                 = IntMap MI.empty
-    alter  f k (IntMap m) = IntMap $ MI.alter f k m
-    foldlS f i (IntMap m) = MI.foldl' f i m
-
+{-# INLINE command2indexes #-} -- note: otherwise it allocates 1.7GB for arr/vec
 command2indexes :: Command -> [Side]
-command2indexes Command{..} =
+command2indexes Command{x0,y0,x1,y1} =
     [x * side + y | x <- [x0..x1]
                   , y <- [y0..y1]]
 
-applyCommandsAndSum :: (Light v, Storage s Side v) => s Side v -> [Command] -> Brightness
-applyCommandsAndSum s cs =
-    getSum $ foldl' applyCommand s cs
+class StorageM s k v where
+    emptyM :: s k v
+    alterM :: (v -> v) -> k -> s k v -> s k v
+    foldlM :: (a -> v -> a) -> a -> s k v -> a
+
+class (Monad m) => StorageI s v m where
+    emptyI :: Int -> v -> m (s v)
+    alterI :: (v -> v) -> Int -> s v -> m ()
+    foldlI :: (a -> v -> a) -> a -> s v -> m a
+
+solveM :: forall s v . (Light v, StorageM s Side v) => String -> Solution
+solveM input =
+    parseOrDie commands input
+        & foldl' applyCommand emptyM
+        & foldlM (\a v -> a + fromIntegral (brightness v)) 0
   where
-    getSum :: (Light v, Storage s Side v) => s Side v -> Brightness
-    getSum = foldlS (\a v -> a + brightness v) 0
+    applyCommand :: s Side v -> Command -> s Side v
+    applyCommand s' c@Command{op} =
+        foldl' (\a v -> alterM (operate op) v a) s' (command2indexes c)
 
-    applyCommand :: (Light v, Storage s Side v) => s Side v -> Command -> s Side v
-    applyCommand ss c =
-        foldl' (flip $ alter (\mv ->
-                                let x = operate (fromMaybe initial mv) (op c)
-                                in  x `seq` Just x))
-            ss
-            (command2indexes c)
-
-solve1MH, solve2MH :: String -> Brightness
-solve1MH = applyCommandsAndSum (empty :: MH.HashMap Side L1) . parseOrDie commands
-solve2MH = applyCommandsAndSum (empty :: MH.HashMap Side L2) . parseOrDie commands
-
-solve1MS, solve2MS :: String -> Brightness
-solve1MS = applyCommandsAndSum (empty :: MS.Map Side L1) . parseOrDie commands
-solve2MS = applyCommandsAndSum (empty :: MS.Map Side L2) . parseOrDie commands
-
-solve1MI, solve2MI :: String -> Brightness
-solve1MI = applyCommandsAndSum (empty :: IntMap' Side L1) . parseOrDie commands
-solve2MI = applyCommandsAndSum (empty :: IntMap' Side L2) . parseOrDie commands
-
--- array based implementations
-applyCommandsAndSumArray :: (Light e, MArray a e m) => [Command] -> a Side e -> m Brightness
-applyCommandsAndSumArray cs arr = do
-    forM_ cs $ applyCommand arr
-    sum . map brightness <$> getElems arr
+solveI :: forall s v m. (Light v, Monad m, StorageI s v m) => String -> m Solution
+solveI input = do
+    s <- emptyI @s @v @m (side * side - 1) initial
+    forM_ (parseOrDie commands input) $ applyCommand s
+    foldlI (\a v -> a + fromIntegral (brightness v)) 0 s
   where
-    applyCommand :: (Light e, MArray a e m) => a Side e -> Command -> m ()
-    applyCommand a c =
-        forM_
-            (command2indexes c)
-            (\i -> do
-                v <- readArray a i
-                writeArray a i (operate v $ op c))
+    applyCommand s' c@Command{op} =
+        forM_ (command2indexes c) (\k -> alterI (operate op) k s')
 
-newArr :: (Light e, MArray a e m) => m (a Side e)
-newArr = newArray (0, side * side - 1) initial
+-- solutions
+solve1MH, solve2MH
+    , solve1MS, solve2MS
+    , solve1MI, solve2MI
+    , solve1VS, solve2VS :: String -> Solution
 
-solve1AI, solve2AI :: String -> IO Brightness
-solve1AI s = applyCommandsAndSumArray (parseOrDie commands s) =<< (newArr :: IO (IOUArray Side L1))
-solve2AI s = applyCommandsAndSumArray (parseOrDie commands s) =<< (newArr :: IO (IOUArray Side L2))
+solve1AI, solve2AI
+    , solve1VB, solve2VB
+    , solve1VR, solve2VR
+    , solve1VU, solve2VU :: String -> IO Solution
 
-solve1AS, solve2AS :: String -> Brightness
-solve1AS s = runST $ applyCommandsAndSumArray (parseOrDie commands s) =<< (newArr :: ST s (STUArray s Side L1))
-solve2AS s = runST $ applyCommandsAndSumArray (parseOrDie commands s) =<< (newArr :: ST s (STUArray s Side L2))
+solve1MH   =         solveM @MH.HashMap                        @L1
+solve2MH   =         solveM @MH.HashMap                        @L2
+solve1MS   =         solveM @MS.Map                            @L1
+solve2MS   =         solveM @MS.Map                            @L2
+solve1MI   =         solveM @IntMap'                           @L1
+solve2MI   =         solveM @IntMap'                           @L2
+solve1AI   =         solveI @(IOUArray Int)                    @L1 @IO
+solve2AI   =         solveI @(IOUArray Int)                    @L2 @IO
+solve1VB   =         solveI @(VM.MVector  (PrimState IO))      @L1 @IO
+solve2VB   =         solveI @(VM.MVector  (PrimState IO))      @L2 @IO
+solve1VR   =         solveI @(VSM.MVector (PrimState IO))      @L1 @IO
+solve2VR   =         solveI @(VSM.MVector (PrimState IO))      @L2 @IO
+solve1VS s = runST $ solveI @(VUM.MVector (PrimState (ST _)))  @L1 @(ST _) s
+solve2VS s = runST $ solveI @(VUM.MVector (PrimState (ST _)))  @L2 @(ST _) s
+solve1VU   =         solveI @(VUM.MVector (PrimState IO))      @L1 @IO
+solve2VU   =         solveI @(VUM.MVector (PrimState IO))      @L2 @IO
 
--- vector based implementations
--- see https://wiki.haskell.org/Numeric_Haskell:_A_Vector_Tutorial
--- see https://tech.fpcomplete.com/haskell/library/vector
-newVec :: (Light e, PrimMonad m, Unbox e) => m (MVector (PrimState m) e)
-newVec = VM.replicate (side * side - 1) initial
+-- instances: map-based sotrages
+instance (Light v) => StorageM MS.Map Side v where
+    emptyM = MS.empty
+    alterM = MS.alter . fromJustFold
+    foldlM = MS.foldl'
 
-applyCommandsAndSumVector :: (Light e, PrimMonad m, Unbox e) => [Command] -> MVector (PrimState m) e -> m Brightness
-applyCommandsAndSumVector cs vv = do
-    forM_ cs $ applyCommand vv
-    V.foldl' (\a x -> a + brightness x) 0 <$> V.freeze vv
+instance (Light v) => StorageM MH.HashMap Side v where
+    emptyM = MH.empty
+    alterM = MH.alter . fromJustFold
+    foldlM = MH.foldl'
+
+newtype IntMap' k v = IntMap' (MI.IntMap v) -- TODO get rid of this type?
+
+instance (Light v) => StorageM IntMap' Side v where
+    emptyM                 = IntMap' MI.empty
+    alterM f k (IntMap' m) = IntMap' $ MI.alter (fromJustFold f) k m
+    foldlM f a (IntMap' m) = MI.foldl' f a m
+
+{-# INLINE fromJustFold #-}
+fromJustFold :: (Light v) => (v -> v) -> Maybe v -> Maybe v
+fromJustFold f mv =
+    let x = f (fromMaybe initial mv)
+    in  x `seq` Just x
+
+-- instances: index-based storages
+instance (m ~ IO, MArray IOUArray v m, A.Ix k, k ~ Int)
+    => StorageI (IOUArray k) v m
   where
-    applyCommand :: (Light e, PrimMonad m, Unbox e) => MVector (PrimState m) e -> Command -> m ()
-    applyCommand v c = forM_ (command2indexes c) (VM.modify v (`operate` op c))
+    emptyI   k v = A.newArray (0, k - 1) v
+    alterI f k s = A.readArray s k >>= A.writeArray s k . f
+    foldlI f a s = foldl' f a <$> A.getElems s
 
-solve1VI, solve2VI :: String -> IO Brightness
-solve1VI s = applyCommandsAndSumVector (parseOrDie commands s) =<< (newVec :: IO (MVector RealWorld L1))
-solve2VI s = applyCommandsAndSumVector (parseOrDie commands s) =<< (newVec :: IO (MVector RealWorld L2))
+instance (PrimMonad m, st ~ PrimState m, G.MVector VM.MVector v)
+    => StorageI (VM.MVector st) v m
+  where
+    emptyI   k v = VM.replicate k v
+    alterI f k s = VM.modify s f k
+    foldlI f a s = V.foldl' f a <$> V.freeze s
 
-solve1VS, solve2VS :: String -> Brightness
-solve1VS s = runST $ applyCommandsAndSumVector (parseOrDie commands s) =<< (newVec :: ST s (MVector s L1))
-solve2VS s = runST $ applyCommandsAndSumVector (parseOrDie commands s) =<< (newVec :: ST s (MVector s L2))
+instance (PrimMonad m, st ~ PrimState m, G.MVector VUM.MVector v, VUM.Unbox v)
+    => StorageI (VUM.MVector st) v m
+  where
+    emptyI   k v = VUM.replicate k v
+    alterI f k s = VUM.modify s f k
+    foldlI f a s = VU.foldl' f a <$> VU.freeze s
+
+instance (PrimMonad m, st ~ PrimState m, G.MVector VUM.MVector v, VSM.Storable v)
+    => StorageI (VSM.MVector st) v m
+  where
+    emptyI   k v = VSM.replicate k v
+    alterI f k s = VSM.modify s f k
+    foldlI f a s = VS.foldl' f a <$> VS.freeze s
