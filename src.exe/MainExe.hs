@@ -10,11 +10,12 @@ import           Data.List.Split    (splitOn)
 import qualified Data.Map.Strict    as M
 import           Data.Maybe         (fromMaybe)
 import           System.Environment (getArgs, getExecutablePath)
+import           System.Exit        (ExitCode (..))
 import           System.IO          (hFlush, stdout)
 import           System.Process     (readProcessWithExitCode)
 import           Text.Printf        (printf)
 
-import           SystemInfo         (SystemInfo (..), getSystemInfo)
+import           SysInfo         (SysInfo (..), getSysInfo)
 import           Util
 
 import qualified Y15.D01
@@ -63,12 +64,13 @@ days = M.fromList
     , ("Y15.D17",  i2ios   [Y15.D17.solve1,   Y15.D17.solve2])
     , ("Y15.D18",  i2ios   [Y15.D18.solve1,   Y15.D18.solve2])
     ]
-  where s2ios :: [a -> b] -> [a -> IO b]
-        s2ios   = fmap (return .)
-        i2ios :: Show b => [a -> b] -> [a -> IO String]
-        i2ios   = fmap ((return . show) .)
-        ioi2ios :: Show b => [a -> IO b] -> [a -> IO String]
-        ioi2ios = fmap (fmap show .)
+  where
+    s2ios :: [a -> b] -> [a -> IO b]
+    s2ios   = fmap (return .)
+    i2ios :: Show b => [a -> b] -> [a -> IO String]
+    i2ios   = fmap ((return . show) .)
+    ioi2ios :: Show b => [a -> IO b] -> [a -> IO String]
+    ioi2ios = fmap (fmap show .)
 
 -- # day     answer-1  answer-2
 -- Y15.D01   138       1771
@@ -79,7 +81,7 @@ parseAnswers =
     M.fromList
     . map (\case
             day:answers -> (day, answers)
-            x -> error $ "Couldn't parse answers: " ++ show x)
+            x           -> error $ "Couldn't parse answers: " ++ show x)
     . map (filter (/= "") . splitOn " ")
     . filter (not . isPrefixOf "#")
     . lines
@@ -124,8 +126,17 @@ mainArgs args =
                     printf " %-9s | " dayKey
                     hFlush stdout
 
-                    results <- forM (take (length solvers) [0..]) $ runDayViaExec input dayKey
+                    results <- forM
+                        (take (length solvers) [0..]) $ \solverIndex -> do
+                            runDayViaExec input dayKey solverIndex >>= \case
+                                -- TODO 1. correctly present error (Left) and continue with the rest of days
+                                -- TODO 2. find a better way to remove RTS part that starts with " [("
+                                Left err -> error $ "solver with index "
+                                                        ++ show solverIndex ++ " failed: "
+                                                        ++ (unlines . takeWhile (\e -> not $ " [(" `isPrefixOf` e) . lines $ err)
+                                Right r -> return r
 
+                    -- TODO refactor / reorganize
                     printf "%-18s | %s %s\n"
                         (intercalate ", " $ results <&> output)
                         (intercalate " | " $ results <&> \r ->
@@ -137,19 +148,16 @@ mainArgs args =
                             Nothing -> " <-- couldn't find entry " ++ show dayKey ++ " in " ++ show answersPath
                             Just expected ->
                                 if expected /= (results <&> output) then
-                                    " <-- got wrong answers, expected: "
-                                        ++ intercalate ", " expected
-                                        ++ ", but got: "
-                                        ++ intercalate ", " (output <$> results)
+                                    " <-- expected: " ++ intercalate ", " expected
                                  else
                                     ""))
 
             -- footer
             putStrLn "-----------+--------------------+-----------------------+-----------------------"
-            putStrLn . unlines . map (" " ++) . lines . showSI =<< getSystemInfo
+            putStrLn . unlines . map (" " ++) . lines . showSysInfo =<< getSysInfo
 
-showSI :: SystemInfo -> String
-showSI SystemInfo{..} =
+showSysInfo :: SysInfo -> String
+showSysInfo SysInfo{..} =
     let fm = fromMaybe "?"
     in intercalate ""
         [   "Platform: ", fm osName, ", "
@@ -177,13 +185,13 @@ type DayKey    = String
 type DayIndex  = Int
 
 -- TODO report failures
-runDayViaDirectCall :: DayInput -> DayKey -> DayIndex -> IO ExecResult
+runDayViaDirectCall :: DayInput -> DayKey -> DayIndex -> IO (Either String ExecResult)
 runDayViaDirectCall input dayKey dayIndex = do
     let ioa = fromMaybe (error $ "Couldn't find day: " ++ dayKey) (M.lookup dayKey days) !! dayIndex
     (out, ms) <- timeOf $ ioa input
-    return $ ExecResult out ms Nothing Nothing
+    return . Right $ ExecResult out ms Nothing Nothing
 
-runDayViaExec :: DayInput -> DayKey -> DayIndex -> IO ExecResult
+runDayViaExec :: DayInput -> DayKey -> DayIndex -> IO (Either String ExecResult)
 runDayViaExec input dayKey dayIndex  = do
     selfPath <- getExecutablePath
 
@@ -191,21 +199,23 @@ runDayViaExec input dayKey dayIndex  = do
         -- fallback to direct call if we are in a REPL
         then runDayViaDirectCall input dayKey dayIndex
         else do
-            (_, out, err) <- readProcessWithExitCode
+            (e, out, err) <- readProcessWithExitCode
                 selfPath
                 ["runday", dayKey, show dayIndex, "+RTS", "-t", "--machine-readable", "-RTS"]
                 input
 
-            -- TODO assert exit code
-            -- TODO parse err
+            case e of
+                -- TODO move error to stdout? (to separate from stats in stderr)
+                ExitFailure _ -> return . Left $ err
+                ExitSuccess -> do
+                    -- TODO handle parse error in stdout
+                    let s :: M.Map String String = M.fromList $ read err
 
-            let s :: M.Map String String = M.fromList $ read err
-
-            -- total_cpu_seconds, total_wall_seconds
-            --   mut_cpu_seconds,   mut_wall_seconds
-            return $ ExecResult
-                out
-                (maybe (-1) (ceiling . (* 1000))
-                    (M.lookup "total_wall_seconds" s <&> (read :: String -> Double)))
-                (M.lookup "allocated_bytes" s <&> read)
-                (M.lookup "max_live_bytes" s  <&> read)
+                    -- total_cpu_seconds, total_wall_seconds
+                    --   mut_cpu_seconds,   mut_wall_seconds
+                    return . Right $ ExecResult
+                        out
+                        (maybe (-1) (ceiling . (* 1000))
+                            (M.lookup "total_wall_seconds" s <&> (read :: String -> Double)))
+                        (M.lookup "allocated_bytes" s <&> read)
+                        (M.lookup "max_live_bytes" s  <&> read)

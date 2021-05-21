@@ -1,6 +1,6 @@
-module SystemInfo
-       ( getSystemInfo
-       , SystemInfo(..)
+module SysInfo
+       ( getSysInfo
+       , SysInfo(..)
        ) where
 
 import           Control.Exception (SomeException, catch)
@@ -14,7 +14,7 @@ import qualified System.Info       as SI
 import           System.Process    (readProcessWithExitCode)
 import           Text.Read         (readMaybe)
 
-data SystemInfo = SystemInfo
+data SysInfo = SysInfo
     { osName       :: Maybe String
     , osArch       :: Maybe String
     , osVersion    :: Maybe String
@@ -27,8 +27,8 @@ data SystemInfo = SystemInfo
     , compilerArch :: Maybe String
     }
 
-defaultSystemInfo :: SystemInfo
-defaultSystemInfo = SystemInfo
+mkEmptySysInfo :: SysInfo
+mkEmptySysInfo = SysInfo
     { osName       = Just SI.os
     , osArch       = Nothing
     , osVersion    = Nothing
@@ -41,8 +41,8 @@ defaultSystemInfo = SystemInfo
     , compilerArch = Just SI.arch
     }
 
-getSystemInfo :: IO SystemInfo
-getSystemInfo =
+getSysInfo :: IO SysInfo
+getSysInfo =
     let os = toLower <$> SI.os in
     if | "darwin" `isPrefixOf` os -> getMac
        | "mingw"  `isPrefixOf` os -> getWin
@@ -53,7 +53,7 @@ getSystemInfo =
 -- RAM:      16.0G @ ?MHz
 -- Compiler: ghc-8.6
 --
-getMac :: IO SystemInfo
+getMac :: IO SysInfo
 getMac = do
     osA  <- execM "uname -m"                           <&> (headM . lines =<<)
     osV  <- execM "sw_vers -productVersion"            <&> (headM . lines =<<)
@@ -62,7 +62,7 @@ getMac = do
     cpuM <- execM "sysctl -n machdep.cpu.brand_string" <&> (headM . lines =<<)
     ramT <- execM "sysctl -n hw.memsize"               <&> (readMaybe =<<)
 
-    return $ defaultSystemInfo
+    return $ mkEmptySysInfo
         { osArch       = osA
         , osVersion    = osV
         , hwModel      = hwM
@@ -77,7 +77,7 @@ getMac = do
 -- RAM:      16.0G @ 2400MHz
 -- Compiler: ghc-8.6
 --
-getWin :: IO SystemInfo
+getWin :: IO SysInfo
 getWin = do
     let trim    = dropWhile isSpace . dropWhileEnd isSpace
         linesRN = map trim . splitOn "\r\n"
@@ -90,7 +90,7 @@ getWin = do
                 sum . map (fromMaybe 0 . readMaybe) <$> (tailM . linesRN =<< ramT)
     ramS <- execM "wmic MEMORYCHIP get Speed"    <&> (readMaybe =<<) . (secondM . linesRN =<<)
 
-    return $ defaultSystemInfo
+    return $ mkEmptySysInfo
         { osArch       = Nothing -- TODO
         , osVersion    = osV
         , hwModel      = hwM
@@ -107,7 +107,7 @@ getWin = do
 -- Compiler: ghc-8.8
 --
 -- TODO implement
-getLin :: IO SystemInfo
+getLin :: IO SysInfo
 getLin = do
     osA     <- execM "uname -m" <&> (headM . lines =<<)
     osV     <- execM "uname -r" <&> (headM . lines =<<)
@@ -116,7 +116,7 @@ getLin = do
     -- freeB   <- execM "free -b"
 
     if | "86" `isInfixOf` (toLower <$> SI.arch) ->
-        return $ defaultSystemInfo
+        return $ mkEmptySysInfo
             { osArch       = osA
             , osVersion    = osV
             -- TODO take into account parsing errors
@@ -128,7 +128,7 @@ getLin = do
             }
         | "arm" `isInfixOf` (toLower <$> SI.arch) ->
 
-         return $ defaultSystemInfo
+         return $ mkEmptySysInfo
              { osArch       = osA
              , osVersion    = osV
              -- TODO take into account parsing errors
@@ -140,7 +140,7 @@ getLin = do
              }
 
         | otherwise ->
-         return $ defaultSystemInfo
+         return $ mkEmptySysInfo
              { osArch       = osA
              , osVersion    = osV
              , hwModel      = Nothing
