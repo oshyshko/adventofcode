@@ -229,11 +229,19 @@ newline: native
 #
 # No language extensions are enabled by default.
 language_extensions:
+- AllowAmbiguousTypes
+- ConstraintKinds
 - DeriveGeneric
 - FlexibleContexts
+- FlexibleInstances
 - LambdaCase
+- MultiParamTypeClasses
 - MultiWayIf
+- NamedFieldPuns
 - OverloadedStrings
+- RankNTypes,
 - RecordWildCards
 - ScopedTypeVariables
 - StrictData
+- TypeApplications
+- TypeFamilies

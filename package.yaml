@@ -3,40 +3,9 @@ version:             0.1.0.0
 github:              "oshyshko/adventofcode"
 license:             BSD3
 license-file:        LICENSE
-author:              Oleksandr Shyshko
+author:              Alex Shyshko
 maintainer:          oshyshko@gmail.com
-copyright:           Oleksandr Shyshko
-
-ghc-options:
-- -Wall
-- -fno-warn-unused-do-bind
-- -O2
-- -optc-O3
-#  from https://kowainik.github.io/posts/2019-02-06-style-guide#general-recommendations
-- -Widentities
-# - -Wincomplete-uni-patterns
-- -Wincomplete-record-updates
-# - -Wmissing-export-lists
-# - -Wmissing-deriving-strategies   <--  8.8.1
-# exclude these for etlas:
-- -Wcompat
-- -Wredundant-constraints
-- -Wpartial-fields
-- -fhide-source-paths
-- -freverse-errors
-# stan
-#- -fwrite-ide-info
-#- -hiedir=.hie
-
-default-extensions:
-- DeriveGeneric
-- FlexibleContexts
-- LambdaCase
-- MultiWayIf
-- OverloadedStrings
-- RecordWildCards
-- ScopedTypeVariables
-- StrictData
+copyright:           Alex Shyshko
 
 library:
   source-dirs: src
@@ -71,6 +40,7 @@ executables:
     - containers
     - process
     - split
+    - unordered-containers
     ghc-options:
     - -rtsopts
 
@@ -84,3 +54,43 @@ tests:
     - hspec
     ghc-options:
     - -rtsopts
+
+ghc-options:
+- -Wall
+- -fno-warn-unused-do-bind
+- -O2
+# - -fllvm
+
+#  from https://kowainik.github.io/posts/2019-02-06-style-guide#general-recommendations
+- -Widentities
+# - -Wincomplete-uni-patterns
+- -Wincomplete-record-updates
+# - -Wmissing-export-lists
+# - -Wmissing-deriving-strategies   <--  8.8.1
+# exclude these for etlas:
+- -Wcompat
+- -Wredundant-constraints
+- -Wpartial-fields
+- -fhide-source-paths
+- -freverse-errors
+# stan
+#- -fwrite-ide-info
+#- -hiedir=.hie
+
+default-extensions:
+- AllowAmbiguousTypes
+- ConstraintKinds
+- DeriveGeneric
+- FlexibleContexts
+- FlexibleInstances
+- LambdaCase
+- MultiParamTypeClasses
+- MultiWayIf
+- NamedFieldPuns
+- OverloadedStrings
+- RankNTypes,
+- RecordWildCards
+- ScopedTypeVariables
+- StrictData
+- TypeApplications
+- TypeFamilies
