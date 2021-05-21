@@ -18,8 +18,9 @@ isNice1 = and . sequence
                         , ('x','y') ]) . pairs ]
 
 contains2NonConsPairs :: [(Char,Char)] -> Bool
-contains2NonConsPairs (a:bs@(_:cs)) = a `elem` cs || contains2NonConsPairs bs
-contains2NonConsPairs _             = False
+contains2NonConsPairs  = \case
+    (a:bs@(_:cs)) -> a `elem` cs || contains2NonConsPairs bs
+    _             -> False
 
 isNice2 :: String -> Bool
 isNice2 = and . sequence

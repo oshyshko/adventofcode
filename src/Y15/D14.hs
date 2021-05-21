@@ -1,5 +1,7 @@
 module Y15.D14 where
 
+import           Data.Functor                  ((<&>))
+import           Data.Function                 ((&))
 import           Data.List                     (sortOn)
 import           Data.Ord                      (Down (..))
 import           Text.ParserCombinators.Parsec (Parser, digit, endBy, letter,
@@ -10,9 +12,10 @@ type KmS     = Int
 type Km      = Int
 type Seconds = Int
 
-data State = Running Seconds
-           | Resting Seconds
-           deriving Show
+data State
+    = Running Seconds
+    | Resting Seconds
+    deriving Show
 
 data Spec = Spec
     { name     :: String
@@ -40,30 +43,32 @@ specs =
         <*> (read <$> many digit) <* string " seconds."
 
 tick :: Racer -> Racer
-tick r = case state r of
+tick r@Racer{state} = case state of
     Running 1 -> r { state = Resting (restTime . spec $ r), distance = distance r + (speed . spec) r }
     Running n -> r { state = Running (n - 1),               distance = distance r + (speed . spec) r}
     Resting 1 -> r { state = Running (runTime . spec $ r) }
     Resting n -> r { state = Resting (n - 1)}
 
 race :: Seconds -> [Racer] -> [Racer]
-race n racers = iterate tickAll racers !! n
+race n racers =
+    iterate tickAll racers !! n
   where
     tickAll :: [Racer] -> [Racer]
-    tickAll rs = let ranRs@(lead:_) = sortOn (Down . distance) . map tick $ rs
-                 in map (\r -> if distance lead == distance r
-                                   then r { points = points r + 1}
-                                   else r)
-                        ranRs
+    tickAll rs =
+        let ranRs@(lead:_) = sortOn (Down . distance) . map tick $ rs
+        in ranRs <&> \r ->
+            if distance lead == distance r
+                then r { points = points r + 1}
+                else r
 
 solveBy :: (Racer -> Int) -> String -> Int
-solveBy distanceOrPoints =
-    distanceOrPoints
-    . head
-    . sortOn (Down . distanceOrPoints)
-    . race 2503 -- 2503 seconds to race
-    . map (\s -> Racer s (Running $ runTime s) 0 0)
-    . parseOrDie specs
+solveBy distanceOrPoints input =
+      parseOrDie specs input
+    & map (\s -> Racer s (Running $ runTime s) 0 0)
+    & race 2503 -- 2503 seconds to race
+    & sortOn (Down . distanceOrPoints)
+    & head
+    & distanceOrPoints
 
 solve1 :: String -> Int
 solve1 = solveBy distance
