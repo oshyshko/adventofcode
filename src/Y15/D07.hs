@@ -3,22 +3,25 @@ module Y15.D07 where
 import           Control.Monad.State           (State, evalState, gets, modify)
 import           Data.Bits                     (complement, shiftL, shiftR,
                                                 (.&.), (.|.))
-import qualified Data.Map.Strict               as M
+import           Data.HashMap.Strict           (HashMap)
+import qualified Data.HashMap.Strict           as M
 import           Data.Word                     (Word16)
 import           Text.ParserCombinators.Parsec (Parser, digit, endBy, letter,
                                                 many1, string, try, (<|>))
 import           Util
 
 type RefId = String
-type Def = (RefId, Exp)
+type Def   = (RefId, Exp)
 
-data Exp = Val Word16
-         | Ref RefId
-         | Not Exp
-         | And Exp Exp
-         | Or  Exp Exp
-         | Lsh Exp Exp
-         | Rsh Exp Exp deriving Show
+data Exp
+    = Val Word16
+    | Ref RefId
+    | Not Exp
+    | And Exp Exp
+    | Or  Exp Exp
+    | Lsh Exp Exp
+    | Rsh Exp Exp
+    deriving Show
 
 -- 44430 -> b
 -- NOT dq -> dr
@@ -49,7 +52,7 @@ defs = def `endBy` eol
         <|> try (Rsh <$> rv <* string " RSHIFT " <*> rv)
         <|> rv
 
-eval :: Exp -> State (M.Map RefId Exp) Word16
+eval :: Exp -> State (HashMap RefId Exp) Word16
 eval = \case
     Val v   -> return v
     Ref r   -> do v <- eval =<< gets (M.! r)
@@ -61,10 +64,10 @@ eval = \case
     Lsh x n -> shiftL <$> eval x <*> (fromIntegral <$> eval n)
     Rsh x n -> shiftR <$> eval x <*> (fromIntegral <$> eval n)
 
-apply1 :: M.Map RefId Exp -> Word16
+apply1 :: HashMap RefId Exp -> Word16
 apply1 = evalState (eval $ Ref "a")
 
-apply2 :: M.Map RefId Exp -> Word16
+apply2 :: HashMap RefId Exp -> Word16
 apply2 m = evalState (eval $ Ref "a") $ M.insert "b" (Val $ apply1 m) m
 
 solve1 :: String -> Int
