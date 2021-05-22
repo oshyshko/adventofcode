@@ -9,13 +9,20 @@ triplets xs = zip3 xs (drop 1 xs) (drop 2 xs)
 -- uxcplgxnkwbdwhrp
 -- suerykeptdsutidb
 isNice1 :: String -> Bool
-isNice1 = and . sequence
-    [ (>= 3) . length . filter (`elem` ("aeiou"::String)) -- contains 3+ vowels
-    , any (uncurry (==)) . pairs                          -- contains 1+ symmetric pair. Note: "uncurry (==)" is equivalent to "(\(q,p) -> q == p)"
-    , not . any (`elem` [ ('a','b')                       -- does not contain these pairs: "ab", "cd", "pq", "xy"
-                        , ('c','d')
-                        , ('p','q')
-                        , ('x','y') ]) . pairs ]
+isNice1 =
+    and . sequence
+        -- contains 3+ vowels
+        [ (>= 3) . length . filter (`elem` ("aeiou"::String))
+        -- contains 1+ symmetric pair. Note: "uncurry (==)" is equivalent to "(\(q,p) -> q == p)"
+        , any (uncurry (==)) . pairs
+        -- does not contain these pairs: "ab", "cd", "pq", "xy"
+        , not . any (`elem`
+            [ ('a','b')
+            , ('c','d')
+            , ('p','q')
+            , ('x','y')
+            ]) . pairs
+        ]
 
 contains2NonConsPairs :: [(Char,Char)] -> Bool
 contains2NonConsPairs  = \case

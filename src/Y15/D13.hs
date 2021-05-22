@@ -1,7 +1,8 @@
 module Y15.D13 where
 
-import           Data.Hashable                 (Hashable)
+import           Data.Function                 ((&))
 import qualified Data.HashMap.Strict           as M
+import           Data.Hashable                 (Hashable)
 import           Data.List                     (nub, permutations, sort)
 import           Data.List.Split               (divvy)
 import           Data.Maybe                    (fromMaybe)
@@ -42,10 +43,11 @@ maxHappiness ms =
     fta = M.fromList ms
 
     table2happiness :: [Guest] -> Int
-    table2happiness guests = sum
-        $ map (\[a,b] -> fta ! (a,b) + fta ! (b,a))
-        $ divvy 2 1
-        $ guests ++ take 1 guests -- wrap around one guest
+    table2happiness guests =
+          guests ++ take 1 guests -- wrap around one guest
+        & divvy 2 1
+        & map (\[a,b] -> fta ! (a,b) + fta ! (b,a))
+        & sum
 
     -- like Data.HashMap.Strict.!, but prints missing key in case of error
     (!) :: (Eq k, Hashable k, Show k) => M.HashMap k v -> k -> v
@@ -57,7 +59,8 @@ solve1 :: String -> Int
 solve1 = maxHappiness . parseOrDie attrs
 
 solve2 :: String -> Int
-solve2 = maxHappiness . addSelf . parseOrDie attrs
+solve2 =
+    maxHappiness . addSelf . parseOrDie attrs
   where
     addSelf ms =
         ms ++ map (\g -> (("Me", g), 0)) (attrs2guests ms)

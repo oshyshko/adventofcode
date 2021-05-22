@@ -15,7 +15,8 @@ import           Text.ParserCombinators.Parsec (Parser, char, endBy, many,
 
 import           Util
 
-data YX = YX !Int !Int deriving (Eq, Ord, Show, Read, Bounded, Ix)
+data YX = YX Int Int
+    deriving (Eq, Ord, Show, Read, Bounded, Ix)
 
 -- :: (bounds) -> YX -> alive? -> neighbors-alive -> alive?
 type TickFn = (YX, YX) -> YX -> Bool -> Int -> Bool
@@ -63,13 +64,13 @@ neighborsOnAround m yxaz (YX y x) =
 tick1 :: TickFn
 tick1 _ _ v n =
     (v && (n == 2 || n == 3))
-    || (not v &&  n == 3)
+        || (not v &&  n == 3)
 
 -- four lights, one in each corner, are stuck on and can't be turned off.
 tick2 :: TickFn
 tick2 yxaz@(YX y0 x0, YX yz xz) yx@(YX y x) v n =
-       ((y == y0 || y == yz) && (x == x0 || x == xz))
-    || tick1 yxaz yx v n
+    ((y == y0 || y == yz) && (x == x0 || x == xz))
+        || tick1 yxaz yx v n
 
 tickLights :: MArray a Bool m => TickFn -> (YX, YX) -> a YX Bool -> a YX Bool -> m ()
 tickLights f yxaz src dst =

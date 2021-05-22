@@ -8,8 +8,18 @@ import           Text.ParserCombinators.Parsec (Parser, char, digit, endBy,
 
 import           Util
 
-data Key = Children | Cats | Samoyeds | Pomeranians | Akitas | Vizslas
-    | Goldfish | Trees | Cars | Perfumes deriving (Eq, Ord, Show)
+data Key
+    = Akitas
+    | Cars
+    | Cats
+    | Children
+    | Goldfish
+    | Perfumes
+    | Pomeranians
+    | Samoyeds
+    | Trees
+    | Vizslas
+    deriving (Eq, Ord, Show)
 
 type Clue      = (Key, Int)
 type Sue2Clues = (Int, [Clue])
@@ -54,40 +64,42 @@ exactlyOneOrDie = \case
 
 solve1 :: String -> Int
 solve1 s =
-    fst . exactlyOneOrDie $ filter
-        (\(_, clues) -> all satisfies clues)
-        (parseOrDie sue2clues s)
-      where
-        satisfies :: Clue -> Bool
-        satisfies (k, v) =
-            v == case k of
-                Children    -> 3
-                Cats        -> 7
-                Samoyeds    -> 2
-                Pomeranians -> 3
-                Akitas      -> 0
-                Vizslas     -> 0
-                Goldfish    -> 5
-                Trees       -> 3
-                Cars        -> 2
-                Perfumes    -> 1
+      parseOrDie sue2clues s
+    & filter (\(_, clues) -> all satisfies clues)
+    & exactlyOneOrDie
+    & fst
+  where
+    satisfies :: Clue -> Bool
+    satisfies (k, v) =
+        v == case k of
+            Children    -> 3
+            Cats        -> 7
+            Samoyeds    -> 2
+            Pomeranians -> 3
+            Akitas      -> 0
+            Vizslas     -> 0
+            Goldfish    -> 5
+            Trees       -> 3
+            Cars        -> 2
+            Perfumes    -> 1
 
 solve2 :: String -> Int
 solve2 s =
-    fst . exactlyOneOrDie $ filter
-        (\(_, clues) -> all satisfies clues)
-        (parseOrDie sue2clues s)
-      where
-        satisfies :: Clue -> Bool
-        satisfies (k, v) =
-            v & case k of
-                Children    -> (== 3)
-                Cats        -> (>  7)
-                Samoyeds    -> (== 2)
-                Pomeranians -> (<  3)
-                Akitas      -> (== 0)
-                Vizslas     -> (== 0)
-                Goldfish    -> (<  5)
-                Trees       -> (>  3)
-                Cars        -> (== 2)
-                Perfumes    -> (== 1)
+      parseOrDie sue2clues s
+    & filter (\(_, clues) -> all satisfies clues)
+    & exactlyOneOrDie
+    & fst
+  where
+    satisfies :: Clue -> Bool
+    satisfies (k, v) =
+        v & case k of
+            Children    -> (== 3)
+            Cats        -> (>  7)
+            Samoyeds    -> (== 2)
+            Pomeranians -> (<  3)
+            Akitas      -> (== 0)
+            Vizslas     -> (== 0)
+            Goldfish    -> (<  5)
+            Trees       -> (>  3)
+            Cars        -> (== 2)
+            Perfumes    -> (== 1)

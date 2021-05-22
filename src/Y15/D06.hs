@@ -60,7 +60,8 @@ side = 1000
 -- toggle 322,558 through 977,958
 -- turn on 226,196 through 599,390
 commands :: Parser [Command]
-commands = command `endBy` eol
+commands =
+    command `endBy` eol
   where
     command :: Parser Command
     command = Command
@@ -115,9 +116,9 @@ class (Monad m) => StorageI s v m where
 
 solveM :: forall s v . (Light v, StorageM s Side v) => String -> Solution
 solveM input =
-    parseOrDie commands input
-        & foldl' applyCommand emptyM
-        & foldlM (\a v -> a + fromIntegral (brightness v)) 0
+      parseOrDie commands input
+    & foldl' applyCommand emptyM
+    & foldlM (\a v -> a + fromIntegral (brightness v)) 0
   where
     applyCommand :: s Side v -> Command -> s Side v
     applyCommand s' c@Command{op} =
@@ -166,6 +167,8 @@ instance (Light v) => StorageM MS.Map Side v where
     alterM = MS.alter . fromJustFold
     foldlM = MS.foldl'
 
+-- TODO find out why HashMap is slower than Map
+-- also see https://github.com/haskell-perf/dictionaries
 instance (Light v) => StorageM MH.HashMap Side v where
     emptyM = MH.empty
     alterM = MH.alter . fromJustFold

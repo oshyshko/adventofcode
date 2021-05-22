@@ -30,7 +30,8 @@ data Exp
 -- lf RSHIFT 2 -> lg
 -- kf LSHIFT 15 -> kj
 defs :: Parser [Def]
-defs = def `endBy` eol
+defs =
+    def `endBy` eol
   where
     def :: Parser Def
     def = do

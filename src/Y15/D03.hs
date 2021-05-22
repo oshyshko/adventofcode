@@ -12,14 +12,16 @@ char2move = \case
 
 -- ^^<<v<<v><v^^<><>^^ ...
 moves2houses :: String -> [(Int, Int)]
-moves2houses = scanl (\(xa,ya) (x,y) -> (xa+x, ya+y)) (0, 0)
-             . map char2move
+moves2houses =
+    scanl (\(xa,ya) (x,y) -> (xa+x, ya+y)) (0, 0)
+    . map char2move
 
 solve1 :: String -> Int
 solve1 = length . nub . moves2houses
 
 solve2 :: String -> Int
-solve2 xs = let (santaPairs, robotPairs) = partition (even . fst) $ zip [(0::Int)..] xs
-                santaHouses = moves2houses $ map snd santaPairs
-                robotHouses = moves2houses $ map snd robotPairs
-             in length . nub $ santaHouses ++ robotHouses
+solve2 xs =
+    let (santaPairs, robotPairs) = partition (even . fst) $ zip [(0::Int)..] xs
+        santaHouses              = moves2houses $ snd <$> santaPairs
+        robotHouses              = moves2houses $ snd <$> robotPairs
+    in length . nub $ santaHouses ++ robotHouses

@@ -11,7 +11,8 @@ type FromToDist = (String, String, Int)
 -- Faerun to Tristram = 65
 -- Faerun to Tambi = 129
 defs :: Parser [FromToDist]
-defs = def `endBy` eol
+defs =
+    def `endBy` eol
   where
     def :: Parser FromToDist
     def = (,,) <$> many letter <* string " to "
