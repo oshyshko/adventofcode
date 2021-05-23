@@ -1,9 +1,10 @@
+{-# LANGUAGE TemplateHaskell #-}
 module Main
        ( main
        , mainArgs
        ) where
 
-import           Control.Monad      (forM, forM_, when)
+import           Control.Monad      (forM, forM_, join, when)
 import           Data.Functor       ((<&>))
 import           Data.List          (intercalate, isPrefixOf, isSuffixOf)
 import           Data.List.Split    (splitOn)
@@ -15,7 +16,8 @@ import           System.IO          (hFlush, stdout)
 import           System.Process     (readProcessWithExitCode)
 import           Text.Printf        (printf)
 
-import           SysInfo         (SysInfo (..), getSysInfo)
+import           MainExeTH          (solversFromImportsAndSources)
+import           SysInfo            (SysInfo (..), getSysInfo)
 import           Util
 
 import qualified Y15.D01
@@ -38,40 +40,7 @@ import qualified Y15.D17
 import qualified Y15.D18
 
 days :: M.Map String [String -> IO String]
-days = M.fromList
-    [ ("Y15.D01",  i2ios   [Y15.D01.solve1,   Y15.D01.solve2])
-    , ("Y15.D02",  i2ios   [Y15.D02.solve1,   Y15.D02.solve2])
-    , ("Y15.D03",  i2ios   [Y15.D03.solve1,   Y15.D03.solve2])
-    , ("Y15.D04",  i2ios   [Y15.D04.solve1,   Y15.D04.solve2])
-    , ("Y15.D05",  i2ios   [Y15.D05.solve1,   Y15.D05.solve2])
-    , ("Y15.D06AI",ioi2ios [Y15.D06.solve1AI, Y15.D06.solve2AI])
-    , ("Y15.D06MH",i2ios   [Y15.D06.solve1MH, Y15.D06.solve2MH])
-    , ("Y15.D06MI",i2ios   [Y15.D06.solve1MI, Y15.D06.solve2MI])
-    , ("Y15.D06MS",i2ios   [Y15.D06.solve1MS, Y15.D06.solve2MS])
-    , ("Y15.D06VB",ioi2ios [Y15.D06.solve1VB, Y15.D06.solve2VB])
-    , ("Y15.D06VR",ioi2ios [Y15.D06.solve1VR, Y15.D06.solve2VR])
-    , ("Y15.D06VS",i2ios   [Y15.D06.solve1VS, Y15.D06.solve2VS])
-    , ("Y15.D06VU",ioi2ios [Y15.D06.solve1VU, Y15.D06.solve2VU])
-    , ("Y15.D07",  i2ios   [Y15.D07.solve1,   Y15.D07.solve2])
-    , ("Y15.D08",  i2ios   [Y15.D08.solve1,   Y15.D08.solve2])
-    , ("Y15.D09",  i2ios   [Y15.D09.solve1,   Y15.D09.solve2])
-    , ("Y15.D10",  i2ios   [Y15.D10.solve1,   Y15.D10.solve2])
-    , ("Y15.D11",  s2ios   [Y15.D11.solve1,   Y15.D11.solve2])
-    , ("Y15.D12",  i2ios   [Y15.D12.solve1,   Y15.D12.solve2])
-    , ("Y15.D13",  i2ios   [Y15.D13.solve1,   Y15.D13.solve2])
-    , ("Y15.D14",  i2ios   [Y15.D14.solve1,   Y15.D14.solve2])
-    , ("Y15.D15",  i2ios   [Y15.D15.solve1,   Y15.D15.solve2])
-    , ("Y15.D16",  i2ios   [Y15.D16.solve1,   Y15.D16.solve2])
-    , ("Y15.D17",  i2ios   [Y15.D17.solve1,   Y15.D17.solve2])
-    , ("Y15.D18",  i2ios   [Y15.D18.solve1,   Y15.D18.solve2])
-    ]
-  where
-    s2ios :: [a -> b] -> [a -> IO b]
-    s2ios   = fmap (return .)
-    i2ios :: Show b => [a -> b] -> [a -> IO String]
-    i2ios   = fmap ((return . show) .)
-    ioi2ios :: Show b => [a -> IO b] -> [a -> IO String]
-    ioi2ios = fmap (fmap show .)
+days = M.fromList $ join $(solversFromImportsAndSources)
 
 -- # day     answer-1  answer-2
 -- Y15.D01   138       1771
@@ -145,7 +114,7 @@ mainArgs args =
                                 (msReal r)
                                 (maybe "?" size2humanSize $ bytesAllocated r)
                                 (maybe "?" size2humanSize $ bytesPeak r))
-                        (case M.lookup (take 7 dayKey) day2answers of
+                        (case M.lookup (take (length ("YXX.DXX" :: String)) dayKey) day2answers of
                             Nothing -> " <-- couldn't find entry " ++ show dayKey ++ " in " ++ show answersPath
                             Just expected ->
                                 if expected /= (results <&> output) then

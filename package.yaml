@@ -16,7 +16,9 @@ library:
   - bytestring
   - containers
   - deepseq
+  - directory
   - exceptions
+  - filepath
   - hashable
   - hspec # needed to make Atom happy
   - mtl
@@ -38,9 +40,11 @@ executables:
     - base
     - bytestring
     - containers
+    - directory
+    - filepath
     - process
     - split
-    - unordered-containers
+    - template-haskell
     ghc-options:
     - -rtsopts
 

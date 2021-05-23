@@ -7,3 +7,4 @@
 *.prof*
 *.cabal
 *-exe.*
+hie.yaml
