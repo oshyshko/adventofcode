@@ -39,7 +39,7 @@ $ ./scripts/build-exec.sh
  Compiler: ghc-8.6
 ```
 
-To run tasks with a particular prefix in name:
+To run tasks with a particular prefix:
 ```
 $ ./scripts/build-exec.sh Y15.D06
 -----------+--------------------+- day 1 ---------------+- day 2 ---------------
@@ -56,8 +56,16 @@ $ ./scripts/build-exec.sh Y15.D06
  Darwin x86_64 i386
 ```
 
+## Running a solver using stdin/stdout
+```bash
+$ cat res/Y15/D01.txt | ./scripts/build-exec.sh runday Y15.D01 0
+  ^^^^^^^^^^^^^^^^^^^                                            - input
+                                                       ^^^^^^^   - year + day
+                                                               ^ - solver index (0 or 1)
+<prints result to stdout>
+```
 
-## Runnig on Raspberry Pi
+## Running on Raspberry Pi
 
 In `stack.yaml` replace line `resolver: ...` with:
 ```
