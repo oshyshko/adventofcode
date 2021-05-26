@@ -1,0 +1,67 @@
+name: ci
+
+on:
+    pull_request:
+    push:
+        branches: [master]
+
+jobs:
+    stack:
+        name: ${{ matrix.os }}, ${{ matrix.resolver }}
+        runs-on: ${{ matrix.os }}
+        strategy:
+            fail-fast: false
+            matrix:
+                os: [macOS-latest, ubuntu-latest, windows-latest]
+                resolver: ['lts-17.12']
+                # resolver: ['lts-17.12', 'nightly-2021-05-23']
+                stack: ['2.7.1']
+
+        env:
+            STACK     : stack build --resolver ${{ matrix.resolver }}
+            CACHE_DIR : ${{ matrix.os == 'windows-latest' && '~/AppData/Roaming/stack' || '~/.stack' }}
+            BINARY    : ./dist/adventofcode-exe${{ matrix.os == 'windows-latest' && '.exe' || '' }}
+
+        steps:
+        - uses: actions/checkout@v2
+
+        - name: Install stack
+          uses: actions/setup-haskell@v1.1.4
+          with:
+              stack-version: ${{ matrix.stack }}
+              enable-stack: true
+              stack-no-global: true
+
+        - name: Cache ${{ env.CACHE_DIR }}
+          uses: actions/cache@v2.1.3
+          with:
+              path: ${{ env.CACHE_DIR }}
+              key: ${{ runner.os }}-${{ matrix.resolver }}-stack-cache-5
+
+        - name: Clean
+          run: stack clean
+
+        - name: Clean ~/.stack/setup-exe-* (skip for Windows)
+          if: ${{ runner.os != 'Windows' }}
+          run: rm -rf ~/.stack/setup-exe-cache && rm -rf ~/.stack/setup-exe-src
+
+        - name: Install GHC and deps
+          run: ${{ env.STACK }} --only-dependencies
+
+        - name: Build
+          run: |
+              mkdir ./dist
+              ${{ env.STACK }} --test --bench --no-run-tests --no-run-benchmarks --copy-bins --local-bin-path ./dist
+
+        - name: Test
+          run: ${{ env.STACK }} --test
+
+        - name: Run
+          run: ${{ env.BINARY }}
+
+        # - name: Compress
+        #   uses: svenstaro/upx-action@2.0.1
+        #   with:
+        #       file: ${{ env.BINARY }}
+        #       strip: true
+        #       args: --ultra-brute
