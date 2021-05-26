@@ -1,4 +1,5 @@
-# adventofcode
+# adventofcode [![ci](https://github.com/oshyshko/adventofcode/actions/workflows/ci.yaml/badge.svg)](https:/github.com/oshyshko/adventofcode/actions/workflows/ci.yaml)
+
 Haskell solutions for http://adventofcode.com/
 
 ## Running
