@@ -7,6 +7,7 @@ import           Control.Monad.ST              (ST, runST)
 import           Data.Array.IO                 (IOUArray)
 import           Data.Array.MArray             (MArray)
 import qualified Data.Array.MArray             as A
+import           Data.Bit                      (Bit(..))
 import           Data.Bool                     (bool)
 import           Data.Foldable                 (foldl')
 import           Data.Function                 ((&))
@@ -16,7 +17,6 @@ import qualified Data.IntMap.Strict            as MI
 import qualified Data.Map.Strict               as MS
 import           Data.Maybe                    (fromMaybe)
 import qualified Data.Vector                   as V
-import qualified Data.Vector.Generic.Mutable   as G
 import qualified Data.Vector.Mutable           as VM
 import qualified Data.Vector.Storable          as VS
 import qualified Data.Vector.Storable.Mutable  as VSM
@@ -35,6 +35,7 @@ import           Util
 -- VR - Data.Vector.Storable.Mutable + IO
 -- VS - Data.Vector.Unboxed.Mutable  + ST
 -- VU - Data.Vector.Unboxed.Mutable  + IO
+-- VZ - Data.Vector.Unboxed.Mutable  + IO + Data.Bit
 
 type Side       = Int
 type Brightness = Word16
@@ -50,8 +51,9 @@ data Command = Command
     } deriving Show
 
 -- TODO find a way to migrate L1/L2 to a newtype + have MArray instances
-type L1 = Bool
-type L2 = Word16
+type L1  = Bool
+type L1B = Bit
+type L2  = Word16
 
 side :: Side -- TODO determine sides from input?
 side = 1000
@@ -90,6 +92,14 @@ instance Light L1 where
         Off    -> const False
         Toggle -> not
 
+instance Light L1B where
+    initial     = Bit False
+    brightness  = bool 0 1 . unBit
+    operate     = \case
+        On     -> const (Bit True)
+        Off    -> const (Bit False)
+        Toggle -> Bit . not . unBit
+
 instance Light L2 where
     initial     = 0
     brightness  = id
@@ -114,6 +124,7 @@ class (Monad m) => StorageI s v m where
     alterI :: (v -> v) -> Int -> s v -> m ()
     foldlI :: (a -> v -> a) -> a -> s v -> m a
 
+{-# ANN solveM ("HLint: ignore Avoid lambda" :: String) #-}
 solveM :: forall s v . (Light v, StorageM s Side v) => String -> Solution
 solveM input =
       parseOrDie commands input
@@ -134,7 +145,7 @@ solveI input = do
         forM_ (command2indexes c) (\k -> alterI (operate op) k s')
 
 -- solutions
-solve1MH, solve2MH
+_solve1MH, _solve2MH
     , solve1MS, solve2MS
     , solve1MI, solve2MI
     , solve1VS, solve2VS :: String -> Solution
@@ -142,10 +153,13 @@ solve1MH, solve2MH
 solve1AI, solve2AI
     , solve1VB, solve2VB
     , solve1VR, solve2VR
-    , solve1VU, solve2VU :: String -> IO Solution
+    , solve1VU, solve2VU
+    , _solve1VZ :: String -> IO Solution
 
-solve1MH   =         solveM @MH.HashMap                        @L1
-solve2MH   =         solveM @MH.HashMap                        @L2
+-- disabled, takes abput 25s and 32s to run (vs 10s and 11s for solve12MS)
+_solve1MH  =         solveM @MH.HashMap                        @L1
+_solve2MH  =         solveM @MH.HashMap                        @L2
+
 solve1MS   =         solveM @MS.Map                            @L1
 solve2MS   =         solveM @MS.Map                            @L2
 solve1MI   =         solveM @IntMap'                           @L1
@@ -160,6 +174,8 @@ solve1VS s = runST $ solveI @(VUM.MVector (PrimState (ST _)))  @L1 @(ST _) s
 solve2VS s = runST $ solveI @(VUM.MVector (PrimState (ST _)))  @L2 @(ST _) s
 solve1VU   =         solveI @(VUM.MVector (PrimState IO))      @L1 @IO
 solve2VU   =         solveI @(VUM.MVector (PrimState IO))      @L2 @IO
+-- TODO remove `solve2VZ` + make it possible in MainExe to run one solver (day 1 or 2)
+_solve1VZ   =         solveI @(VUM.MVector (PrimState IO))      @L1B @IO
 
 -- instances: map-based sotrages
 instance (Light v) => StorageM MS.Map Side v where
@@ -195,21 +211,21 @@ instance (m ~ IO, MArray IOUArray v m, A.Ix k, k ~ Int)
     alterI f k s = A.readArray s k >>= A.writeArray s k . f
     foldlI f a s = foldl' f a <$> A.getElems s
 
-instance (PrimMonad m, st ~ PrimState m, G.MVector VM.MVector v)
+instance (PrimMonad m, st ~ PrimState m)
     => StorageI (VM.MVector st) v m
   where
     emptyI   k v = VM.replicate k v
     alterI f k s = VM.modify s f k
     foldlI f a s = V.foldl' f a <$> V.freeze s
 
-instance (PrimMonad m, st ~ PrimState m, G.MVector VUM.MVector v, VUM.Unbox v)
+instance (PrimMonad m, st ~ PrimState m, VUM.Unbox v)
     => StorageI (VUM.MVector st) v m
   where
     emptyI   k v = VUM.replicate k v
     alterI f k s = VUM.modify s f k
     foldlI f a s = VU.foldl' f a <$> VU.freeze s
 
-instance (PrimMonad m, st ~ PrimState m, G.MVector VUM.MVector v, VSM.Storable v)
+instance (PrimMonad m, st ~ PrimState m, VSM.Storable v)
     => StorageI (VSM.MVector st) v m
   where
     emptyI   k v = VSM.replicate k v
