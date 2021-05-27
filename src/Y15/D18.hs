@@ -1,25 +1,27 @@
+
 module Y15.D18 where
 
-import           Control.Monad                 (join, when)
-import           Control.Monad.ST              (ST, runST)
-import           Data.Array                    (Ix)
-import           Data.Array.MArray             (MArray, getAssocs, getBounds,
-                                                getElems, newArray,
-                                                newListArray, readArray,
-                                                writeArray)
-import           Data.Array.ST                 (STUArray)
+import           Control.Monad                 (forM_, join, when)
+import           Control.Monad.Primitive       (PrimMonad (..))
+import           Data.Bool                     (bool)
 import           Data.Functor                  (($>))
 import           Data.List.Split               (chunksOf)
+import qualified Data.Vector.Unboxed           as VU
+import           Data.Vector.Unboxed.Mutable   (MVector)
+import qualified Data.Vector.Unboxed.Mutable   as VUM
 import           Text.ParserCombinators.Parsec (Parser, char, endBy, many,
                                                 (<|>))
 
 import           Util
 
 data YX = YX Int Int
-    deriving (Eq, Ord, Show, Read, Bounded, Ix)
 
--- :: (bounds) -> YX -> alive? -> neighbors-alive -> alive?
-type TickFn = (YX, YX) -> YX -> Bool -> Int -> Bool
+data Board m = Board
+    { bounds :: (YX, YX) -- (min,max) coords (inclusive)
+    , vector :: MVector (PrimState m) Bool
+    }
+
+type TickFn = (YX,YX) -> YX -> Bool -> Int -> Bool
 
 lights :: Parser [[Bool]]
 lights =
@@ -32,32 +34,64 @@ lights =
     light = char '#' $> True
         <|> char '.' $> False
 
-mkLights :: MArray a Bool m => [[Bool]] -> m (a YX Bool)
+mkLights :: PrimMonad m => [[Bool]] -> m (Board m)
 mkLights xs =
-    let h = length xs
-        w = length . head $ xs
-    in newListArray (YX 0 0, YX (h-1) (w-1)) $ join xs
+    let h = length xs - 1
+        w = (length . head $ xs) - 1
+    in Board (YX 0 0, YX h w) <$> (VU.thaw . VU.fromList $ join xs)
 
-unLights :: MArray a Bool m => a YX Bool -> m [[Bool]]
-unLights m = do
-    (YX _ xa, YX _ xz) <- getBounds m -- NOTE no # of rows check
-    chunksOf (xz-xa+1) <$> getElems m
+unLights :: PrimMonad m  => Board m -> m [[Bool]]
+unLights Board{bounds,vector} = do
+    let (_, YX _ x0) = bounds -- NOTE no # of rows check
+    chunksOf (x0 + 1) . VU.toList <$> VU.freeze vector
 
-getOr :: MArray a e m => e -> a YX e -> (YX, YX) -> YX -> m e
-getOr orV m (YX ay ax, YX zx zy) yx@(YX y x) =
-    if     y < ay || y > zy
-        || x < ax || x > zx
+getOr :: PrimMonad m => Bool -> Board m -> YX -> m Bool
+getOr orV Board{bounds, vector} (YX y x) =
+    let (YX y0 x0, YX y1 x1) = bounds
+    in if  y < y0 || y > y1
+        || x < x0 || x > x1
         then return orV
-        else readArray m yx
+        else VUM.read vector (y * (x1 + 1) + x)
 
--- neighborsOnAround :: IOUArray YX Bool -> (YX, YX) -> YX -> IO Int
-neighborsOnAround :: MArray a Bool m => a YX Bool -> (YX, YX) -> YX -> m Int
-neighborsOnAround m yxaz (YX y x) =
-    length . filter id <$> mapM (getOr False m yxaz)
+neighborsOnAround :: PrimMonad m => Board m -> YX -> m Int
+neighborsOnAround b (YX y x) =
+    length . filter id <$> mapM (getOr False b)
         [ YX (y-1) (x-1), YX (y-1) x, YX (y-1) (x+1)
         , YX  y    (x-1),             YX  y    (x+1)
         , YX (y+1) (x-1), YX (y+1) x, YX (y+1) (x+1)
         ]
+
+tickLights :: PrimMonad m => TickFn -> Board m -> Board m -> m ()
+tickLights f src@Board{bounds} dst = do
+    let (YX y0 x0, YX y1 x1) = bounds
+    forM_ [ (YX y x, y * (x1 + 1) + x)
+                | y <- [y0..y1]
+                , x <- [x0..x1]] $ \(yx, i) -> do
+        v <- VUM.read (vector src) i
+
+        n <- neighborsOnAround src yx
+        VUM.write (vector dst) i (f bounds yx v n)
+
+tickTimes :: PrimMonad m => TickFn -> Board m -> Int -> m ()
+tickTimes tick b n = do
+    dstVector <- VUM.replicate (VUM.length (vector b)) False
+    let bb = b {vector = dstVector}
+    tickTimes_ n b bb
+
+    when (odd n) $
+        VUM.copy (vector b) (vector bb)
+  where
+    tickTimes_ :: PrimMonad m => Int -> Board m -> Board m -> m ()
+    tickTimes_ 0 _ _     = return ()
+    tickTimes_ i src dst = do
+        tickLights tick src dst
+        stepTimes_ (i-1) dst src
+
+solve :: TickFn -> String -> IO Int
+solve tick s = do
+    b <- mkLights (parseOrDie lights s)
+    tickTimes tick b 100
+    VUM.foldl' (\a x -> a + bool 0 1 x) 0  (vector b)
 
 -- A light which is on  stays on when 2 or 3 neighbors are on,  and turns off otherwise.
 -- A light which is off turns on if exactly 3 neighbors are on, and stays off otherwise.
@@ -68,37 +102,10 @@ tick1 _ _ v n =
 
 -- four lights, one in each corner, are stuck on and can't be turned off.
 tick2 :: TickFn
-tick2 yxaz@(YX y0 x0, YX yz xz) yx@(YX y x) v n =
-    ((y == y0 || y == yz) && (x == x0 || x == xz))
-        || tick1 yxaz yx v n
+tick2 bounds@(YX ya xa, YX yz xz) yx@(YX y x) v n =
+    ((y == ya || y == yz) && (x == xa || x == xz))
+        || tick1 bounds  yx v n
 
-tickLights :: MArray a Bool m => TickFn -> (YX, YX) -> a YX Bool -> a YX Bool -> m ()
-tickLights f yxaz src dst =
-    getAssocs src >>= mapM_
-        (\(yx, v::Bool) -> do
-            n <- neighborsOnAround src yxaz yx
-            writeArray dst yx (f yxaz yx v n))
-
-tickTimes :: MArray a Bool m => TickFn -> a YX Bool -> Int -> m ()
-tickTimes tick a n = do
-    yxaz <- getBounds a
-    a' <- newArray yxaz False
-    dst <- stepTimes_ n yxaz a a'
-    when (odd n) $
-        getAssocs dst >>= mapM_ (\(i, e::Bool) -> writeArray a i e)
-  where
-    stepTimes_ :: (MArray a Bool m) => Int -> (YX, YX) -> a YX Bool -> a YX Bool -> m (a YX Bool)
-    stepTimes_ 0 _ src _ = return src
-    stepTimes_ i yxaz src dst = do
-        tickLights tick yxaz src dst
-        stepTimes_ (i-1) yxaz dst src
-
-solve :: TickFn -> String -> Int
-solve tick s = runST $ do
-    a <- mkLights (parseOrDie lights s) :: ST s (STUArray s YX Bool)
-    tickTimes tick a 100
-    length . filter id <$> getElems a
-
-solve1, solve2 :: String -> Int
+solve1, solve2 :: String -> IO Int
 solve1 = solve tick1
 solve2 = solve tick2

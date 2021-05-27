@@ -55,7 +55,9 @@ tests:
     dependencies:
     - base
     - adventofcode
+    - containers
     - hspec
+    - vector
     ghc-options:
     - -rtsopts
 

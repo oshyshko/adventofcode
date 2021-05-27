@@ -1,1 +1,4 @@
-resolver: lts-17.12
+resolver: lts-17.13
+
+extra-deps:
+- vector-0.12.3.0

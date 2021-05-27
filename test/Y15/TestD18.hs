@@ -1,8 +1,7 @@
 module Y15.TestD18 where
 
-import           Control.Monad     (forM_, join)
-import           Data.Array.IO     (IOUArray)
-import           Data.Array.MArray (getBounds, newArray)
+import           Control.Monad               (forM_, join)
+import qualified Data.Vector.Unboxed.Mutable as VUM
 import           Test.Hspec
 
 import           Util
@@ -102,67 +101,67 @@ spec = describe "Y15.D18" $ do
     it "parseOrDie lights" $
         head states `shouldBe` state0
 
-    it "mkLights" $
-        (mkLights state0 :: IO (IOUArray YX Bool))
+    it "mkLights + unLinghts" $
+        mkLights state0
             >>= unLights
             >>= (`shouldBe` state0)
 
     it "getOr" $ do
-        m <- mkLights state0 :: IO (IOUArray YX Bool)
-        yxaz <- getBounds m
+        b <- mkLights state0
         let yz = pred . length        $ state0
             xz = pred . length . head $ state0
 
-        sequence (getOr undefined m yxaz
+        sequence (getOr undefined b
             <$> [YX yy xx | yy <- [0..yz] , xx <- [0..xz]])
                 >>= (`shouldBe` join state0)
 
-        getOr True  m yxaz (YX (yz+1) (xz+1)) >>= (`shouldBe` True)
-        getOr False m yxaz (YX (yz+1) (xz+1)) >>= (`shouldBe` False)
+        getOr True  m (YX (yz+1) (xz+1)) >>= (`shouldBe` True)
+        getOr False m (YX (yz+1) (xz+1)) >>= (`shouldBe` False)
 
     it "neighboursOnAround" $ do
-        m <- mkLights [ [x, x, x]
+        b <- mkLights [ [x, x, x]
                            , [o, x, o]
-                           , [o, x, o] ] :: IO (IOUArray YX Bool)
+                           , [o, x, o] ]
 
-        yxaz <- getBounds m
-
-        sequence (neighborsOnAround m yxaz
+        sequence (neighborsOnAround b
             <$> [YX yy xx | yy <- [-1..3], xx <- [-1..3]])
-                >>= (`shouldBe` join [ [1, 2, 3, 2, 1]
-                                     , [1, 2, 3, 2, 1]
-                                     , [1, 4, 4, 4, 1]
-                                     , [0, 2, 1, 2, 0]
-                                     , [0, 1, 1, 1, 0] ])
+                >>= (`shouldBe` join
+                    [ [1, 2, 3, 2, 1]
+                    , [1, 2, 3, 2, 1]
+                    , [1, 4, 4, 4, 1]
+                    , [0, 2, 1, 2, 0]
+                    , [0, 1, 1, 1, 0] ])
 
     it "fate1" $ do
         (tick1 undefined undefined True  <$> [0..8]) `shouldBe` [o, o, x, x, o, o, o, o, o]
         (tick1 undefined undefined False <$> [0..8]) `shouldBe` [o, o, o, x, o, o, o, o, o]
 
     it "tick" $ do
-        src <- mkLights [ [x, x, x]
-                             , [o, x, o]
-                             , [o, x, o] ] :: IO (IOUArray YX Bool)
-        yxaz <- getBounds src
-        dst <- newArray yxaz False :: IO (IOUArray YX Bool)
+        src <- mkLights
+            [ [x, x, x]
+            , [o, x, o]
+            , [o, x, o] ]
 
-        tickLights tick1 yxaz src dst
+        dstVector <- VUM.replicate (VUM.length (vector src)) False
 
-        a <- unLights dst
-        e <- (mkLights [ [x, x, x]
-                            , [o, o, o]
-                            , [o, o, o] ]  :: IO (IOUArray YX Bool)) >>= unLights
+        let dst = src{vector=dstVector}
 
-        a `shouldBe` e
+        tickLights tick1 src dst
+
+        let e = [ [x, x, x]
+                , [o, o, o]
+                , [o, o, o] ]
+
+        unLights dst >>= (`shouldBe` e)
 
     it "tickTimes fate1" $
-        forM_ (zip [0..] states) $ \(i, es) -> do
-            a <- mkLights . head $ states :: IO (IOUArray YX Bool)
+        forM_ (zip [0..] states) $ \(i, e) -> do
+            a <- mkLights . head $ states
             tickTimes tick1 a i
-            unLights a >>= \as -> (i,as) `shouldBe` (i,es)
+            unLights a >>= \aa -> (i,aa) `shouldBe` (i, e)
 
     it "tickTimes fate2" $
-        forM_ (zip [0..] states2) $ \(i, es) -> do
-            a <- mkLights . head $ states2 :: IO (IOUArray YX Bool)
+        forM_ (zip [0..] states2) $ \(i, e) -> do
+            a <- mkLights . head $ states2
             tickTimes tick2 a i
-            unLights a >>= \as -> (i,as) `shouldBe` (i,es)
+            unLights a >>= \aa -> (i,aa) `shouldBe` (i, e)
