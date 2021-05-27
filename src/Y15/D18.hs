@@ -76,14 +76,14 @@ tickTimes :: PrimMonad m => TickFn -> Board m -> Int -> m ()
 tickTimes tick b n = do
     dstVector <- VUM.replicate (VUM.length (vector b)) False
     let bb = b {vector = dstVector}
-    tickTimes_ n b bb
+    stepTimes_ n b bb
 
     when (odd n) $
         VUM.copy (vector b) (vector bb)
   where
-    tickTimes_ :: PrimMonad m => Int -> Board m -> Board m -> m ()
-    tickTimes_ 0 _ _     = return ()
-    tickTimes_ i src dst = do
+    stepTimes_ :: PrimMonad m => Int -> Board m -> Board m -> m ()
+    stepTimes_ 0 _ _     = return ()
+    stepTimes_ i src dst = do
         tickLights tick src dst
         stepTimes_ (i-1) dst src
 
