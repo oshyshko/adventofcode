@@ -77,6 +77,9 @@ getMac = do
 -- RAM:      16.0G @ 2400MHz
 -- Compiler: ghc-8.6
 --
+
+{-# ANN getWin ("HLint: ignore Use <=<"  :: String) #-}
+{-# ANN getWin ("HLint: ignore Use fmap" :: String) #-}
 getWin :: IO SysInfo
 getWin = do
     let trim    = dropWhile isSpace . dropWhileEnd isSpace

@@ -13,7 +13,7 @@ jobs:
             fail-fast: false
             matrix:
                 os: [macOS-latest, ubuntu-latest, windows-latest]
-                resolver: ['lts-17.12']
+                resolver: ['lts-17.13']
                 # resolver: ['lts-17.12', 'nightly-2021-05-23']
                 stack: ['2.7.1']
 
@@ -58,6 +58,12 @@ jobs:
 
         - name: Run
           run: ${{ env.BINARY }}
+
+        - name: Install hlint
+          run: stack install hlint
+
+        - name: Run hlint
+          run: hlint src src.exe test
 
         # - name: Compress
         #   uses: svenstaro/upx-action@2.0.1
