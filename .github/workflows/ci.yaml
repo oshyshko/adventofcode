@@ -18,7 +18,7 @@ jobs:
                 stack: ['2.7.1']
 
         env:
-            STACK     : stack build --resolver ${{ matrix.resolver }}
+            STACK     : stack --resolver ${{ matrix.resolver }}
             CACHE_DIR : ${{ matrix.os == 'windows-latest' && '~/AppData/Roaming/stack' || '~/.stack' }}
             BINARY    : ./dist/adventofcode-exe${{ matrix.os == 'windows-latest' && '.exe' || '' }}
 
@@ -39,31 +39,31 @@ jobs:
               key: ${{ runner.os }}-${{ matrix.resolver }}-stack-cache-5
 
         - name: Clean
-          run: stack clean
+          run: ${{ env.STACK }} clean
 
         - name: Clean ~/.stack/setup-exe-* (skip for Windows)
           if: ${{ runner.os != 'Windows' }}
           run: rm -rf ~/.stack/setup-exe-cache && rm -rf ~/.stack/setup-exe-src
 
         - name: Install GHC and deps
-          run: ${{ env.STACK }} --only-dependencies
+          run: ${{ env.STACK }} build --only-dependencies
 
         - name: Build
           run: |
               mkdir ./dist
-              ${{ env.STACK }} --test --bench --no-run-tests --no-run-benchmarks --copy-bins --local-bin-path ./dist
+              ${{ env.STACK }} install --test --bench --no-run-tests --no-run-benchmarks --copy-bins --local-bin-path ./dist
 
         - name: Test
-          run: ${{ env.STACK }} --test
+          run: ${{ env.STACK }} test
 
         - name: Run
           run: ${{ env.BINARY }}
 
         - name: Install hlint
-          run: stack install hlint
+          run: ${{ env.STACK }} install hlint
 
         - name: Run hlint
-          run: hlint src src.exe test
+          run: ${{ env.STACK }} exec hlint -- src src.exe test --no-exit-code
 
         # - name: Compress
         #   uses: svenstaro/upx-action@2.0.1
