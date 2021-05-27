@@ -115,8 +115,8 @@ spec = describe "Y15.D18" $ do
             <$> [YX yy xx | yy <- [0..yz] , xx <- [0..xz]])
                 >>= (`shouldBe` join state0)
 
-        getOr True  m (YX (yz+1) (xz+1)) >>= (`shouldBe` True)
-        getOr False m (YX (yz+1) (xz+1)) >>= (`shouldBe` False)
+        getOr True  b (YX (yz+1) (xz+1)) >>= (`shouldBe` True)
+        getOr False b (YX (yz+1) (xz+1)) >>= (`shouldBe` False)
 
     it "neighboursOnAround" $ do
         b <- mkLights [ [x, x, x]
