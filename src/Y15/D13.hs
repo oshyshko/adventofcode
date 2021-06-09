@@ -1,13 +1,8 @@
 module Y15.D13 where
 
-import           Data.Function                 ((&))
-import qualified Data.HashMap.Strict           as M
-import           Data.Hashable                 (Hashable)
-import           Data.List                     (nub, permutations, sort)
-import           Data.List.Split               (divvy)
-import           Data.Maybe                    (fromMaybe)
-import           Text.ParserCombinators.Parsec (Parser, digit, endBy, letter,
-                                                many, string)
+import qualified Data.HashMap.Strict as M
+
+import           Imports
 import           Util
 
 type Guest = String
@@ -39,7 +34,7 @@ maxHappiness :: [Attr] -> Int
 maxHappiness ms =
     maximum $ table2happiness <$> permutations (attrs2guests ms)
   where
-    fta :: M.HashMap (Guest, Guest) Int -- (from, to) -> attractiveness
+    fta :: HashMap (Guest, Guest) Int -- (from, to) -> attractiveness
     fta = M.fromList ms
 
     table2happiness :: [Guest] -> Int
@@ -50,7 +45,7 @@ maxHappiness ms =
         & sum
 
     -- like Data.HashMap.Strict.!, but prints missing key in case of error
-    (!) :: (Eq k, Hashable k, Show k) => M.HashMap k v -> k -> v
+    (!) :: (Eq k, Hashable k, Show k) => HashMap k v -> k -> v
     (!) m k = fromMaybe
         (error $ "Couldn't find key: " ++ show k)
         (M.lookup k m)

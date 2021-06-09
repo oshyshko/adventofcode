@@ -1,18 +1,12 @@
 
 module Y15.D18 where
 
-import           Control.Monad                 (forM_, join, when)
-import           Control.Monad.Primitive       (PrimMonad (..))
-import           Data.Bool                     (bool)
-import           Data.Functor                  (($>))
-import           Data.List.Split               (chunksOf)
 import qualified Data.Vector.Unboxed           as VU
 import           Data.Vector.Unboxed.Mutable   (MVector)
 import qualified Data.Vector.Unboxed.Mutable   as VUM
-import           Text.ParserCombinators.Parsec (Parser, char, endBy, many,
-                                                (<|>))
 
 import           Util
+import           Imports
 
 data YX = YX Int Int
 

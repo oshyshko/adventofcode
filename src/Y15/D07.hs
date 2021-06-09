@@ -1,13 +1,10 @@
 module Y15.D07 where
 
-import           Control.Monad.State           (State, evalState, gets, modify)
-import           Data.Bits                     (complement, shiftL, shiftR,
-                                                (.&.), (.|.))
-import           Data.HashMap.Strict           (HashMap)
-import qualified Data.HashMap.Strict           as M
-import           Data.Word                     (Word16)
-import           Text.ParserCombinators.Parsec (Parser, digit, endBy, letter,
-                                                many1, string, try, (<|>))
+import           Control.Monad.State (State, evalState, gets, modify)
+import           Data.Bits           (complement, shiftL, shiftR, (.&.), (.|.))
+import qualified Data.HashMap.Strict as M
+
+import           Imports
 import           Util
 
 type RefId = String

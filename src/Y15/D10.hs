@@ -1,7 +1,8 @@
 module Y15.D10 where
 
-import           Control.Monad ((<=<))
-import qualified Data.List     as L
+import qualified Data.List as L
+
+import           Imports
 
 -- 1113122113
 solve :: String -> String

@@ -1,8 +1,8 @@
 module Y15.TestD15 where
 
-import           Control.Exception (evaluate)
 import           Test.Hspec
 
+import           Imports
 import           Util
 import           Y15.D15
 

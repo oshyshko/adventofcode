@@ -1,12 +1,7 @@
 module Y15.D16 where
 
-import           Data.Function                 ((&))
-import           Data.Functor                  (($>))
-import           Text.ParserCombinators.Parsec (Parser, char, digit, endBy,
-                                                many, sepBy, space, string, try,
-                                                (<|>))
-
 import           Util
+import           Imports
 
 data Key
     = Akitas

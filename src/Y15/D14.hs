@@ -1,11 +1,8 @@
 module Y15.D14 where
 
-import           Data.Functor                  ((<&>))
-import           Data.Function                 ((&))
-import           Data.List                     (sortOn)
-import           Data.Ord                      (Down (..))
-import           Text.ParserCombinators.Parsec (Parser, digit, endBy, letter,
-                                                many, string)
+import           Data.Ord (Down (..))
+
+import           Imports
 import           Util
 
 type KmS     = Int

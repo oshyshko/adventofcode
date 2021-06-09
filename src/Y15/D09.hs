@@ -2,9 +2,9 @@ module Y15.D09 where
 
 import qualified Data.List                     as L
 import qualified Data.Map                      as M
-import           Text.ParserCombinators.Parsec (Parser, digit, endBy, letter,
-                                                many, string)
+
 import           Util
+import           Imports
 
 type FromToDist = (String, String, Int)
 

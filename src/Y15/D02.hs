@@ -1,6 +1,6 @@
 module Y15.D02 where
 
-import           Data.List.Split (splitOn)
+import Imports
 
 -- 29x13x26
 -- 11x11x14

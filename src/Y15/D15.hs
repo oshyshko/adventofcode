@@ -1,9 +1,7 @@
 module Y15.D15 where
 
-import           Text.ParserCombinators.Parsec (Parser, char, digit, endBy,
-                                                letter, many, space, string,
-                                                (<|>))
 import           Util
+import           Imports
 
 data Ingredient = Ingredient
     { name       :: String

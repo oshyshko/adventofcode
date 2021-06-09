@@ -1,9 +1,7 @@
 module Y15.D08 where
 
-import           Data.Functor                  (($>))
-import           Text.ParserCombinators.Parsec (Parser, char, endBy, hexDigit,
-                                                many, noneOf, (<|>))
 import           Util
+import           Imports
 
 -- "sjdivfriyaaqa\xd2v\"k\"mpcu\"yyu\"en"
 -- "vcqc"

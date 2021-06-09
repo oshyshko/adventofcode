@@ -1,10 +1,10 @@
 module Y15.TestD18 where
 
-import           Control.Monad               (forM_, join)
 import qualified Data.Vector.Unboxed.Mutable as VUM
 import           Test.Hspec
 
 import           Util
+import           Imports
 import           Y15.D18
 
 spec :: SpecWith ()

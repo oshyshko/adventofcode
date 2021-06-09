@@ -1,6 +1,6 @@
 module Y15.D11 where
 
-import           Data.Char (isAsciiLower)
+import Imports
 
 type StringReversed = String
 
