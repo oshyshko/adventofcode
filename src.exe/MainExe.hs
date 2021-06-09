@@ -1,23 +1,20 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Main
-       ( main
-       , mainArgs
+       ( main, mainArgs
        ) where
 
-import           Control.Monad      (forM, forM_, join, when)
-import           Data.Functor       ((<&>))
-import           Data.List          (intercalate, isPrefixOf, isSuffixOf)
-import           Data.List.Split    (splitOn)
 import qualified Data.Map.Strict    as M
-import           Data.Maybe         (fromMaybe)
 import           System.Environment (getArgs, getExecutablePath)
 import           System.Exit        (ExitCode (..))
-import           System.IO          (hFlush, stdout)
 import           System.Process     (readProcessWithExitCode)
-import           Text.Printf        (printf)
 
-import           MainExeTH          (solversFromImportsAndSources)
-import           SysInfo            (SysInfo (..), getSysInfo)
+
+import           Imports
+import qualified MainExeTH
+import           Report             (DayIndex, DayInput, DayKey,
+                                     ExecResult (..))
+import qualified Report
+import qualified SysInfo
 import           Util
 
 import qualified Y15.D01
@@ -38,15 +35,16 @@ import qualified Y15.D15
 import qualified Y15.D16
 import qualified Y15.D17
 import qualified Y15.D18
+import qualified Y15.D19
 
-days :: M.Map String [String -> IO String]
-days = M.fromList $ join $(solversFromImportsAndSources)
+days :: Map String [String -> IO String]
+days = M.fromList $ join $(MainExeTH.solversFromImportsAndSources)
 
 -- # day     answer-1  answer-2
 -- Y15.D01   138       1771
 -- Y15.D02   1586300   3737498
 {-# ANN parseAnswers ("HLint: ignore Use map once" :: String) #-}
-parseAnswers :: String -> M.Map String [String]
+parseAnswers :: String -> Map String [String]
 parseAnswers =
     M.fromList
     . map (\case
@@ -80,79 +78,31 @@ mainArgs args =
                 error $ "Couldn't find day " ++ (show . head) args
                     ++ ".\nAvailable days are: " ++ intercalate ", " (M.keys days) ++ ".\n"
 
-            -- header
-            putStrLn "-----------+--------------------+- day 1 ---------------+- day 2 ---------------"
-            putStrLn " day       | answers            |    time  alloc   peak |    time  alloc   peak"
-            putStrLn "-----------+--------------------+-----------------------+-----------------------"
-
             -- read answers.txt
             let answersPath = "res/answers.txt"
             day2answers <- parseAnswers <$> readFile answersPath
 
+            Report.header
+
             -- run
-            forM_ daysSelected
-                (\ (dayKey, solvers) -> do
-                    input <- readInput dayKey
-                    printf " %-9s | " dayKey
-                    hFlush stdout
+            forM_ daysSelected $ \ (dayKey, solvers) -> do
+                input <- readInput dayKey
 
-                    results <- forM
-                        (take (length solvers) [0..]) $ \solverIndex -> do
-                            runDayViaExec input dayKey solverIndex >>= \case
-                                -- TODO 1. correctly present error (Left) and continue with the rest of days
-                                -- TODO 2. find a better way to remove RTS part that starts with " [("
-                                Left err -> error $ "solver with index "
-                                                        ++ show solverIndex ++ " failed: "
-                                                        ++ (unlines . takeWhile (\e -> not $ " [(" `isPrefixOf` e) . lines $ err)
-                                Right r -> return r
+                Report.dayPrefix dayKey
 
-                    -- TODO refactor / reorganize
-                    printf "%-18s | %s %s\n"
-                        (intercalate ", " $ results <&> output)
-                        (intercalate " | " $ results <&> \r ->
-                            printf "%5dms %6s %6s"
-                                (msReal r)
-                                (maybe "?" size2humanSize $ bytesAllocated r)
-                                (maybe "?" size2humanSize $ bytesPeak r))
-                        (case M.lookup (take (length ("YXX.DXX" :: String)) dayKey) day2answers of
-                            Nothing -> " <-- couldn't find entry " ++ show dayKey ++ " in " ++ show answersPath
-                            Just expected ->
-                                if expected /= (results <&> output) then
-                                    " <-- expected: " ++ intercalate ", " expected
-                                 else
-                                    ""))
+                results <- forM (take (length solvers) [0..]) $ \solverIndex -> do
+                    runDayViaExec input dayKey solverIndex >>= \case
+                        -- TODO 1. correctly present error (Left) and continue with the rest of days
+                        -- TODO 2. find a better way to remove RTS part that starts with " [("
+                        Left err -> error $
+                                "solver with index "
+                                ++ show solverIndex ++ " failed: "
+                                ++ (unlines . takeWhile (\e -> not $ " [(" `isPrefixOf` e) . lines $ err)
+                        Right r -> return r
 
-            -- footer
-            putStrLn "-----------+--------------------+-----------------------+-----------------------"
-            putStrLn . unlines . map (" " ++) . lines . showSysInfo =<< getSysInfo
+                Report.dayResults answersPath day2answers dayKey results
 
-showSysInfo :: SysInfo -> String
-showSysInfo SysInfo{..} =
-    let fm = fromMaybe "?"
-    in intercalate ""
-        [   "Platform: ", fm osName, ", "
-                        , fm osArch, ", v"
-                        , fm osVersion, ", "
-                        , fm hwModel
-        , "\nCPU:      ", fm cpuModel, ", "
-                        , fm $ show <$> cpuCores, " cores"
-        , "\nRAM:      ", fm $ size2humanSize . fromIntegral <$> ramTotal, " @ "
-                        , fm $ show <$> ramSpeed, "MHz"
-        , "\nCompiler: ", fm compiler, " ("
-                        , fm compilerArch, ")"
-        ]
-
-
-data ExecResult = ExecResult
-    { output         :: String
-    , msReal         :: Integer
-    , bytesAllocated :: Maybe Integer
-    , bytesPeak      :: Maybe Integer
-    } deriving (Show)
-
-type DayInput  = String
-type DayKey    = String
-type DayIndex  = Int
+            Report.footer =<< SysInfo.getSysInfo
 
 -- TODO report failures
 runDayViaDirectCall :: DayInput -> DayKey -> DayIndex -> IO (Either String ExecResult)
@@ -179,7 +129,7 @@ runDayViaExec input dayKey dayIndex  = do
                 ExitFailure _ -> return . Left $ err
                 ExitSuccess -> do
                     -- TODO handle parse error in stdout
-                    let s :: M.Map String String = M.fromList $ read err
+                    let s :: Map String String = M.fromList $ read err
 
                     -- total_cpu_seconds, total_wall_seconds
                     --   mut_cpu_seconds,   mut_wall_seconds

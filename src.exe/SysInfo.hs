@@ -3,16 +3,11 @@ module SysInfo
        , SysInfo(..)
        ) where
 
-import           Control.Exception (SomeException, catch)
-import           Data.Char         (isSpace, toLower)
-import           Data.Functor      ((<&>))
-import           Data.List         (dropWhileEnd, isInfixOf, isPrefixOf)
-import           Data.List.Split   (splitOn)
-import           Data.Maybe        (fromMaybe)
 import qualified Data.Version      as V
 import qualified System.Info       as SI
 import           System.Process    (readProcessWithExitCode)
-import           Text.Read         (readMaybe)
+
+import Imports
 
 data SysInfo = SysInfo
     { osName       :: Maybe String

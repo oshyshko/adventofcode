@@ -1,21 +1,17 @@
 {-# LANGUAGE TemplateHaskell #-}
-module MainExeTH where
+module MainExeTH
+    ( solversFromImportsAndSources
+    ) where
 
-import           Control.Monad              (forM)
-import           Data.Bool                  (bool)
-import           Data.Char                  (isAlphaNum)
-import           Data.Function              ((&))
-import           Data.Functor               ((<&>))
-import           Data.List                  (isPrefixOf, nub, sort)
-import           Data.Map.Strict            (Map)
-import qualified Data.Map.Strict            as M
-import           Data.Maybe                 (fromMaybe)
+import qualified Data.Map.Strict     as M
 import           Language.Haskell.TH
-import           System.Directory           (doesDirectoryExist, listDirectory)
-import           System.FilePath            (takeBaseName, takeDirectory,
-                                             takeFileName, (</>))
+import           System.Directory    (doesDirectoryExist, listDirectory)
+import           System.FilePath     (takeBaseName, takeDirectory, takeFileName,
+                                      (</>))
 
 import qualified Y15.D06
+
+import           Imports
 
 solversFromImportsAndSources :: Q Exp
 solversFromImportsAndSources = do

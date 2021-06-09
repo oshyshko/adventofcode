@@ -1,16 +1,13 @@
 module Util where
 
 import           Control.DeepSeq               (NFData, force)
-import           Control.Exception             (evaluate)
-import           Control.Monad                 (void)
-import           Data.Function                 (fix)
-import           Data.List                     (intercalate)
-import           Data.List.Split               (splitOn)
 import           Data.Time.Clock.POSIX         (getPOSIXTime)
 import qualified Debug.Trace                   as Trace
 import           Numeric                       (showFFloat)
 import           Text.ParserCombinators.Parsec (Parser, parse, string, try,
                                                 (<|>))
+
+import Imports
 
 eol :: Parser String
 eol =   try (string "\n\r")
