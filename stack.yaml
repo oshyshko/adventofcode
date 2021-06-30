@@ -1,4 +1,1 @@
-resolver: lts-17.15
-
-extra-deps:
-- vector-0.12.3.0
+resolver: lts-18.0
