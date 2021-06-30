@@ -4,8 +4,8 @@ import           Test.Hspec
 
 import           Util
 
-spec :: SpecWith ()
-spec = describe "Util" $
+spec :: Spec
+spec =
     it "size2humanSize" $
         size2humanSize . fst <$> sizeHumanSizes
             `shouldBe` snd <$> sizeHumanSizes

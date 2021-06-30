@@ -5,8 +5,8 @@ import           Test.Hspec
 import           Util
 import           Y15.D16
 
-spec :: SpecWith ()
-spec = describe "Y15.D16" $ do
+spec :: Spec
+spec = do
     let input = "Sue 1: goldfish: 6, trees:    9, akitas: 0\n"
              ++ "Sue 2: goldfish: 7, trees:    1, akitas: 0\n"
              ++ "Sue 3: cars:     2, perfumes: 5, cats:   2\n"

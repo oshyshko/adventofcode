@@ -6,8 +6,8 @@ import           Imports
 import           Util
 import           Y15.D15
 
-spec :: SpecWith ()
-spec = describe "Y15.D15" $ do
+spec :: Spec
+spec = do
     let input = "Butterscotch: capacity -1, durability -2, flavor  6, texture  3, calories 8\n"
              ++ "Cinnamon:     capacity  2, durability  3, flavor -2, texture -1, calories 3\n"
         ingrs = parseOrDie ingredients input

@@ -7,8 +7,8 @@ import           Util
 import           Imports
 import           Y15.D18
 
-spec :: SpecWith ()
-spec = describe "Y15.D18" $ do
+spec :: Spec
+spec = do
     let x      = True
         o      = False
 

@@ -4,8 +4,8 @@ import           Test.Hspec
 
 import           Y15.D17
 
-spec :: SpecWith ()
-spec = describe "Y15.D17" $ do
+spec :: Spec
+spec = do
     it "parseContainers" $
         parseContainers "1\n2\n3\n" `shouldBe` [1, 2, 3]
 

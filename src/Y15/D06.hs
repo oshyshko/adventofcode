@@ -1,20 +1,20 @@
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 module Y15.D06 where
 
-import           Control.Monad.ST              (ST, runST)
-import           Data.Array.IO                 (IOUArray)
-import           Data.Array.MArray             (MArray)
-import qualified Data.Array.MArray             as A
-import           Data.Bit                      (Bit (..))
-import qualified Data.HashMap.Strict           as MH
-import qualified Data.IntMap.Strict            as MI
-import qualified Data.Map.Strict               as MS
-import qualified Data.Vector                   as V
-import qualified Data.Vector.Mutable           as VM
-import qualified Data.Vector.Storable          as VS
-import qualified Data.Vector.Storable.Mutable  as VSM
-import qualified Data.Vector.Unboxed           as VU
-import qualified Data.Vector.Unboxed.Mutable   as VUM
+import           Control.Monad.ST             (ST, runST)
+import           Data.Array.IO                (IOUArray)
+import           Data.Array.MArray            (MArray)
+import qualified Data.Array.MArray            as A
+import           Data.Bit                     (Bit (..))
+import qualified Data.HashMap.Strict          as MH
+import qualified Data.IntMap.Strict           as MI
+import qualified Data.Map.Strict              as MS
+import qualified Data.Vector                  as V
+import qualified Data.Vector.Mutable          as VM
+import qualified Data.Vector.Storable         as VS
+import qualified Data.Vector.Storable.Mutable as VSM
+import qualified Data.Vector.Unboxed          as VU
+import qualified Data.Vector.Unboxed.Mutable  as VUM
 
 import           Imports
 import           Util
