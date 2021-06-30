@@ -50,7 +50,7 @@ executables:
     - -rtsopts
 
 tests:
-  adventofcode-test:
+  spec:
     main: MainTest.hs
     source-dirs: test
     dependencies:
