@@ -39,8 +39,7 @@ solve1 :: String -> Int
 solve1 s =
     let (rrs, i) = parseOrDie replacementsAndInitial s
         k2vs = M.fromListWith (++) $ (\(k, v) -> (k, [v])) <$> rrs
-        unique = S.toList . S.fromList                              -- faster than nub
-    in length . unique . singleReplacements k2vs $ i
+    in S.size . S.fromList . singleReplacements k2vs $ i
 
 solve2 :: String -> Int
 solve2 s =
