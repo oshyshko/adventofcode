@@ -243,5 +243,6 @@ language_extensions:
 - RecordWildCards
 - ScopedTypeVariables
 - StrictData
+- TupleSections
 - TypeApplications
 - TypeFamilies

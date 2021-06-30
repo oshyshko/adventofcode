@@ -99,5 +99,6 @@ default-extensions:
 - RecordWildCards
 - ScopedTypeVariables
 - StrictData
+- TupleSections
 - TypeApplications
 - TypeFamilies

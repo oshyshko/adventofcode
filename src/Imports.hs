@@ -22,7 +22,7 @@ module Imports
 
 import           Control.Exception             (SomeException, catch, evaluate)
 import           Control.Monad                 (forM, forM_, join, void, when,
-                                                (<=<))
+                                                (<=<), guard)
 import           Control.Monad.Primitive       (PrimMonad (..))
 import           Data.Bool                     (bool)
 import           Data.Char                     (isAlphaNum, isAsciiLower,
