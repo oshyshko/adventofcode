@@ -64,4 +64,3 @@ showSysInfo SysInfo{..} =
         , "\nCompiler: ", fm compiler, " ("
                         , fm compilerArch, ")"
         ]
-
