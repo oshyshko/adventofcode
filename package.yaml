@@ -12,6 +12,7 @@ library:
   dependencies:
   - base
   - aeson
+  - arithmoi
   - array
   - bitvec
   - bytestring
@@ -86,6 +87,7 @@ ghc-options:
 
 default-extensions:
 - AllowAmbiguousTypes
+- BangPatterns
 - ConstraintKinds
 - DeriveGeneric
 - FlexibleContexts
@@ -102,3 +104,4 @@ default-extensions:
 - TupleSections
 - TypeApplications
 - TypeFamilies
+- ViewPatterns

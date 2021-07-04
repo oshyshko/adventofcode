@@ -230,6 +230,7 @@ newline: native
 # No language extensions are enabled by default.
 language_extensions:
 - AllowAmbiguousTypes
+- BangPatterns
 - ConstraintKinds
 - DeriveGeneric
 - FlexibleContexts
@@ -246,3 +247,4 @@ language_extensions:
 - TupleSections
 - TypeApplications
 - TypeFamilies
+- ViewPatterns

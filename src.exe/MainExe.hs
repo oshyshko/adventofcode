@@ -36,6 +36,7 @@ import qualified Y15.D16
 import qualified Y15.D17
 import qualified Y15.D18
 import qualified Y15.D19
+import qualified Y15.D20
 
 days :: Map String [String -> IO String]
 days = M.fromList $ join $(MainExeTH.solversFromImportsAndSources)
