@@ -13,6 +13,9 @@ eol =   try (string "\n\r")
     <|>      string "\n"
     <|>      string "\r"
 
+decimal :: Read a => Parser a
+decimal = read <$> many digit
+
 -- a :: String
 -- a = parseOrDie eol "\n\n"
 parseOrDie :: Parser a -> String -> a

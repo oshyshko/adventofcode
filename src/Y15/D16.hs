@@ -28,7 +28,7 @@ sue2clues =
     sue2clue :: Parser Sue2Clues
     sue2clue = do
         string "Sue" *> many space
-        sueId <- read <$> many digit
+        sueId <- decimal
         many space <* char ':' <* many space
         clues <- clue `sepBy` (char ',' <* many space) :: Parser [Clue]
         return (sueId, clues)
@@ -48,7 +48,7 @@ sue2clues =
 
         string ":" <* many space
 
-        v <- read <$> many digit
+        v <- decimal
         return (k, v)
 
 exactlyOneOrDie :: Show a => [a] -> a

@@ -60,11 +60,11 @@ commands =
     command :: Parser Command
     command = Command
         <$> op <* space
-        <*> (read <$> many digit) <* char ','
-        <*> (read <$> many digit)
+        <*> decimal <* char ','
+        <*> decimal
         <* string " through " -- TODO many1 space ...
-        <*> (read <$> many digit) <* char ','
-        <*> (read <$> many digit)
+        <*> decimal <* char ','
+        <*> decimal
 
     op :: Parser Op
     op =    try (string "turn on")  $> On

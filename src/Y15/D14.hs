@@ -34,10 +34,10 @@ specs =
   where
     _spec :: Parser Spec
     _spec = Spec
-        <$> many letter           <* string " can fly "
-        <*> (read <$> many digit) <* string " km/s for "
-        <*> (read <$> many digit) <* string " seconds, but then must rest for "
-        <*> (read <$> many digit) <* string " seconds."
+        <$> many letter <* string " can fly "
+        <*> decimal     <* string " km/s for "
+        <*> decimal     <* string " seconds, but then must rest for "
+        <*> decimal     <* string " seconds."
 
 tick :: Racer -> Racer
 tick r@Racer{state} = case state of
