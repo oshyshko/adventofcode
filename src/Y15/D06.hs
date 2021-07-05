@@ -103,8 +103,10 @@ instance Light L2 where
 {-# INLINE command2indexes #-} -- note: otherwise it allocates 1.7GB for arr/vec
 command2indexes :: Command -> [Side]
 command2indexes Command{x0,y0,x1,y1} =
-    [x * side + y | x <- [x0..x1]
-                  , y <- [y0..y1]]
+    [ x * side + y
+    | x <- [x0..x1]
+    , y <- [y0..y1]
+    ]
 
 class StorageM s k v where
     emptyM :: s k v
