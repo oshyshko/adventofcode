@@ -11,13 +11,12 @@ type Molecule = String
 
 replacementsAndInitial :: Parser ([(Part, Part)], Molecule)
 replacementsAndInitial = do
-    replacements <- manyTill (mapping <* eol) eol
-    initial <- many1 letter
-    _ <- eol
+    replacements <- manyTill (kv <* eol) eol
+    initial <- many1 letter <* eol
     return (replacements, initial)
   where
-    mapping :: Parser (Part, Part)
-    mapping = (,)
+    kv :: Parser (Part, Part)
+    kv = (,)
         <$> many1 letter <* many1 space <* string "=>" <* many1 space
         <*> many1 letter
 
