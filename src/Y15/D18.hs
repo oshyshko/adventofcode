@@ -59,8 +59,9 @@ tickLights :: PrimMonad m => TickFn -> Board m -> Board m -> m ()
 tickLights f src@Board{bounds} dst = do
     let (YX y0 x0, YX y1 x1) = bounds
     forM_ [ (YX y x, y * (x1 + 1) + x)
-                | y <- [y0..y1]
-                , x <- [x0..x1]] $ \(yx, i) -> do
+          | y <- [y0..y1]
+          , x <- [x0..x1]
+          ] $ \(yx, i) -> do
         v <- VUM.read (vector src) i
 
         n <- neighborsOnAround src yx

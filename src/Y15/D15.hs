@@ -54,8 +54,10 @@ genMixes :: Int -> Int -> [[Int]]
 genMixes 0 _ = []
 genMixes 1 spoonsLeft = [[spoonsLeft]]
 genMixes ingrsLeft spoonsLeft =
-    [x:rest | x    <- [0..spoonsLeft]
-            , rest <- genMixes (ingrsLeft - 1) (spoonsLeft - x)]
+    [ x:rest
+    | x    <- [0..spoonsLeft]
+    , rest <- genMixes (ingrsLeft - 1) (spoonsLeft - x)
+    ]
 
     -- alternatives:
     -- do x    <- [0..spoonsLeft]
