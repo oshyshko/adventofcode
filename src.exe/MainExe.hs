@@ -37,6 +37,7 @@ import qualified Y15.D17
 import qualified Y15.D18
 import qualified Y15.D19
 import qualified Y15.D20
+import qualified Y15.D21
 
 days :: Map String [String -> IO String]
 days = M.fromList $ join $(MainExeTH.solversFromImportsAndSources)
@@ -113,7 +114,7 @@ runDayViaDirectCall input dayKey dayIndex = do
     return . Right $ ExecResult out ms Nothing Nothing
 
 runDayViaExec :: DayInput -> DayKey -> DayIndex -> IO (Either String ExecResult)
-runDayViaExec input dayKey dayIndex  = do
+runDayViaExec input dayKey dayIndex = do
     selfPath <- getExecutablePath
 
     if "ghc" `isSuffixOf` selfPath
