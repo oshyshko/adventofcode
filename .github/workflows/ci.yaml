@@ -13,9 +13,9 @@ jobs:
             fail-fast: false
             matrix:
                 os: [macOS-latest, ubuntu-latest, windows-latest]
-                resolver: ['lts-18.0']
+                resolver: ['lts-18.8']
                 # resolver: ['lts-18.0', 'nightly-2021-05-23']
-                stack: ['2.7.1']
+                stack: ['2.7.3']
 
         env:
             STACK     : stack --resolver ${{ matrix.resolver }}
