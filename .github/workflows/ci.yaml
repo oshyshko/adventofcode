@@ -13,7 +13,7 @@ jobs:
             fail-fast: false
             matrix:
                 os: [macOS-latest, ubuntu-latest, windows-latest]
-                resolver: ['lts-18.7']
+                resolver: ['lts-18.0']
                 # resolver: ['lts-18.0', 'nightly-2021-05-23']
                 stack: ['2.7.3']
 
