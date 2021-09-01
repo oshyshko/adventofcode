@@ -18,7 +18,7 @@ data ExecResult = ExecResult
 
 header :: IO ()
 header = do
-    putStrLn "-----------+--------------------+- day 1 ---------------+- day 2 ---------------"
+    putStrLn "-----------+--------------------+- part 1 --------------+- part 2 --------------"
     putStrLn " day       | answers            |    time  alloc   peak |    time  alloc   peak"
     putStrLn "-----------+--------------------+-----------------------+-----------------------"
 
