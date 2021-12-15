@@ -90,6 +90,7 @@ default-extensions:
 - BangPatterns
 - ConstraintKinds
 - DeriveGeneric
+- DuplicateRecordFields
 - FlexibleContexts
 - FlexibleInstances
 - LambdaCase

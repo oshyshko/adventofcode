@@ -18,9 +18,9 @@ data ExecResult = ExecResult
 
 header :: IO ()
 header = do
-    putStrLn "-----------+--------------------+- part 1 --------------+- part 2 --------------"
-    putStrLn " day       | answers            |    time  alloc   peak |    time  alloc   peak"
-    putStrLn "-----------+--------------------+-----------------------+-----------------------"
+    putStrLn "-----------+---------------------+- part 1 --------------+- part 2 --------------"
+    putStrLn " day       | answers             |    time  alloc   peak |    time  alloc   peak"
+    putStrLn "-----------+---------------------+-----------------------+-----------------------"
 
 dayPrefix :: DayKey -> IO ()
 dayPrefix dayKey = do
@@ -29,7 +29,7 @@ dayPrefix dayKey = do
 
 dayResults :: FilePath -> Map DayKey [String] -> DayKey -> [ExecResult] -> IO ()
 dayResults answersPath day2answers dayKey results = do
-    printf "%-18s | %s %s\n"
+    printf "%-19s | %s %s\n"
         (intercalate ", " $ results <&> output)
         (intercalate " | " $ results <&> \r ->
             printf "%5dms %6s %6s"
@@ -46,7 +46,7 @@ dayResults answersPath day2answers dayKey results = do
 
 footer :: SysInfo -> IO ()
 footer i = do
-    putStrLn "-----------+--------------------+-----------------------+-----------------------"
+    putStrLn "-----------+---------------------+-----------------------+-----------------------"
     putStrLn . unlines . map (" " ++) . lines . showSysInfo $ i
 
 showSysInfo :: SysInfo -> String

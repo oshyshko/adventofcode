@@ -39,6 +39,10 @@ import qualified Y15.D19
 import qualified Y15.D20
 import qualified Y15.D21
 
+import qualified Y21.D01
+import qualified Y21.D02
+import qualified Y21.D03
+
 days :: Map String [String -> IO String]
 days = M.fromList $ join $(MainExeTH.solversFromImportsAndSources)
 
@@ -53,6 +57,7 @@ parseAnswers =
             day:answers -> (day, answers)
             x           -> error $ "Couldn't parse answers: " ++ show x)
     . map (filter (/= "") . splitOn " ")
+    . filter (/= "")
     . filter (not . isPrefixOf "#")
     . lines
 

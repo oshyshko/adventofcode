@@ -1,5 +1,6 @@
 module Imports
-    ( module Control.Exception
+    ( module Control.Arrow
+    , module Control.Exception
     , module Control.Monad
     , module Control.Monad.Primitive
     , module Data.Bool
@@ -20,9 +21,10 @@ module Imports
     , module Text.Read
     ) where
 
+import           Control.Arrow                 ((&&&))
 import           Control.Exception             (SomeException, catch, evaluate)
-import           Control.Monad                 (forM, forM_, join, void, when,
-                                                (<=<), guard)
+import           Control.Monad                 (forM, forM_, guard, join, void,
+                                                when, (<=<))
 import           Control.Monad.Primitive       (PrimMonad (..))
 import           Data.Bool                     (bool)
 import           Data.Char                     (isAlphaNum, isAsciiLower,
@@ -35,7 +37,8 @@ import           Data.Hashable                 (Hashable)
 import           Data.List                     (dropWhileEnd, intercalate,
                                                 isInfixOf, isPrefixOf,
                                                 isSuffixOf, nub, partition,
-                                                permutations, sort, sortOn)
+                                                permutations, sort, sortOn,
+                                                transpose)
 import           Data.List.Split               (chunksOf, divvy, splitOn)
 import           Data.Map.Strict               (Map)
 import           Data.Maybe                    (fromJust, fromMaybe,
