@@ -29,7 +29,7 @@ import           Control.Monad.Primitive       (PrimMonad (..))
 import           Data.Bool                     (bool)
 import           Data.Char                     (isAlphaNum, isAsciiLower,
                                                 isSpace, toLower)
-import           Data.Foldable                 (foldl')
+import           Data.Foldable                 (foldl', foldlM)
 import           Data.Function                 (fix, (&))
 import           Data.Functor                  (($>), (<&>))
 import           Data.HashMap.Strict           (HashMap)
@@ -43,11 +43,12 @@ import           Data.List.Split               (chunksOf, divvy, splitOn)
 import           Data.Map.Strict               (Map)
 import           Data.Maybe                    (fromJust, fromMaybe,
                                                 maybeToList)
-import           Data.Word                     (Word16)
+import           Data.Word                     (Word16, Word8)
 import           System.IO                     (hFlush, stdout)
-import           Text.ParserCombinators.Parsec (Parser, char, digit, endBy,
-                                                hexDigit, letter, many, many1,
-                                                manyTill, noneOf, parse, sepBy,
-                                                space, string, try, (<|>))
+import           Text.ParserCombinators.Parsec (Parser, between, char, digit,
+                                                endBy, endBy1, hexDigit, letter,
+                                                many, many1, manyTill, noneOf,
+                                                parse, sepBy, space, string,
+                                                try, (<|>))
 import           Text.Printf                   (printf)
 import           Text.Read                     (readMaybe)

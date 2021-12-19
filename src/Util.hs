@@ -14,7 +14,10 @@ eol =   try (string "\n\r")
     <|>      string "\r"
 
 decimal :: Read a => Parser a
-decimal = read <$> many digit
+decimal = read <$> many1 digit
+
+surroundedBy :: Char -> Parser a -> Parser a
+surroundedBy c = between (many $ char c) (many $ char c)
 
 -- a :: String
 -- a = parseOrDie eol "\n\n"
@@ -34,6 +37,9 @@ readInput :: String -> IO String
 readInput name = readFile $ "res/" ++ replace "." "/" (take 7 name) ++ ".txt"
 
 -- trace
+tr :: Show a => String -> a -> a
+tr s x = trace (s <> ": " <> show x) x
+
 trace :: String -> a -> a
 trace = Trace.trace
 
