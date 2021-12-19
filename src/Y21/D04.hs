@@ -36,7 +36,7 @@ numbersAndBoards =
     numbers = decimal `sepBy` char ','
     board   = join <$> (many1 (surroundedBy ' ' decimal) `endBy` eol)
 
-ejectScoresAndRemaining :: (PrimV m s v a) => a -> [v s a] -> m ([Score], [v s a])
+ejectScoresAndRemaining :: PrimV m s v a => a -> [v s a] -> m ([Score], [v s a])
 ejectScoresAndRemaining n =
     foldlM
         (\(ss, remBs) b -> markMaybeScore b n >>= \case
@@ -44,7 +44,7 @@ ejectScoresAndRemaining n =
             Nothing -> return (ss,        remBs <> [b]))
         ([], [])
 
-markMaybeScore :: (PrimV m s v a) => v s a -> a -> m (Maybe Score)
+markMaybeScore :: PrimV m s v a => v s a -> a -> m (Maybe Score)
 markMaybeScore b n =
     G.ifoldM markMaybeIndex Nothing b >>= \case
         Nothing -> return Nothing
@@ -81,14 +81,14 @@ solve2 =
   where
     go _       []      _  = error "No winner found"
     go Nothing  _      [] = error "No winners or last single winner found"
-    go (Just s) _      [] = return s
+    go (Just s) _      [] = return s            -- stop when all boards are gone
     go mw       (n:ns) bs = ejectScoresAndRemaining n bs >>= \case
         ([],  remBs) -> go mw       ns remBs    -- continue (no winners)
         ([s], remBs) -> go (Just s) ns remBs    -- set last score (1 winner)
         (_,   remBs) -> go Nothing  ns remBs    -- unset last score (2+ winners)
 
 -- vector utils
-foldVector :: forall m s v a b. (PrimV m s v a)
+foldVector :: forall m s v a b. PrimV m s v a
     => (b -> a -> b) -> b -> Index -> (Index -> Index) -> Int -> v s a -> m b
 foldVector op initA initI moveI times v =
     go initA initI times
