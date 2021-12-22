@@ -31,7 +31,6 @@ import           Util
 
 type Side       = Int
 type Brightness = Word16
-type Solution   = Int
 data Op         = On | Off | Toggle deriving Show
 
 data Command = Command
@@ -109,55 +108,55 @@ command2indexes Command{x0,y0,x1,y1} =
     ]
 
 class StorageM s k v where
-    emptyM :: s k v
-    alterM :: (v -> v) -> k -> s k v -> s k v
-    foldlM :: (a -> v -> a) -> a -> s k v -> a
+    emptySM :: s k v
+    alterSM :: (v -> v) -> k -> s k v -> s k v
+    foldlSM :: (a -> v -> a) -> a -> s k v -> a
 
-class (Monad m) => StorageI s v m where
-    emptyI :: Int -> v -> m (s v)
-    alterI :: (v -> v) -> Int -> s v -> m ()
-    foldlI :: (a -> v -> a) -> a -> s v -> m a
+class (PrimMonad m) => StorageI s v m where
+    emptySI :: Int -> v -> m (s v)
+    alterSI :: (v -> v) -> Int -> s v -> m ()
+    foldlSI :: (a -> v -> a) -> a -> s v -> m a
 
 {-# ANN solveM ("HLint: ignore Avoid lambda" :: String) #-}
-solveM :: forall s v . (Light v, StorageM s Side v) => String -> Solution
+solveM :: forall s v . (Light v, StorageM s Side v) => String -> Int
 solveM input =
       parseOrDie commands input
-    & foldl' applyCommand emptyM
-    & foldlM (\a v -> a + fromIntegral (brightness v)) 0
+    & foldl' applyCommand emptySM
+    & foldlSM (\a v -> a + fromIntegral (brightness v)) 0
   where
     applyCommand :: s Side v -> Command -> s Side v
     applyCommand s' c@Command{op} =
-        foldl' (\a v -> alterM (operate op) v a) s' (command2indexes c)
+        foldl' (\a v -> alterSM (operate op) v a) s' (command2indexes c)
 
-solveI :: forall s v m. (Light v, Monad m, StorageI s v m) => String -> m Solution
+solveI :: forall s v m. (Light v, PrimMonad m, StorageI s v m) => String -> m Int
 solveI input = do
-    s <- emptyI @s @v @m (side * side - 1) initial
+    s <- emptySI @s @v @m (side * side - 1) initial
     forM_ (parseOrDie commands input) $ applyCommand s
-    foldlI (\a v -> a + fromIntegral (brightness v)) 0 s
+    foldlSI (\a v -> a + fromIntegral (brightness v)) 0 s
   where
     applyCommand s' c@Command{op} =
-        forM_ (command2indexes c) (\k -> alterI (operate op) k s')
+        forM_ (command2indexes c) (\k -> alterSI (operate op) k s')
 
 -- solutions
-_solve1MH, _solve2MH
+solve1MH, solve2MH
     , solve1MS, solve2MS
     , solve1MI, solve2MI
-    , solve1VS, solve2VS :: String -> Solution
+    , solve1VS, solve2VS :: String -> Int
 
-solve1AI, solve2AI
+solve1, solve2
+    , solve1AI, solve2AI
     , solve1VB, solve2VB
     , solve1VR, solve2VR
     , solve1VU, solve2VU
-    , _solve1VZ :: String -> IO Solution
+    , _solve1VZ :: String -> IO Int
 
--- disabled, takes abput 25s and 32s to run (vs 10s and 11s for solve12MS)
-_solve1MH  =         solveM @MH.HashMap                        @L1
-_solve2MH  =         solveM @MH.HashMap                        @L2
-
+solve1MH   =         solveM @MH.HashMap                        @L1
+solve2MH   =         solveM @MH.HashMap                        @L2
 solve1MS   =         solveM @MS.Map                            @L1
 solve2MS   =         solveM @MS.Map                            @L2
 solve1MI   =         solveM @IntMap'                           @L1
 solve2MI   =         solveM @IntMap'                           @L2
+
 solve1AI   =         solveI @(IOUArray Int)                    @L1 @IO
 solve2AI   =         solveI @(IOUArray Int)                    @L2 @IO
 solve1VB   =         solveI @(VM.MVector  (PrimState IO))      @L1 @IO
@@ -168,28 +167,33 @@ solve1VS s = runST $ solveI @(VUM.MVector (PrimState (ST _)))  @L1 @(ST _) s
 solve2VS s = runST $ solveI @(VUM.MVector (PrimState (ST _)))  @L2 @(ST _) s
 solve1VU   =         solveI @(VUM.MVector (PrimState IO))      @L1 @IO
 solve2VU   =         solveI @(VUM.MVector (PrimState IO))      @L2 @IO
--- TODO remove `solve2VZ` + make it possible in MainExe to run one solver (day 1 or 2)
-_solve1VZ   =         solveI @(VUM.MVector (PrimState IO))      @L1B @IO
+
+-- TODO make it possible in MainExe to run one solver (day 1 or 2)
+_solve1VZ   =        solveI @(VUM.MVector (PrimState IO))      @L1B @IO
+
+-- best performance
+solve1 = solve1VU
+solve2 = solve2VU
 
 -- instances: map-based sotrages
 instance (Light v) => StorageM MS.Map Side v where
-    emptyM = MS.empty
-    alterM = MS.alter . fromJustFold
-    foldlM = MS.foldl'
+    emptySM = MS.empty
+    alterSM = MS.alter . fromJustFold
+    foldlSM = MS.foldl'
 
 -- TODO find out why HashMap is slower than Map
 -- also see https://github.com/haskell-perf/dictionaries
 instance (Light v) => StorageM MH.HashMap Side v where
-    emptyM = MH.empty
-    alterM = MH.alter . fromJustFold
-    foldlM = MH.foldl'
+    emptySM = MH.empty
+    alterSM = MH.alter . fromJustFold
+    foldlSM = MH.foldl'
 
 newtype IntMap' k v = IntMap' (MI.IntMap v) -- TODO get rid of this type?
 
 instance (Light v) => StorageM IntMap' Side v where
-    emptyM                 = IntMap' MI.empty
-    alterM f k (IntMap' m) = IntMap' $ MI.alter (fromJustFold f) k m
-    foldlM f a (IntMap' m) = MI.foldl' f a m
+    emptySM                 = IntMap' MI.empty
+    alterSM f k (IntMap' m) = IntMap' $ MI.alter (fromJustFold f) k m
+    foldlSM f a (IntMap' m) = MI.foldl' f a m
 
 {-# INLINE fromJustFold #-}
 fromJustFold :: (Light v) => (v -> v) -> Maybe v -> Maybe v
@@ -201,27 +205,27 @@ fromJustFold f mv =
 instance (m ~ IO, MArray IOUArray v m, A.Ix k, k ~ Int)
     => StorageI (IOUArray k) v m
   where
-    emptyI   k v = A.newArray (0, k - 1) v
-    alterI f k s = A.readArray s k >>= A.writeArray s k . f
-    foldlI f a s = foldl' f a <$> A.getElems s
+    emptySI   k v = A.newArray (0, k - 1) v
+    alterSI f k s = A.readArray s k >>= A.writeArray s k . f
+    foldlSI f a s = foldl' f a <$> A.getElems s
 
 instance (PrimMonad m, st ~ PrimState m)
     => StorageI (VM.MVector st) v m
   where
-    emptyI   k v = VM.replicate k v
-    alterI f k s = VM.modify s f k
-    foldlI f a s = V.foldl' f a <$> V.freeze s
+    emptySI   k v = VM.replicate k v
+    alterSI f k s = VM.modify s f k
+    foldlSI f a s = V.foldl' f a <$> V.freeze s
 
 instance (PrimMonad m, st ~ PrimState m, VUM.Unbox v)
     => StorageI (VUM.MVector st) v m
   where
-    emptyI   k v = VUM.replicate k v
-    alterI f k s = VUM.modify s f k
-    foldlI f a s = VU.foldl' f a <$> VU.freeze s
+    emptySI   k v = VUM.replicate k v
+    alterSI f k s = VUM.modify s f k
+    foldlSI f a s = VU.foldl' f a <$> VU.freeze s
 
 instance (PrimMonad m, st ~ PrimState m, VSM.Storable v)
     => StorageI (VSM.MVector st) v m
   where
-    emptyI   k v = VSM.replicate k v
-    alterI f k s = VSM.modify s f k
-    foldlI f a s = VS.foldl' f a <$> VS.freeze s
+    emptySI   k v = VSM.replicate k v
+    alterSI f k s = VSM.modify s f k
+    foldlSI f a s = VS.foldl' f a <$> VS.freeze s
