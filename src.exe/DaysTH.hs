@@ -17,7 +17,7 @@ import           Types
 days :: Q Exp
 days = do
     files <- TH.runIO listSources
-    [| $(ListE <$> join <$> mapM extractDays files) |]
+    [| $(ListE . join <$> mapM extractDays files) |]
 
 -- > extractDays "src/Y15/D01.hs"
 -- [| [Day "Y15.D01" Nothing [return . show . Y15.D01.solve1, return . show . Y15.D01.solve2] ] |]
@@ -26,8 +26,7 @@ extractDays s = do
     -- TODO report missing imports (enumerate and compare against solversFnNames)
     s2sn <- TH.runIO $ benchSuffixToSolverFnNames s
 
-    forM (M.toList s2sn) \(suf, sol) ->
-        solverRow moduleName suf sol
+    forM (M.toList s2sn) (uncurry (solverRow moduleName))
   where
     moduleName = (takeFileName . takeDirectory $ s) ++ "." ++ takeBaseName s
 
@@ -50,7 +49,6 @@ callF moduleName solverFnName = do
 
     return $ applyAdapter t msn
 
-{-# ANN applyAdapter ("HLint: redundant multiway if" :: String) #-}
 applyAdapter :: Type -> ModuleNameSolverFnName -> Exp
 applyAdapter t msn = case t of
     -- (a -> b)
@@ -80,7 +78,7 @@ benchSuffixToSolverFnNames p =
     --   M.elems
       M.map sort
     . M.fromListWith (++)
-    . fmap (\x -> (,[x]) . snd . (splitAt (length ("solveX" :: String))) $ x)
+    . fmap (\x -> (,[x]) . drop (length ("solveX" :: String)) $ x)
     . nub
     . filter (all isAlphaNum)
     . fmap (head . words)

@@ -86,11 +86,11 @@ mainArgs args =
 -- TODO report failures
 runDayViaDirectCall :: Input -> DayPrefix -> SolverIndex -> IO (Either String ExecResult)
 runDayViaDirectCall input dayPrefix solverIndex = do
-    let ioa = (solvers $ fromMaybe
-                (error $ "Couldn't find day: " ++ dayPrefix)
-                (M.lookup dayPrefix Days.moduleName2day))
-                    !! solverIndex
-    (out, ms) <- timeOf $ ioa input
+    let Day{solvers} =  fromMaybe
+            (error $ "Couldn't find day: " ++ dayPrefix)
+            (M.lookup dayPrefix Days.moduleName2day)
+
+    (out, ms) <- timeOf $ (solvers !! solverIndex) input
     return . Right $ ExecResult
         { output         = out
         , msReal         = ms

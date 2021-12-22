@@ -30,9 +30,9 @@ singleReplacements k2vs =
       where
         replacedNext = go [x] xs
         replacedHere = do
-            (pattern, replacements) <- M.toList k2vs
-            guard $ pattern `isPrefixOf` remaining
-            replacements <&> (<> drop (length pattern) remaining)
+            (pat, replacements) <- M.toList k2vs
+            guard $ pat `isPrefixOf` remaining
+            replacements <&> (<> drop (length pat) remaining)
 
 solve1 :: String -> Int
 solve1 s =
