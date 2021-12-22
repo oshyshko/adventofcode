@@ -10,13 +10,14 @@ copyright:           Alex Shyshko
 library:
   source-dirs: src
   dependencies:
-  - base
   - aeson
   - arithmoi
   - array
+  - base
   - bitvec
   - bytestring
   - containers
+  - cryptohash-md5
   - deepseq
   - directory
   - exceptions
@@ -26,7 +27,6 @@ library:
   - mtl
   - parsec
   - primitive
-  - cryptohash-md5
   - scientific
   - split
   - time

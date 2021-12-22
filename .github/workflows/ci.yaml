@@ -13,7 +13,7 @@ jobs:
             fail-fast: false
             matrix:
                 os: [macOS-latest, ubuntu-latest, windows-latest]
-                resolver: ['lts-18.0']
+                resolver: ['lts-18.0', 'lts-18.19']
                 # resolver: ['lts-18.0', 'nightly-2021-05-23']
                 stack: ['2.7.3']
 
@@ -57,7 +57,7 @@ jobs:
           run: ${{ env.STACK }} test
 
         - name: Run
-          run: ${{ env.BINARY }}
+          run: ${{ env.BINARY }} bench
 
         - name: Install hlint
           run: ${{ env.STACK }} install hlint
