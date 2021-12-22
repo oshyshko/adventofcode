@@ -1,62 +1,29 @@
-{-# LANGUAGE TemplateHaskell #-}
 module Main
-       ( main, mainArgs
-       ) where
+    ( main, mainArgs
+    ) where
 
 import qualified Data.Map.Strict    as M
 import           System.Environment (getArgs, getExecutablePath)
 import           System.Exit        (ExitCode (..))
 import           System.Process     (readProcessWithExitCode)
 
-
+import qualified Days
 import           Imports
-import qualified MainExeTH
-import           Report             (DayIndex, DayInput, DayKey,
-                                     ExecResult (..))
 import qualified Report
 import qualified SysInfo
 import           Util
-
-import qualified Y15.D01
-import qualified Y15.D02
-import qualified Y15.D03
-import qualified Y15.D04
-import qualified Y15.D05
-import qualified Y15.D06
-import qualified Y15.D07
-import qualified Y15.D08
-import qualified Y15.D09
-import qualified Y15.D10
-import qualified Y15.D11
-import qualified Y15.D12
-import qualified Y15.D13
-import qualified Y15.D14
-import qualified Y15.D15
-import qualified Y15.D16
-import qualified Y15.D17
-import qualified Y15.D18
-import qualified Y15.D19
-import qualified Y15.D20
-import qualified Y15.D21
-
-import qualified Y21.D01
-import qualified Y21.D02
-import qualified Y21.D03
-import qualified Y21.D04
-
-days :: Map String [String -> IO String]
-days = M.fromList $ join $(MainExeTH.solversFromImportsAndSources)
+import           Types
 
 -- # day     answer-1  answer-2
 -- Y15.D01   138       1771
 -- Y15.D02   1586300   3737498
 {-# ANN parseAnswers ("HLint: ignore Use map once" :: String) #-}
-parseAnswers :: String -> Map String [String]
+parseAnswers :: String -> Map DayPrefix [String]
 parseAnswers =
-    M.fromList
+      M.fromList
     . map (\case
-            day:answers -> (day, answers)
-            x           -> error $ "Couldn't parse answers: " ++ show x)
+        day:answers -> (day, answers)
+        x           -> error $ "Couldn't parse answers: " ++ show x)
     . map (filter (/= "") . splitOn " ")
     . filter (/= "")
     . filter (not . isPrefixOf "#")
@@ -68,38 +35,42 @@ main = getArgs >>= mainArgs
 mainArgs :: [String] -> IO ()
 mainArgs args =
     case args of
-        ["runday", dayKey, dayNs] ->
-            case M.lookup dayKey days of
-                Nothing      -> error $ "Couldn't find day " ++ dayKey ++ ", solver " ++ dayNs
-                Just solvers -> readInput dayKey >>= (solvers !! read dayNs) >>= putStr
+        -- TODO refactor: encode dayNs in a type?
+        ["runday", moduleName, dayNs] ->
+            case M.lookup moduleName Days.moduleName2day of
+                Nothing           -> error $ "Couldn't find day for prefix" ++ moduleName ++ ", solver " ++ dayNs
+                Just Day{solvers} -> readInput moduleName >>= (solvers !! read dayNs) >>= putStr
 
         _ -> do
             -- select day(s)
+            -- TODO refactor: use some args library?
             let daysPred = case args of
-                    []  -> const True
-                    [x] -> (x `isPrefixOf`)
-                    _   -> error $ "Don't know how to interpret args: " ++ show args
+                    []           -> (\Day{benchmark}           -> not benchmark)
+                    ["bench"]    -> const True
+                    [x, "bench"] -> (\Day{dayPrefix}           -> x `isPrefixOf` dayPrefix)
+                    [x]          -> (\Day{dayPrefix,benchmark} -> x `isPrefixOf` dayPrefix && not benchmark)
+                    _            -> error $ "Don't know how to interpret args: " ++ show args
 
-            let daysSelected = M.toList $ M.filterWithKey (\k _ -> daysPred k) days
+            let daysSelected :: [Day] = filter daysPred $ M.elems Days.moduleName2day
 
             when (null daysSelected) $
                 error $ "Couldn't find day " ++ (show . head) args
-                    ++ ".\nAvailable days are: " ++ intercalate ", " (M.keys days) ++ ".\n"
+                    ++ ".\nAvailable days are: " ++ intercalate ", " (M.keys Days.moduleName2day) ++ ".\n"
 
             -- read answers.txt
             let answersPath = "res/answers.txt"
-            day2answers <- parseAnswers <$> readFile answersPath
+            mod2answers <- parseAnswers <$> readFile answersPath
 
             Report.header
 
             -- run
-            forM_ daysSelected $ \ (dayKey, solvers) -> do
-                input <- readInput dayKey
+            forM_ daysSelected $ \Day{dayPrefix,solvers} -> do
+                input <- readInput dayPrefix
 
-                Report.dayPrefix dayKey
+                Report.dayPrefix dayPrefix
 
                 results <- forM (take (length solvers) [0..]) $ \solverIndex -> do
-                    runDayViaExec input dayKey solverIndex >>= \case
+                    runDayViaExec input dayPrefix solverIndex >>= \case
                         -- TODO 1. correctly present error (Left) and continue with the rest of days
                         -- TODO 2. find a better way to remove RTS part that starts with " [("
                         Left err -> error $
@@ -108,28 +79,36 @@ mainArgs args =
                                 ++ (unlines . takeWhile (\e -> not $ " [(" `isPrefixOf` e) . lines $ err)
                         Right r -> return r
 
-                Report.dayResults answersPath day2answers dayKey results
+                Report.dayResults answersPath mod2answers dayPrefix results
 
             Report.footer =<< SysInfo.getSysInfo
 
 -- TODO report failures
-runDayViaDirectCall :: DayInput -> DayKey -> DayIndex -> IO (Either String ExecResult)
-runDayViaDirectCall input dayKey dayIndex = do
-    let ioa = fromMaybe (error $ "Couldn't find day: " ++ dayKey) (M.lookup dayKey days) !! dayIndex
+runDayViaDirectCall :: Input -> DayPrefix -> SolverIndex -> IO (Either String ExecResult)
+runDayViaDirectCall input dayPrefix solverIndex = do
+    let ioa = (solvers $ fromMaybe
+                (error $ "Couldn't find day: " ++ dayPrefix)
+                (M.lookup dayPrefix Days.moduleName2day))
+                    !! solverIndex
     (out, ms) <- timeOf $ ioa input
-    return . Right $ ExecResult out ms Nothing Nothing
+    return . Right $ ExecResult
+        { output         = out
+        , msReal         = ms
+        , bytesAllocated = Nothing
+        , bytesPeak      = Nothing
+        }
 
-runDayViaExec :: DayInput -> DayKey -> DayIndex -> IO (Either String ExecResult)
-runDayViaExec input dayKey dayIndex = do
+runDayViaExec :: Input -> DayPrefix -> SolverIndex -> IO (Either String ExecResult)
+runDayViaExec input dayPrefix solverIndex = do
     selfPath <- getExecutablePath
 
     if "ghc" `isSuffixOf` selfPath
         -- fallback to direct call if we are in a REPL
-        then runDayViaDirectCall input dayKey dayIndex
+        then runDayViaDirectCall input dayPrefix solverIndex
         else do
             (e, out, err) <- readProcessWithExitCode
                 selfPath
-                ["runday", dayKey, show dayIndex, "+RTS", "-t", "--machine-readable", "-RTS"]
+                ["runday", dayPrefix, show solverIndex, "+RTS", "-t", "--machine-readable", "-RTS"]
                 input
 
             case e of
@@ -142,8 +121,11 @@ runDayViaExec input dayKey dayIndex = do
                     -- total_cpu_seconds, total_wall_seconds
                     --   mut_cpu_seconds,   mut_wall_seconds
                     return . Right $ ExecResult
-                        out
-                        (maybe (-1) (ceiling . (* 1000))
-                            (M.lookup "total_wall_seconds" s <&> (read :: String -> Double)))
-                        (M.lookup "allocated_bytes" s <&> read)
-                        (M.lookup "max_live_bytes" s  <&> read)
+                        { output         = out
+                        , msReal         = maybe (-1)
+                                                (ceiling . (* 1000))
+                                                (M.lookup "total_wall_seconds" s
+                                                    <&> (read :: String -> Double))
+                        , bytesAllocated = M.lookup "allocated_bytes" s <&> read
+                        , bytesPeak      = M.lookup "max_live_bytes" s  <&> read
+                        }

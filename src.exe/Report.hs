@@ -3,18 +3,8 @@ module Report where
 import qualified Data.Map.Strict as M
 import           Imports
 import           SysInfo         (SysInfo (..))
+import           Types
 import           Util
-
-type DayInput  = String
-type DayKey    = String
-type DayIndex  = Int
-
-data ExecResult = ExecResult
-    { output         :: String
-    , msReal         :: Integer
-    , bytesAllocated :: Maybe Integer
-    , bytesPeak      :: Maybe Integer
-    } deriving (Show)
 
 header :: IO ()
 header = do
@@ -22,13 +12,16 @@ header = do
     putStrLn " day       | answers             |    time  alloc   peak |    time  alloc   peak"
     putStrLn "-----------+---------------------+-----------------------+-----------------------"
 
-dayPrefix :: DayKey -> IO ()
-dayPrefix dayKey = do
-    printf " %-9s | " dayKey
+dayPrefix :: DayPrefix -> IO ()
+dayPrefix dayP = do
+    printf " %-9s | " dayP
     hFlush stdout
 
-dayResults :: FilePath -> Map DayKey [String] -> DayKey -> [ExecResult] -> IO ()
-dayResults answersPath day2answers dayKey results = do
+dayPrefixToModuleName :: DayPrefix -> ModuleName
+dayPrefixToModuleName = take (length ("YXX.DXX" :: String))
+
+dayResults :: FilePath -> Map ModuleName [AnswerStr] -> DayPrefix -> [ExecResult] -> IO ()
+dayResults answersPath mod2answers dayP results = do
     printf "%-19s | %s %s\n"
         (intercalate ", " $ results <&> output)
         (intercalate " | " $ results <&> \r ->
@@ -36,13 +29,12 @@ dayResults answersPath day2answers dayKey results = do
                 (msReal r)
                 (maybe "?" size2humanSize $ bytesAllocated r)
                 (maybe "?" size2humanSize $ bytesPeak r))
-        (case M.lookup (take (length ("YXX.DXX" :: String)) dayKey) day2answers of
-            Nothing -> " <-- couldn't find entry " ++ show dayKey ++ " in " ++ show answersPath
+        (case M.lookup (dayPrefixToModuleName dayP) mod2answers of
+            Nothing -> " <-- couldn't find entry " ++ show dayP ++ " in " ++ show answersPath
             Just expected ->
-                if expected /= (results <&> output) then
-                    " <-- expected: " ++ intercalate ", " expected
-                    else
-                    "")
+                if expected /= (results <&> output)
+                    then " <-- expected: " ++ intercalate ", " expected
+                    else "")
 
 footer :: SysInfo -> IO ()
 footer i = do
