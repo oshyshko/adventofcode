@@ -48,7 +48,7 @@ import           System.IO                     (hFlush, stdout)
 import           Text.ParserCombinators.Parsec (Parser, between, char, digit,
                                                 endBy, endBy1, hexDigit, letter,
                                                 many, many1, manyTill, noneOf,
-                                                parse, sepBy, space, string,
-                                                try, (<|>))
+                                                sepBy, space, string, try,
+                                                (<|>))
 import           Text.Printf                   (printf)
 import           Text.Read                     (readMaybe)

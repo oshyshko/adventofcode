@@ -12,6 +12,11 @@ header = do
     putStrLn " day       | answers             |    time allocs maxhea maxmem |    time allocs maxhea maxmem "
     putStrLn "-----------+---------------------+------------------------------+------------------------------"
 
+footer :: SysInfo -> IO ()
+footer i = do
+    putStrLn "-----------+---------------------+------------------------------+------------------------------"
+    putStrLn . unlines . map (" " ++) . lines . showSysInfo $ i
+
 dayPrefix :: DayPrefix -> IO ()
 dayPrefix dayP = do
     printf " %-9s | " dayP
@@ -24,12 +29,12 @@ dayResults :: FilePath -> Map ModuleName [AnswerStr] -> DayPrefix -> [ExecResult
 dayResults answersPath mod2answers dayP results = do
     printf "%-19s | %s %s\n"
         (intercalate ", " $ results <&> output)
-        (intercalate " | " $ results <&> \r ->
+        (intercalate " | " $ results <&> \ExecResult{msReal, bytesAllocated, bytesPeak, bytesMaxInUse} ->
             printf "%5dms %6s %6s %6s"
-                (msReal r)
-                (maybe "?" size2humanSize $ bytesAllocated r)
-                (maybe "?" size2humanSize $ bytesPeak r)
-                (maybe "?" size2humanSize $ bytesMaxInUse r))
+                msReal
+                (maybe "?" size2humanSize bytesAllocated)
+                (maybe "?" size2humanSize bytesPeak)
+                (maybe "?" size2humanSize bytesMaxInUse))
         (case M.lookup (dayPrefixToModuleName dayP) mod2answers of
             Nothing -> " <-- couldn't find entry " ++ show dayP ++ " in " ++ show answersPath
             Just expected ->
@@ -37,10 +42,6 @@ dayResults answersPath mod2answers dayP results = do
                     then " <-- expected: " ++ intercalate ", " expected
                     else "")
 
-footer :: SysInfo -> IO ()
-footer i = do
-    putStrLn "-----------+---------------------+------------------------------+------------------------------"
-    putStrLn . unlines . map (" " ++) . lines . showSysInfo $ i
 
 showSysInfo :: SysInfo -> String
 showSysInfo SysInfo{..} =

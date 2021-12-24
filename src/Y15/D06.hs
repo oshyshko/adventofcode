@@ -32,13 +32,12 @@ import           Util
 type Side       = Int
 type Brightness = Word16
 data Op         = On | Off | Toggle deriving Show
+data XY         = XY Side Side      deriving Show
 
 data Command = Command
-    { op :: Op
-    , x0 :: Side
-    , y0 :: Side
-    , x1 :: Side
-    , y1 :: Side
+    { op  :: Op
+    , xy0 :: XY
+    , xy1 :: XY
     } deriving Show
 
 -- TODO find a way to migrate L1/L2 to a newtype + have MArray instances
@@ -59,11 +58,12 @@ commands =
     command :: Parser Command
     command = Command
         <$> op <* space
-        <*> decimal <* char ','
-        <*> decimal
+        <*> xy
         <* string " through " -- TODO many1 space ...
-        <*> decimal <* char ','
-        <*> decimal
+        <*> xy
+
+    xy :: Parser XY
+    xy = XY <$> decimal <* char ',' <*> decimal
 
     op :: Parser Op
     op =    try (string "turn on")  $> On
@@ -101,7 +101,7 @@ instance Light L2 where
 
 {-# INLINE command2indexes #-} -- note: otherwise it allocates 1.7GB for arr/vec
 command2indexes :: Command -> [Side]
-command2indexes Command{x0,y0,x1,y1} =
+command2indexes (Command _ (XY x0 y0) (XY x1 y1)) =
     [ x * side + y
     | x <- [x0..x1]
     , y <- [y0..y1]
