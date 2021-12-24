@@ -8,9 +8,9 @@ import           Util
 
 header :: IO ()
 header = do
-    putStrLn "-----------+---------------------+- part 1 --------------+- part 2 --------------"
-    putStrLn " day       | answers             |    time  alloc   peak |    time  alloc   peak"
-    putStrLn "-----------+---------------------+-----------------------+-----------------------"
+    putStrLn "-----------+---------------------+- part 1 ---------------------+- part 2 ---------------------"
+    putStrLn " day       | answers             |    time allocs maxhea maxmem |    time allocs maxhea maxmem "
+    putStrLn "-----------+---------------------+------------------------------+------------------------------"
 
 dayPrefix :: DayPrefix -> IO ()
 dayPrefix dayP = do
@@ -25,10 +25,11 @@ dayResults answersPath mod2answers dayP results = do
     printf "%-19s | %s %s\n"
         (intercalate ", " $ results <&> output)
         (intercalate " | " $ results <&> \r ->
-            printf "%5dms %6s %6s"
+            printf "%5dms %6s %6s %6s"
                 (msReal r)
                 (maybe "?" size2humanSize $ bytesAllocated r)
-                (maybe "?" size2humanSize $ bytesPeak r))
+                (maybe "?" size2humanSize $ bytesPeak r)
+                (maybe "?" size2humanSize $ bytesMaxInUse r))
         (case M.lookup (dayPrefixToModuleName dayP) mod2answers of
             Nothing -> " <-- couldn't find entry " ++ show dayP ++ " in " ++ show answersPath
             Just expected ->
@@ -38,7 +39,7 @@ dayResults answersPath mod2answers dayP results = do
 
 footer :: SysInfo -> IO ()
 footer i = do
-    putStrLn "-----------+---------------------+-----------------------+-----------------------"
+    putStrLn "-----------+---------------------+------------------------------+------------------------------"
     putStrLn . unlines . map (" " ++) . lines . showSysInfo $ i
 
 showSysInfo :: SysInfo -> String

@@ -33,4 +33,5 @@ data ExecResult = ExecResult
     , msReal         :: Integer
     , bytesAllocated :: Maybe Integer
     , bytesPeak      :: Maybe Integer
+    , bytesMaxInUse  :: Maybe Integer
     } deriving (Show)

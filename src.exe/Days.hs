@@ -32,7 +32,7 @@ import qualified Y21.D04
 import qualified Data.Map.Strict as M
 
 import qualified DaysTH
-import           Types
+import           Types (DayPrefix, Day(..))
 
 moduleName2day :: M.Map DayPrefix Day
 moduleName2day =

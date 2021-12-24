@@ -39,17 +39,24 @@ mainArgs args =
         ["runday", moduleName, dayNs] ->
             case M.lookup moduleName Days.moduleName2day of
                 Nothing           -> error $ "Couldn't find day for prefix" ++ moduleName ++ ", solver " ++ dayNs
-                Just Day{solvers} -> readInput moduleName >>= (solvers !! read dayNs) >>= putStr
+                Just Day{solvers} -> getContents >>= (solvers !! read dayNs) >>= putStr
 
         _ -> do
             -- select day(s)
             -- TODO refactor: use some args library?
             let daysPred = case args of
-                    []           -> (\Day{benchmark}           -> not benchmark)
-                    ["bench"]    -> const True
-                    [x, "bench"] -> (\Day{dayPrefix}           -> x `isPrefixOf` dayPrefix)
-                    [x]          -> (\Day{dayPrefix,benchmark} -> x `isPrefixOf` dayPrefix && not benchmark)
+                    ["fast"]     -> (\Day{benchmark}           -> not benchmark)
+                    []           -> const True
+                    [x]          -> (\Day{dayPrefix}           -> x `isPrefixOf` dayPrefix)
+                    [x, "fast"]  -> (\Day{dayPrefix,benchmark} -> x `isPrefixOf` dayPrefix && not benchmark)
                     _            -> error $ "Don't know how to interpret args: " ++ show args
+                                        ++ "\nExamples:"
+                                        ++ "\n./scripts/build-exec.sh"
+                                        ++ "\n./scripts/build-exec.sh fast"
+                                        ++ "\n./scripts/build-exec.sh Y15"
+                                        ++ "\n./scripts/build-exec.sh Y15 fast"
+                                        ++ "\ncat res/Y15/D05.txt | ./scripts/build-exec.sh runday Y15.D05 0"
+                                        ++ "\ncat res/Y15/D05.txt | ./scripts/build-exec.sh runday Y15.D05 0 +RTS -t -s -RTS"
 
             let daysSelected :: [Day] = filter daysPred $ M.elems Days.moduleName2day
 
@@ -96,6 +103,7 @@ runDayViaDirectCall input dayPrefix solverIndex = do
         , msReal         = ms
         , bytesAllocated = Nothing
         , bytesPeak      = Nothing
+        , bytesMaxInUse  = Nothing
         }
 
 runDayViaExec :: Input -> DayPrefix -> SolverIndex -> IO (Either String ExecResult)
@@ -128,4 +136,5 @@ runDayViaExec input dayPrefix solverIndex = do
                                                     <&> (read :: String -> Double))
                         , bytesAllocated = M.lookup "allocated_bytes" s <&> read
                         , bytesPeak      = M.lookup "max_live_bytes" s  <&> read
+                        , bytesMaxInUse  = M.lookup "max_mem_in_use_bytes" s  <&> read
                         }
