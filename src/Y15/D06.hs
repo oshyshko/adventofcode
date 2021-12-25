@@ -1,4 +1,6 @@
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
+{-# LANGUAGE DefaultSignatures, DeriveAnyClass, DeriveFoldable, DeriveFunctor,
+             DerivingStrategies, StandaloneDeriving #-}
 module Y15.D06 where
 
 import qualified Data.Array.Base              as AB
@@ -108,6 +110,16 @@ class StorageMonadic s v m where
     alterSM :: s -> (v -> v) -> Side -> m ()
     foldlSM :: (a -> v -> a) -> a -> s -> m a
 
+    -- NOTE see 3 instances below
+    default emptySM :: (vec x v ~ s, PrimMonad m, x ~ PrimState m, VG.MVector vec v) => Side -> v -> m s
+    emptySM = VG.replicate
+
+    default alterSM :: (vec x v ~ s, PrimMonad m, x ~ PrimState m, VG.MVector vec v) => s -> (v -> v) -> Side -> m ()
+    alterSM = VG.modify
+
+    default foldlSM :: (vec x v ~ s, PrimMonad m, x ~ PrimState m, VG.MVector vec v) => (a -> v -> a) -> a -> s -> m a
+    foldlSM = VG.foldl'
+
 class StoragePure s v where
     emptySP :: s
     alterSP :: (v -> v) -> Side -> s -> s
@@ -117,8 +129,8 @@ class StoragePure s v where
 {-# ANN solvePure ("HLint: ignore Avoid lambda" :: String) #-}
 solvePure :: forall s v. (Light v, StoragePure s v) => String -> Int
 solvePure =
-      foldlSP @s @v (\a v -> a + fromIntegral (brightness v)) 0
-    . foldl' applyCommand (emptySP @s @v)
+      foldlSP @s @v (\a v -> a + fromIntegral (brightness v)) 0 -- fold
+    . foldl' applyCommand (emptySP @s @v)                       -- create, iterate + alter
     . parseOrDie commands
   where
     applyCommand :: s -> Command -> s
@@ -129,10 +141,9 @@ solvePure =
 {-# ANN solveMonadic ("HLint: ignore Avoid lambda" :: String) #-}
 solveMonadic :: forall s v m. (Light v, Monad m, StorageMonadic s v m) => String -> m Int
 solveMonadic input = do
-    s <- emptySM @s @v (side * side) initial
-
-    forM_ (parseOrDie commands input) (applyCommand s)
-    foldlSM @s @v (\a v -> a + fromIntegral (brightness v)) 0 s
+    s <- emptySM @s @v (side * side) initial                    -- create
+    forM_ (parseOrDie commands input) (applyCommand s)          -- iterate + alter
+    foldlSM @s @v (\a v -> a + fromIntegral (brightness v)) 0 s -- fold
   where
     applyCommand :: s -> Command -> m ()
     applyCommand s c@Command{op}=
@@ -185,15 +196,10 @@ instance (Monad m, MArray IOUArray v m, Ix k, k ~ Int) => StorageMonadic (IOUArr
             x <- AB.unsafeRead s i
             go (f aa x) (i-1)
 
-instance (PrimMonad m, s ~ PrimState m) => StorageMonadic (VM.MVector s v) v m where
-    emptySM = VG.replicate;     alterSM = VG.modify;            foldlSM = VG.foldl'
-
-instance (PrimMonad m, s ~ PrimState m, VSM.Storable v) => StorageMonadic (VSM.MVector s v) v m where
-    emptySM = VG.replicate;     alterSM = VG.modify;            foldlSM = VG.foldl'
-
-instance (PrimMonad m, s ~ PrimState m, VUM.Unbox v) => StorageMonadic (VUM.MVector s v) v m where
-    emptySM = VG.replicate;     alterSM = VG.modify;            foldlSM = VG.foldl'
-
+-- TODO figure hout how this works. See 3 defaults in StorageMonadic + language extensions at the top
+deriving anyclass instance (PrimMonad m, s ~ PrimState m)                 => StorageMonadic (VM.MVector s v)  v m
+deriving anyclass instance (PrimMonad m, s ~ PrimState m, VSM.Storable v) => StorageMonadic (VSM.MVector s v) v m
+deriving anyclass instance (PrimMonad m, s ~ PrimState m, VUM.Unbox v)    => StorageMonadic (VUM.MVector s v) v m
 
 -- pure instances
 instance (Light v) => StoragePure (MS.Map Side v) v where
