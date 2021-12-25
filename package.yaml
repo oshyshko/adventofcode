@@ -90,6 +90,8 @@ default-extensions:
 - BangPatterns
 - BlockArguments
 - ConstraintKinds
+- DeriveFoldable
+- DeriveFunctor
 - DeriveGeneric
 - DuplicateRecordFields
 - FlexibleContexts

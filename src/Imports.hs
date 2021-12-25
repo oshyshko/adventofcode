@@ -1,5 +1,6 @@
 module Imports
-    ( module Control.Arrow
+    ( module Control.Applicative
+    , module Control.Arrow
     , module Control.Exception
     , module Control.Monad
     , module Control.Monad.Primitive
@@ -8,6 +9,7 @@ module Imports
     , module Data.Foldable
     , module Data.Function
     , module Data.Functor
+    , module Data.Functor.Identity
     , module Data.HashMap.Strict
     , module Data.Hashable
     , module Data.List
@@ -21,6 +23,7 @@ module Imports
     , module Text.Read
     ) where
 
+import           Control.Applicative           (liftA2)
 import           Control.Arrow                 ((&&&))
 import           Control.Exception             (SomeException, catch, evaluate)
 import           Control.Monad                 (forM, forM_, guard, join, void,
@@ -32,6 +35,7 @@ import           Data.Char                     (isAlphaNum, isAsciiLower,
 import           Data.Foldable                 (foldl', foldlM)
 import           Data.Function                 (fix, (&))
 import           Data.Functor                  (($>), (<&>))
+import           Data.Functor.Identity         (Identity (..))
 import           Data.HashMap.Strict           (HashMap)
 import           Data.Hashable                 (Hashable)
 import           Data.List                     (dropWhileEnd, intercalate,
