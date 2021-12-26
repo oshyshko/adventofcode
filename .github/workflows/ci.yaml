@@ -7,14 +7,15 @@ on:
 
 jobs:
     stack:
-        name: ${{ matrix.os }}, ${{ matrix.resolver }}
+        name: ${{ matrix.os }}, ${{ matrix.resolver }}, ${{ matrix.ghc }}
         runs-on: ${{ matrix.os }}
         strategy:
             fail-fast: false
             matrix:
                 os: [macOS-latest, ubuntu-latest, windows-latest]
                 resolver: [lts-18.19]
-                stack: ['2.7.3']
+                stack: [latest]
+                ghc: ['latest']
 
         env:
             STACK     : stack --resolver ${{ matrix.resolver }}
@@ -25,9 +26,10 @@ jobs:
         - uses: actions/checkout@v2
 
         - name: Install stack
-          uses: actions/setup-haskell@v1.1.4
+          uses: haskell/actions/setup@v1
           with:
               stack-version: ${{ matrix.stack }}
+              ghc-version: ${{ matrix.ghc }}
               enable-stack: true
               stack-no-global: true
 
@@ -64,9 +66,13 @@ jobs:
         - name: Run hlint
           run: ${{ env.STACK }} exec hlint -- src src.exe test --no-exit-code
 
-        # - name: Compress
-        #   uses: svenstaro/upx-action@2.0.1
-        #   with:
-        #       file: ${{ env.BINARY }}
-        #       strip: true
-        #       args: --ultra-brute
+        - name: List packages
+          run: ${{ env.STACK }} exec ghc-pkg list || true
+
+        - name: Compress binary
+          uses: svenstaro/upx-action@v2
+          with:
+              file: ${{ env.BINARY }}
+              strip: true
+              args: --ultra-brute
+
