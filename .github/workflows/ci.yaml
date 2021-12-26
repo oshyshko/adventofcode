@@ -17,7 +17,7 @@ jobs:
                 ghc: [latest, '9.2.1']
 
         env:
-            STACK     : stack --resolver ${{ matrix.resolver }}
+            STACK     : stack --resolver ${{ matrix.resolver }} --compiler ${{ matrix.ghc }}
             CACHE_DIR : ${{ matrix.os == 'windows-latest' && '~/AppData/Roaming/stack' || '~/.stack' }}
             BINARY    : ./dist/adventofcode-exe${{ matrix.os == 'windows-latest' && '.exe' || '' }}
 
@@ -36,7 +36,7 @@ jobs:
           uses: actions/cache@v2.1.3
           with:
               path: ${{ env.CACHE_DIR }}
-              key: ${{ runner.os }}-${{ matrix.resolver }}-stack-cache-5
+              key: ${{ runner.os }}-${{ matrix.resolver }}-${{ matrix.ghc }}
 
         - name: Clean
           run: ${{ env.STACK }} clean
