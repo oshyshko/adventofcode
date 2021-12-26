@@ -17,7 +17,7 @@ jobs:
                 ghc: ['8.10.7', '9.2.1']
 
         env:
-            STACK     : stack --resolver ${{ matrix.resolver }} --compiler ${{ matrix.ghc }}
+            STACK     : stack --resolver ${{ matrix.resolver }} --compiler ghc-${{ matrix.ghc }}
             CACHE_DIR : ${{ matrix.os == 'windows-latest' && '~/AppData/Roaming/stack' || '~/.stack' }}
             BINARY    : ./dist/adventofcode-exe${{ matrix.os == 'windows-latest' && '.exe' || '' }}
 
