@@ -13,8 +13,8 @@ jobs:
             matrix:
                 os: [macOS-latest, ubuntu-latest, windows-latest]
                 resolver: [lts-18.19]
-                stack: [latest]
-                ghc: [latest, '9.2.1']
+                stack: ['2.7.3']
+                ghc: ['8.10.7', '9.2.1']
 
         env:
             STACK     : stack --resolver ${{ matrix.resolver }} --compiler ${{ matrix.ghc }}
