@@ -65,6 +65,7 @@ tests:
 
 ghc-options:
 - -Wall
+- -Werror
 - -fno-warn-unused-do-bind
 - -O2
 # - -fllvm
@@ -101,7 +102,7 @@ default-extensions:
 - MultiWayIf
 - NamedFieldPuns
 - OverloadedStrings
-- RankNTypes,
+- RankNTypes
 - RecordWildCards
 - ScopedTypeVariables
 - StrictData

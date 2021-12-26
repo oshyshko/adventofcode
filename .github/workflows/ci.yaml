@@ -15,7 +15,7 @@ jobs:
                 os: [macOS-latest, ubuntu-latest, windows-latest]
                 resolver: [lts-18.19]
                 stack: [latest]
-                ghc: ['latest']
+                ghc: [latest, '9.2.1']
 
         env:
             STACK     : stack --resolver ${{ matrix.resolver }}
@@ -75,4 +75,3 @@ jobs:
               file: ${{ env.BINARY }}
               strip: true
               args: --ultra-brute
-
