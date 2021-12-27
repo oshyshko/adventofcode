@@ -27,7 +27,7 @@ dayPrefixToModuleName = take (length ("YXX.DXX" :: String))
 
 dayResults :: FilePath -> Map ModuleName [AnswerStr] -> DayPrefix -> [ExecResult] -> IO ()
 dayResults answersPath mod2answers dayP results = do
-    printf "%-19s | %s %s\n"
+    printf "%-21s | %s %s\n"
         (intercalate ", " $ results <&> output)
         (intercalate " | " $ results <&> \ExecResult{msReal, bytesAllocated, bytesPeak, bytesMaxInUse} ->
             printf "%5dms %6s %6s %6s"
