@@ -27,7 +27,7 @@ import           Control.Applicative           (liftA2)
 import           Control.Arrow                 ((&&&))
 import           Control.Exception             (SomeException, catch, evaluate)
 import           Control.Monad                 (forM, forM_, guard, join, void,
-                                                when, (<=<))
+                                                when, (<=<), (>=>))
 import           Control.Monad.Primitive       (PrimMonad (..))
 import           Data.Bool                     (bool)
 import           Data.Char                     (isAlphaNum, isAsciiLower,
