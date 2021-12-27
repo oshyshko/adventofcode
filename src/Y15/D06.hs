@@ -1,11 +1,10 @@
-{-# OPTIONS_GHC -Wno-redundant-constraints #-}
-{-# LANGUAGE DefaultSignatures, DeriveAnyClass, DeriveFoldable, DeriveFunctor,
+{-# LANGUAGE DefaultSignatures, DeriveAnyClass,
              DerivingStrategies, StandaloneDeriving #-}
 module Y15.D06 where
 
 import qualified Data.Array.Base              as AB
 import           Data.Array.IO                (IOUArray)
-import           Data.Array.MArray            (Ix, MArray)
+import           Data.Array.MArray            (MArray)
 import           Data.Bit                     (Bit (..))
 import qualified Data.HashMap.Strict          as MH
 import qualified Data.IntMap.Strict           as MI
@@ -186,7 +185,7 @@ zolve1MZ = solveMonadic @(VUM.MVector (PrimState IO) L1B) @L1B @IO
 
 
 -- monadic instances
-instance (Monad m, MArray IOUArray v m, Ix k, k ~ Int) => StorageMonadic (IOUArray k v) v m where
+instance (Monad m, MArray IOUArray v m, k ~ Side) => StorageMonadic (IOUArray k v) v m where
     emptySM k     = AB.newArray (0, k - 1)
     alterSM s f k = AB.unsafeRead s k >>= AB.unsafeWrite s k . f
     foldlSM f a s = AB.getNumElements s >>= \n -> go a (n-1)
