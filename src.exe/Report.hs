@@ -8,13 +8,13 @@ import           Util
 
 header :: IO ()
 header = do
-    putStrLn "-----------+---------------------+- part 1 ---------------------+- part 2 ---------------------"
-    putStrLn " day       | answers             |    time allocs maxhea maxmem |    time allocs maxhea maxmem "
-    putStrLn "-----------+---------------------+------------------------------+------------------------------"
+    putStrLn "-----------+-----------------------+- part 1 ---------------------+- part 2 ---------------------"
+    putStrLn " day       | answers               |    time allocs maxhea maxmem |    time allocs maxhea maxmem "
+    putStrLn "-----------+-----------------------+------------------------------+------------------------------"
 
 footer :: SysInfo -> IO ()
 footer i = do
-    putStrLn "-----------+---------------------+------------------------------+------------------------------"
+    putStrLn "-----------+-----------------------+------------------------------+------------------------------"
     putStrLn . unlines . map (" " ++) . lines . showSysInfo $ i
 
 dayPrefix :: DayPrefix -> IO ()
