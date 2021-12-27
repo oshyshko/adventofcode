@@ -13,7 +13,7 @@ solve n =
     . map ((, 1::Int) . read @Int)
     . splitOn ","
   where
-    tick :: (k ~ M.Key, Num v)=> [(k, v)] -> [(k, v)]
+    tick :: (k ~ M.Key, Num v) => [(k, v)] -> [(k, v)]
     tick xs = M.fromListWith (+) xs & M.toList >>= \case
         (0, v) -> [(6, v), (8, v)]
         (k, v) -> [(k-1, v)]
