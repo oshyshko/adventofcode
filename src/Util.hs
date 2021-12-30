@@ -17,8 +17,11 @@ eol =   try (string "\n\r")
 decimal :: Read a => Parser a
 decimal = read <$> many1 digit
 
-surroundedBy :: Char -> Parser a -> Parser a
-surroundedBy c = between (many $ char c) (many $ char c)
+pad :: Parser String
+pad = many $ char ' '
+
+padded :: Parser a -> Parser a
+padded = between pad pad
 
 -- a :: String
 -- a = parseOrDie eol "\n\n"

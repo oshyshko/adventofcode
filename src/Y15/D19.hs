@@ -17,7 +17,7 @@ replacementsAndInitial = do
   where
     kv :: Parser (Part, Part)
     kv = (,)
-        <$> many1 letter <* many1 space <* string "=>" <* many1 space
+        <$> many1 letter <* pad <* string "=>" <* pad
         <*> many1 letter
 
 singleReplacements :: Map Part [Part] -> Molecule -> [Molecule]

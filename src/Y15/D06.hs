@@ -54,7 +54,7 @@ commands =
   where
     command :: Parser Command
     command = Command
-        <$> op <* space
+        <$> op <* char ' '
         <*> xy
         <* string " through " -- TODO many1 space ...
         <*> xy

@@ -34,7 +34,7 @@ numbersAndBoards =
         <*> board `sepBy` eol
   where
     numbers = decimal `sepBy` char ','
-    board   = join <$> (many1 (surroundedBy ' ' decimal) `endBy` eol)
+    board   = join <$> (many1 (padded decimal) `endBy` eol)
 
 ejectScoresAndRemaining :: PrimV m s v a => a -> [v s a] -> m ([Score], [v s a])
 ejectScoresAndRemaining n =

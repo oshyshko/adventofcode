@@ -27,10 +27,10 @@ sue2clues =
   where
     sue2clue :: Parser Sue2Clues
     sue2clue = do
-        string "Sue" *> many space
+        string "Sue" <* pad
         sueId <- decimal
-        many space <* char ':' <* many space
-        clues <- clue `sepBy` (char ',' <* many space) :: Parser [Clue]
+        pad <* char ':' <* pad
+        clues <- clue `sepBy` (char ',' <* pad) :: Parser [Clue]
         return (sueId, clues)
     clue :: Parser Clue
     clue = do
@@ -46,7 +46,7 @@ sue2clues =
             <|> try (string "cars"        $> Cars)
             <|> try (string "perfumes"    $> Perfumes)
 
-        string ":" <* many space
+        string ":" <* pad
 
         v <- decimal
         return (k, v)

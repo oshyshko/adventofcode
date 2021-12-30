@@ -49,10 +49,10 @@ import           Data.Maybe                    (fromJust, fromMaybe,
                                                 maybeToList)
 import           Data.Word                     (Word16, Word8)
 import           System.IO                     (hFlush, stdout)
-import           Text.ParserCombinators.Parsec (Parser, between, char, digit,
-                                                endBy, endBy1, hexDigit, letter,
-                                                many, many1, manyTill, noneOf,
-                                                sepBy, space, string, try,
-                                                (<|>))
+import           Text.ParserCombinators.Parsec (Parser, between, char, count,
+                                                digit, endBy, endBy1, hexDigit,
+                                                letter, many, many1, manyTill,
+                                                noneOf, oneOf, sepBy, sepEndBy,
+                                                string, try, (<|>))
 import           Text.Printf                   (printf)
 import           Text.Read                     (readMaybe)

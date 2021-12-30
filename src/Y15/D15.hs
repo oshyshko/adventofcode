@@ -22,11 +22,11 @@ ingredients =
     ingredient :: Parser Ingredient
     ingredient = Ingredient
         <$> many letter
-        <* char ':' <* many space <* string "capacity"   <* many space <*> (read <$> many ndigit)
-        <* char ',' <* many space <* string "durability" <* many space <*> (read <$> many ndigit)
-        <* char ',' <* many space <* string "flavor"     <* many space <*> (read <$> many ndigit)
-        <* char ',' <* many space <* string "texture"    <* many space <*> (read <$> many ndigit)
-        <* char ',' <* many space <* string "calories"   <* many space <*> (read <$> many ndigit)
+        <* char ':' <* pad <* string "capacity"   <* pad <*> (read <$> many ndigit)
+        <* char ',' <* pad <* string "durability" <* pad <*> (read <$> many ndigit)
+        <* char ',' <* pad <* string "flavor"     <* pad <*> (read <$> many ndigit)
+        <* char ',' <* pad <* string "texture"    <* pad <*> (read <$> many ndigit)
+        <* char ',' <* pad <* string "calories"   <* pad <*> (read <$> many ndigit)
 
 -- TODO optimize: iterate once
 score :: [Ingredient] -> [Int] -> Int
