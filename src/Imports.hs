@@ -38,14 +38,14 @@ import           Data.Functor                  (($>), (<&>))
 import           Data.Functor.Identity         (Identity (..))
 import           Data.HashMap.Strict           (HashMap)
 import           Data.Hashable                 (Hashable)
-import           Data.List                     (dropWhileEnd, intercalate,
-                                                isInfixOf, isPrefixOf,
-                                                isSuffixOf, nub, partition,
-                                                permutations, sort, sortOn,
-                                                transpose)
+import           Data.List                     (dropWhileEnd, group,
+                                                intercalate, isInfixOf,
+                                                isPrefixOf, isSuffixOf, nub,
+                                                partition, permutations, sort,
+                                                sortOn, transpose)
 import           Data.List.Split               (chunksOf, divvy, splitOn)
 import           Data.Map.Strict               (Map)
-import           Data.Maybe                    (fromJust, fromMaybe,
+import           Data.Maybe                    (fromJust, fromMaybe, mapMaybe,
                                                 maybeToList)
 import           Data.Word                     (Word16, Word8)
 import           System.IO                     (hFlush, stdout)
