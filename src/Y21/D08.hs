@@ -3,7 +3,6 @@ module Y21.D08 where
 import           Imports
 import           Util
 
-import           Data.Set        (Set)
 import qualified Data.Set        as S
 import qualified Data.Map.Strict  as M
 
