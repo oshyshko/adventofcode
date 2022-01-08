@@ -16,6 +16,7 @@ module Imports
     , module Data.List.Split
     , module Data.Map.Strict
     , module Data.Maybe
+    , module Data.Set
     , module Data.Word
     , module System.IO
     , module Text.ParserCombinators.Parsec
@@ -30,8 +31,8 @@ import           Control.Monad                 (forM, forM_, guard, join, void,
                                                 when, (<=<), (>=>))
 import           Control.Monad.Primitive       (PrimMonad (..))
 import           Data.Bool                     (bool)
-import           Data.Char                     (isAlphaNum, isAsciiLower,
-                                                isSpace, toLower)
+import           Data.Char                     (digitToInt, isAlphaNum,
+                                                isAsciiLower, isSpace, toLower)
 import           Data.Foldable                 (foldl', foldlM)
 import           Data.Function                 (fix, (&))
 import           Data.Functor                  (($>), (<&>))
@@ -42,11 +43,12 @@ import           Data.List                     (dropWhileEnd, group,
                                                 intercalate, isInfixOf,
                                                 isPrefixOf, isSuffixOf, nub,
                                                 partition, permutations, sort,
-                                                sortOn, transpose)
+                                                sortOn, sortBy, transpose)
 import           Data.List.Split               (chunksOf, divvy, splitOn)
 import           Data.Map.Strict               (Map)
 import           Data.Maybe                    (fromJust, fromMaybe, mapMaybe,
                                                 maybeToList)
+import           Data.Set                      (Set)
 import           Data.Word                     (Word16, Word8)
 import           System.IO                     (hFlush, stdout)
 import           Text.ParserCombinators.Parsec (Parser, between, char, count,
