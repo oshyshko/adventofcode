@@ -22,7 +22,7 @@ add :: XY -> XY -> XY
 add (x, y) (u, v) = (x + u, y + v)
 
 neighbors :: [XY]
-neighbors = [(0, -1), (0, 1), (-1, 0), (1, 0) ]
+neighbors = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
 atMaybe :: HeightMap -> XY -> Maybe Height      -- 9 or out of bounds = Nothing
 atMaybe (HeightMap (w, h) v) (x, y) =
