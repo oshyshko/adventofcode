@@ -67,6 +67,7 @@ ghc-options:
 - -Wall
 - -Werror=missing-methods
 - -Werror=type-defaults
+- -Werror=incomplete-patterns
 - -fno-warn-unused-do-bind
 - -O2
 # - -fllvm
