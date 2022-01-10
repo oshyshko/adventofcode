@@ -42,7 +42,6 @@ dayResults answersPath mod2answers dayP results = do
                     then " <-- expected: " ++ intercalate ", " expected
                     else "")
 
-
 showSysInfo :: SysInfo -> String
 showSysInfo SysInfo{..} =
     let fm = fromMaybe "?"
@@ -54,7 +53,7 @@ showSysInfo SysInfo{..} =
         , "\nCPU:      ", fm cpuModel, ", "
                         , fm $ show <$> cpuCores, " cores"
         , "\nRAM:      ", fm $ size2humanSize . fromIntegral <$> ramTotal, " @ "
-                        , fm $ show <$> ramSpeed, "MHz"
+                        , fm $ show <$> ramClock, "MHz"
         , "\nCompiler: ", fm compiler, " ("
                         , fm compilerArch, ")"
         ]

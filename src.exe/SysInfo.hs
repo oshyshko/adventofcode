@@ -17,10 +17,10 @@ data SysInfo = SysInfo
     , cpuModel     :: Maybe String
     , cpuCores     :: Maybe Int
     , ramTotal     :: Maybe Int
-    , ramSpeed     :: Maybe Int
+    , ramClock     :: Maybe Int
     , compiler     :: Maybe String
     , compilerArch :: Maybe String
-    }
+    } deriving Show
 
 mkEmptySysInfo :: SysInfo
 mkEmptySysInfo = SysInfo
@@ -31,7 +31,7 @@ mkEmptySysInfo = SysInfo
     , cpuModel     = Nothing
     , cpuCores     = Nothing
     , ramTotal     = Nothing
-    , ramSpeed     = Nothing
+    , ramClock     = Nothing
     , compiler     = Just $ SI.compilerName ++ "-" ++ V.showVersion SI.compilerVersion
     , compilerArch = Just SI.arch
     }
@@ -43,10 +43,10 @@ getSysInfo =
        | "mingw"  `isPrefixOf` os -> getWin
        | otherwise                -> getLin
 
--- Platform: darwin, x86_64, v10.15.2, MacBookPro12,1
+-- Platform: darwin, x86_64, v10.15.7, MacBookPro12,1
 -- CPU:      Intel(R) Core(TM) i7-5557U CPU @ 3.10GHz, 2 cores
--- RAM:      16.0G @ ?MHz
--- Compiler: ghc-8.6
+-- RAM:      16.0G @ 1867MHz
+-- Compiler: ghc-8.10 (x86_64)
 --
 getMac :: IO SysInfo
 getMac = do
@@ -56,6 +56,14 @@ getMac = do
     cpuC <- execM "sysctl -n hw.physicalcpu"           <&> (readMaybe =<<)
     cpuM <- execM "sysctl -n machdep.cpu.brand_string" <&> (headM . lines =<<)
     ramT <- execM "sysctl -n hw.memsize"               <&> (readMaybe =<<)
+    ramC <- execM "system_profiler SPMemoryDataType"   <&> fmap
+          (read     -- TODO refactor, take into account parsing errors
+        . last
+        . init
+        . splitOn " "
+        . head
+        . filter (\x -> "Speed: " `isInfixOf` x)
+        . lines)
 
     return $ mkEmptySysInfo
         { osArch       = osA
@@ -64,7 +72,7 @@ getMac = do
         , cpuCores     = cpuC
         , cpuModel     = cpuM
         , ramTotal     = ramT
-        , ramSpeed     = Nothing -- TODO find a way to get it
+        , ramClock     = ramC
         }
 
 -- Platform: mingw32, x86_64, v10.0.17763, NUC7JYB
@@ -86,7 +94,7 @@ getWin = do
     cpuM <- execM "wmic CPU get Name"            <&> (secondM . linesRN =<<)
     ramT <- execM "wmic MEMORYCHIP get Capacity" <&> \ramT ->
                 sum . map (fromMaybe 0 . readMaybe) <$> (tailM . linesRN =<< ramT)
-    ramS <- execM "wmic MEMORYCHIP get Speed"    <&> (readMaybe =<<) . (secondM . linesRN =<<)
+    ramC <- execM "wmic MEMORYCHIP get Speed"    <&> (readMaybe =<<) . (secondM . linesRN =<<)
 
     return $ mkEmptySysInfo
         { osArch       = Nothing -- TODO
@@ -96,7 +104,7 @@ getWin = do
         , cpuModel     = cpuM
         -- TODO take into account parsing errors
         , ramTotal     = ramT
-        , ramSpeed     = ramS
+        , ramClock     = ramC
         }
 
 -- Platform: linux, i386, v4.4.0-142-generic, processor	: 0
@@ -122,7 +130,7 @@ getLin = do
             , cpuCores     = Nothing -- TODO
             , cpuModel     = Nothing -- TODO
             , ramTotal     = Nothing -- TODO
-            , ramSpeed     = Nothing -- TODO
+            , ramClock     = Nothing -- TODO
             }
         | "arm" `isInfixOf` (toLower <$> SI.arch) ->
 
@@ -134,7 +142,7 @@ getLin = do
              , cpuCores     = Nothing -- TODO
              , cpuModel     = Nothing -- TODO
              , ramTotal     = Nothing -- TODO
-             , ramSpeed     = Nothing -- TODO
+             , ramClock     = Nothing -- TODO
              }
 
         | otherwise ->
@@ -145,7 +153,7 @@ getLin = do
              , cpuCores     = Nothing
              , cpuModel     = Nothing
              , ramTotal     = Nothing
-             , ramSpeed     = Nothing
+             , ramClock     = Nothing
              }
 
 -- helper fns
