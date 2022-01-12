@@ -1,6 +1,6 @@
 module Y21.D05 where
 
-import qualified Data.Vector.Generic.Mutable as G
+import qualified Data.Vector.Generic.Mutable as VM
 import qualified Data.Vector.Unboxed.Mutable as VUM
 
 import           Imports
@@ -39,7 +39,7 @@ solve ls = do
             go :: k -> XY k -> m ()
             go 0 _ = return ()
             go l xy@(XY x y) = do
-                G.modify s ((+1) :: v -> v)  (x + y * side)
+                VM.modify s ((+1) :: v -> v)  (x + y * side)
                 go (l - 1) (liftA2 (+) xy step)
 
         in  go len xy0

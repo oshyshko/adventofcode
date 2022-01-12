@@ -9,8 +9,8 @@ import           Data.Bit                     (Bit (..))
 import qualified Data.HashMap.Strict          as MH
 import qualified Data.IntMap.Strict           as MI
 import qualified Data.Map.Strict              as MS
-import qualified Data.Vector.Generic.Mutable  as VG
-import qualified Data.Vector.Mutable          as VM
+import qualified Data.Vector.Generic.Mutable  as VM
+import qualified Data.Vector.Mutable          as VBM
 import qualified Data.Vector.Storable.Mutable as VSM
 import qualified Data.Vector.Unboxed.Mutable  as VUM
 
@@ -110,14 +110,14 @@ class StorageMonadic s v m where
     foldlSM :: (a -> v -> a) -> a -> s -> m a
 
     -- NOTE see 3 instances below
-    default emptySM :: (vec x v ~ s, PrimMonad m, x ~ PrimState m, VG.MVector vec v) => Side -> v -> m s
-    emptySM = VG.replicate
+    default emptySM :: (vec x v ~ s, PrimMonad m, x ~ PrimState m, VM.MVector vec v) => Side -> v -> m s
+    emptySM = VM.replicate
 
-    default alterSM :: (vec x v ~ s, PrimMonad m, x ~ PrimState m, VG.MVector vec v) => s -> (v -> v) -> Side -> m ()
-    alterSM = VG.modify
+    default alterSM :: (vec x v ~ s, PrimMonad m, x ~ PrimState m, VM.MVector vec v) => s -> (v -> v) -> Side -> m ()
+    alterSM = VM.modify
 
-    default foldlSM :: (vec x v ~ s, PrimMonad m, x ~ PrimState m, VG.MVector vec v) => (a -> v -> a) -> a -> s -> m a
-    foldlSM = VG.foldl'
+    default foldlSM :: (vec x v ~ s, PrimMonad m, x ~ PrimState m, VM.MVector vec v) => (a -> v -> a) -> a -> s -> m a
+    foldlSM = VM.foldl'
 
 class StoragePure s v where
     emptySP :: s
@@ -173,8 +173,8 @@ solve1PI = solvePure    @(MI.IntMap       L1)            @L1
 solve2PI = solvePure    @(MI.IntMap       L2)            @L2
 solve1MA = solveMonadic @(IOUArray   Side L1)            @L1
 solve2MA = solveMonadic @(IOUArray   Side L2)            @L2
-solve1MB = solveMonadic @(VM.MVector  (PrimState IO) L1) @L1 @IO
-solve2MB = solveMonadic @(VM.MVector  (PrimState IO) L2) @L2 @IO
+solve1MB = solveMonadic @(VBM.MVector (PrimState IO) L1) @L1 @IO
+solve2MB = solveMonadic @(VBM.MVector (PrimState IO) L2) @L2 @IO
 solve1MS = solveMonadic @(VSM.MVector (PrimState IO) L1) @L1 @IO
 solve2MS = solveMonadic @(VSM.MVector (PrimState IO) L2) @L2 @IO
 solve1MU = solveMonadic @(VUM.MVector (PrimState IO) L1) @L1 @IO
@@ -196,7 +196,7 @@ instance (Monad m, MArray IOUArray v m, k ~ Side) => StorageMonadic (IOUArray k 
             go (f aa x) (i-1)
 
 -- TODO figure hout how this works. See 3 defaults in StorageMonadic + language extensions at the top
-deriving anyclass instance (PrimMonad m, s ~ PrimState m)                 => StorageMonadic (VM.MVector s v)  v m
+deriving anyclass instance (PrimMonad m, s ~ PrimState m)                 => StorageMonadic (VBM.MVector s v)  v m
 deriving anyclass instance (PrimMonad m, s ~ PrimState m, VSM.Storable v) => StorageMonadic (VSM.MVector s v) v m
 deriving anyclass instance (PrimMonad m, s ~ PrimState m, VUM.Unbox v)    => StorageMonadic (VUM.MVector s v) v m
 

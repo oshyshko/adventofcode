@@ -2,13 +2,13 @@ module Y21.D04 where
 -- NOTE: an impure solution using mutable vectors (ugly, but fun)
 
 import           Data.Bits                   ((.|.))
-import qualified Data.Vector.Generic.Mutable as G
+import qualified Data.Vector.Generic.Mutable as VM
 import qualified Data.Vector.Unboxed         as VU
 
 import           Imports
 import           Util
 
-type PrimV m s v a = (PrimMonad m, s ~ PrimState m, G.MVector v a, a ~ Number)
+type PrimV m s v a = (PrimMonad m, s ~ PrimState m, VM.MVector v a, a ~ Number)
 
 type Number = Word8
 type Index  = Int
@@ -46,19 +46,19 @@ ejectScoresAndRemaining n =
 
 markMaybeScore :: PrimV m s v a => v s a -> a -> m (Maybe Score)
 markMaybeScore b n =
-    G.ifoldM markMaybeIndex Nothing b >>= \case
+    VM.ifoldM markMaybeIndex Nothing b >>= \case
         Nothing -> return Nothing
         Just i -> do
             colWon <- foldVector (.|.) 0 (rem  i 5)     (+5) 5 b
             rowWon <- foldVector (.|.) 0 (quot i 5 * 5) (+1) 5 b
 
             if rowWon == 0 || colWon == 0
-                then Just . (* n2i n) <$> G.foldl' (\a x -> a + n2i x) 0 b
+                then Just . (* n2i n) <$> VM.foldl' (\a x -> a + n2i x) 0 b
                 else return Nothing
   where
     n2i = fromInteger . toInteger
     markMaybeIndex mi i x
-        | x == n    = G.write b i 0 >> return (Just i)
+        | x == n    = VM.write b i 0 >> return (Just i)
         | otherwise = return mi
 
 solve1 :: String -> IO Int
@@ -96,5 +96,5 @@ foldVector op initA initI moveI times v =
     go :: b -> Int -> Int -> m b
     go a _ 0 = return a
     go a i n = do
-        x <- G.read v i
+        x <- VM.read v i
         go (a `op` x) (moveI i) (n-1)
