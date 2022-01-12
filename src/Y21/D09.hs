@@ -13,10 +13,9 @@ data HeightMap = HeightMap XY (VU.Vector Height)    -- wh values
 parse :: String -> HeightMap
 parse s =
     let xs = lines s
-        w  = length . head $ xs
-        h  = length xs
+        wh = (length . head $ xs, length xs)
         v  = VU.fromList . concat $ xs
-    in HeightMap (w, h) v
+    in HeightMap wh v
 
 add :: XY -> XY -> XY
 add (x, y) (u, v) = (x + u, y + v)
