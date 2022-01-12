@@ -36,7 +36,8 @@ import           Control.Monad.Primitive       (PrimMonad (..))
 import           Data.Bool                     (bool)
 import           Data.Char                     (digitToInt, intToDigit,
                                                 isAlphaNum, isAsciiLower,
-                                                isSpace, toLower)
+                                                isLower, isSpace, isUpper,
+                                                toLower, toUpper)
 import           Data.Foldable                 (foldl', foldlM)
 import           Data.Function                 (fix, (&))
 import           Data.Functor                  (($>), (<&>))
