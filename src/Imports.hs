@@ -3,6 +3,7 @@ module Imports
     , module Control.Arrow
     , module Control.Exception
     , module Control.Monad
+    , module Control.Monad.IO.Class
     , module Control.Monad.Primitive
     , module Data.Bool
     , module Data.Char
@@ -27,12 +28,15 @@ module Imports
 import           Control.Applicative           (liftA2)
 import           Control.Arrow                 ((&&&))
 import           Control.Exception             (SomeException, catch, evaluate)
-import           Control.Monad                 (forM, forM_, guard, join, void,
-                                                when, (<=<), (>=>))
+import           Control.Monad                 (forM, forM_, guard, join,
+                                                replicateM, unless, void, when,
+                                                (<=<), (>=>))
+import           Control.Monad.IO.Class        (MonadIO, liftIO)
 import           Control.Monad.Primitive       (PrimMonad (..))
 import           Data.Bool                     (bool)
-import           Data.Char                     (digitToInt, isAlphaNum,
-                                                isAsciiLower, isSpace, toLower)
+import           Data.Char                     (digitToInt, intToDigit,
+                                                isAlphaNum, isAsciiLower,
+                                                isSpace, toLower)
 import           Data.Foldable                 (foldl', foldlM)
 import           Data.Function                 (fix, (&))
 import           Data.Functor                  (($>), (<&>))
@@ -43,7 +47,7 @@ import           Data.List                     (dropWhileEnd, group,
                                                 intercalate, isInfixOf,
                                                 isPrefixOf, isSuffixOf, nub,
                                                 partition, permutations, sort,
-                                                sortOn, sortBy, transpose)
+                                                sortBy, sortOn, transpose)
 import           Data.List.Split               (chunksOf, divvy, splitOn)
 import           Data.Map.Strict               (Map)
 import           Data.Maybe                    (fromJust, fromMaybe, mapMaybe,
