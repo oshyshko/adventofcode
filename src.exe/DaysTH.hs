@@ -87,7 +87,11 @@ benchSuffixToSolverFnNames p =
 
 -- ["src/Y15/D01.hs","src/Y15/D02.hs","src/Y15/D03.hs","src/Y15/D04.hs", ...]
 listSources :: IO [SourcePath]
-listSources = filter (isPrefixOf "D" . takeFileName) <$> listFilesRecursively "src"
+listSources =
+        listFilesRecursively "src"
+    <&> filter (\p ->
+            let f = takeFileName p
+            in isPrefixOf "D" f && isSuffixOf ".hs" f)
 
 -- > listFilesRecursively "src"
 -- ["src/Imports.hs","src/Util.hs","src/Y15/D01.hs","src/Y15/D02.hs", ...]
