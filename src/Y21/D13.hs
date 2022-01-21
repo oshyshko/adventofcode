@@ -9,21 +9,15 @@ import           Util
 type YX   = (Int, Int)
 data Fold = AlongX Int | AlongY Int deriving Show
 
-data DotsAndFolds = DotsAndFolds
-    { dots  :: [YX]
-    , folds :: [Fold]
-    } deriving Show
-
 -- 6,10
 -- 0,14
 --
 -- fold along y=7
 -- fold along x=5
 --
-dotsAndFolds :: Parser DotsAndFolds
+dotsAndFolds :: Parser ([YX], [Fold])
 dotsAndFolds =
-    DotsAndFolds
-        <$> (xy `endBy` eol) <* eol
+    (,) <$> (xy `endBy` eol) <* eol
         <*> (fold `endBy` eol)
   where
     xy :: Parser YX
@@ -34,7 +28,6 @@ dotsAndFolds =
         let fx = char 'x' $> AlongX
             fy = char 'y' $> AlongY
         (fx <|> fy) <*> (char '=' *> decimal)
-
 
 foldOnce :: [YX] -> Fold -> [YX]
 foldOnce dots fold =
@@ -63,7 +56,7 @@ solve1 :: String -> Int
 solve1 =
       length
     . nub
-    . (\DotsAndFolds{dots, folds} -> foldl' foldOnce dots [head folds])
+    . (\(dots, folds) -> foldl' foldOnce dots [head folds])
     . parseOrDie dotsAndFolds
 
 solve2 :: String -> String
@@ -73,7 +66,7 @@ solve2 =
     . transpose
     . lines
     . showDots
-    . (\DotsAndFolds{dots, folds} -> foldl' foldOnce dots folds)
+    . uncurry (foldl' foldOnce)
     . parseOrDie dotsAndFolds
   where
     pat2char :: Map String Char
