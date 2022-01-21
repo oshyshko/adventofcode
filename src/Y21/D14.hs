@@ -5,23 +5,23 @@ import qualified Data.Map.Strict as M
 import           Imports
 import           Util
 
-type Elem        = Char
-type Poly        = [Elem]
-data Pair        = Pair Elem Elem           deriving (Eq, Ord, Show)
-data Replacement = Replacement Pair Elem    deriving (Show)
+type Elem = Char
+type Poly = [Elem]
+data Pair = Pair Elem Elem deriving (Eq, Ord, Show)
+data Rule = Rule Pair Elem deriving (Show)
 
 -- NNCB
 --
 -- CH -> B
 -- HH -> N
 --
-polyAndRules :: Parser (Poly, [Replacement])
+polyAndRules :: Parser (Poly, [Rule])
 polyAndRules =
     (,) <$> poly <* eol <* eol
         <*> rule `endBy` eol
   where
     poly = many1 letter
-    rule = (\a b -> Replacement (Pair a b))
+    rule = (\a b -> Rule (Pair a b))
         <$> letter <*> letter
         <* string " -> "
         <*> letter
@@ -40,8 +40,8 @@ solve n =
     . (\(poly, rules) -> iterate (tick $ rules2map rules) (poly2map poly))
     . parseOrDie polyAndRules
   where
-    rules2map :: [Replacement] -> Map Pair [Pair]
-    rules2map = M.fromList . fmap (\(Replacement ab@(Pair a b) r) -> (ab, [Pair a r, Pair r b]))
+    rules2map :: [Rule] -> Map Pair [Pair]
+    rules2map = M.fromList . fmap (\(Rule ab@(Pair a b) r) -> (ab, [Pair a r, Pair r b]))
 
     poly2map :: Poly -> Map Pair Int
     poly2map poly = M.fromListWith (+) $ (\(a:b:_) -> (Pair a b, 1)) <$> divvy 2 1 (poly <> "$")
