@@ -31,14 +31,14 @@ parseOrDie p s = either
     id
     (parse p "parseOrDie" s)
 
-replace :: Eq a => [a] -> [a] -> [a] -> [a]
-replace from to = intercalate to . splitOn from
+replaceAll :: Eq a => [a] -> [a] -> [a] -> [a]
+replaceAll from to = intercalate to . splitOn from
 
 -- Examples:
 -- s <- readInput "Y15.D01"
 -- Y15.D14.solve1 <$> readInput "Y15.D14"
 readInput :: String -> IO String
-readInput name = readFile $ "res/" ++ replace "." "/" (take 7 name) ++ ".txt"
+readInput name = readFile $ "res/" ++ replaceAll "." "/" (take 7 name) ++ ".txt"
 
 -- trace
 tr :: Show a => String -> a -> a
