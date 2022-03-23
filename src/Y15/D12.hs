@@ -1,8 +1,8 @@
 module Y15.D12 where
 
 import           Data.Aeson                 (Object, Value (..), decode)
+import qualified           Data.Aeson.KeyMap                 as M
 import qualified Data.ByteString.Lazy.Char8 as BL
-import qualified Data.HashMap.Strict        as M
 import           Data.Scientific            (toBoundedInteger)
 
 import           Imports
@@ -22,4 +22,4 @@ solve1 :: String -> Int
 solve1 = solve $ const True
 
 solve2 :: String -> Int
-solve2 = solve $ \m -> "red" `notElem` M.elems m
+solve2 = solve $ \m ->  M.member "red" m
