@@ -13,6 +13,7 @@ module Imports
     , module Data.Functor.Identity
     , module Data.HashMap.Strict
     , module Data.Hashable
+    , module Data.IntMap.Strict
     , module Data.List
     , module Data.List.Split
     , module Data.Map.Strict
@@ -44,6 +45,7 @@ import           Data.Functor                  (($>), (<&>))
 import           Data.Functor.Identity         (Identity (..))
 import           Data.HashMap.Strict           (HashMap)
 import           Data.Hashable                 (Hashable)
+import           Data.IntMap.Strict            (IntMap)
 import           Data.List                     (dropWhileEnd, group,
                                                 intercalate, isInfixOf,
                                                 isPrefixOf, isSuffixOf, nub,
@@ -51,8 +53,8 @@ import           Data.List                     (dropWhileEnd, group,
                                                 sortBy, sortOn, transpose)
 import           Data.List.Split               (chunksOf, divvy, splitOn)
 import           Data.Map.Strict               (Map)
-import           Data.Maybe                    (fromJust, fromMaybe, mapMaybe,
-                                                maybeToList)
+import           Data.Maybe                    (catMaybes, fromJust, fromMaybe,
+                                                mapMaybe, maybeToList)
 import           Data.Set                      (Set)
 import           Data.Word                     (Word16, Word8)
 import           System.IO                     (hFlush, stdout)
