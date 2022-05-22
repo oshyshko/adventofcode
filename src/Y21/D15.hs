@@ -19,7 +19,7 @@ type Risk   = Word8
 type Score  = Word16
 
 minScore :: XYI -> XYI -> Vec2 Risk -> Score
-minScore start goal risk@Vec2{vecWh} =
+minScore start goal Vec2{vecWh,vecValues} =
     (flip . flip fix)
         (Q.singleton start maxBound ())  -- open
         (M.singleton start 0)            -- xy2score
@@ -27,29 +27,28 @@ minScore start goal risk@Vec2{vecWh} =
             Q.alterMin (,Nothing) open & \case
                 (Nothing, _) -> error "No path"                         -- exghausted ?
                 (Just (current, _, _), openEjected) ->
-                    let score = xyi2score M.! current
+                    let currentScore = xyi2score M.! current
                     in if current == goal                               -- goal reached?
-                        then score
+                        then currentScore
                         else
-                              neighbors (i2xy vecWh current)            -- for each neighbor
-                            & mapMaybe (\nXy -> do
-                                nRisk <- atMaybe risk nXy               -- if traversable
-                                let nXyi      = xy2i vecWh nXy
-                                    nScoreOld = M.findWithDefault maxBound nXyi xyi2score
-                                    nScore    = fromIntegral nRisk + score
-                                if nScore < nScoreOld
-                                    then Just (nXyi, nScore)
-                                    else Nothing)
+                              neighbors vecWh (i2xy vecWh current)      -- for each neighbor
                             & foldl'                                    -- apply collected changes
-                                (\(openAcc,xyi2scoreAcc) (nXyi,nScore) ->
-                                    ( Q.insert nXyi nScore () openAcc
-                                    , M.insert nXyi nScore xyi2scoreAcc
-                                    ))
+                                (\(openAcc,xyi2scoreAcc) nXy ->
+                                    let nXyi      = xy2i vecWh nXy
+                                        nRisk     = vecValues V.! nXyi
+                                        nScoreOld = M.findWithDefault maxBound nXyi xyi2score
+                                        nScore    = fromIntegral nRisk + currentScore
+                                    in if nScore < nScoreOld
+                                        then ( Q.insert nXyi nScore () openAcc
+                                             , M.insert nXyi nScore xyi2scoreAcc
+                                             )
+                                        else (openAcc,xyi2scoreAcc)
+                                    )
                                 (openEjected,xyi2score)
                             & uncurry loop
 
-minScoreST :: XYI -> XYI -> Vec2 Risk -> Score
-minScoreST start goal risk@Vec2{vecWh,vecValues} = runST $ do
+minScoreMU :: XYI -> XYI -> Vec2 Risk -> Score
+minScoreMU start goal Vec2{vecWh,vecValues} = runST $ do
     open      <- S.newSTRef $ Q.singleton start (maxBound::Score) ()
     xyi2score <- VUM.replicate (V.length vecValues) (maxBound::Score)
 
@@ -60,19 +59,18 @@ minScoreST start goal risk@Vec2{vecWh,vecValues} = runST $ do
             (Nothing, _) -> error "No path"                             -- exghausted ?
             (Just (current, _, _), openEjected) -> do
                 S.writeSTRef open openEjected
-                score <- VUM.read xyi2score current
+                currentScore <- VUM.read xyi2score current
                 if current == goal                                      -- goal reached?
-                    then return score
-                    else do
-                        forM_ (neighbors (i2xy vecWh current)) \nXy ->  -- for each neighbor
-                            atMaybe risk nXy                            -- if traversable
-                            & maybe (return ()) \nRisk -> do
-                                let nXyi   = xy2i vecWh nXy
-                                    nScore = fromIntegral nRisk + score
-                                nScoreOld <- VUM.read xyi2score nXyi
-                                when (nScore < nScoreOld) $ do          -- apply changes
-                                    S.modifySTRef' open (Q.insert nXyi nScore ())
-                                    VUM.write xyi2score nXyi nScore
+                    then return currentScore
+                    else do                                             -- for each neighbor
+                        forM_ (neighbors vecWh (i2xy vecWh current)) \nXy -> do
+                            let nXyi   = xy2i vecWh nXy
+                                nRisk = vecValues V.! nXyi
+                                nScore = fromIntegral nRisk + currentScore
+                            nScoreOld <- VUM.read xyi2score nXyi
+                            when (nScore < nScoreOld) $ do              -- apply changes
+                                S.modifySTRef' open (Q.insert nXyi nScore ())
+                                VUM.write xyi2score nXyi nScore
                         loop
 
 solve :: (XYI -> XYI -> Vec2 Risk -> Score) -> Vec2 Risk -> Int
@@ -82,11 +80,11 @@ solve minScoreF visit@Vec2{vecWh} =
         goal  = xy2i vecWh (w - 1, h - 1)
     in fromIntegral $ minScoreF start goal visit
 
-solve1, solve2, solve1ST, solve2ST :: String -> Int
+solve1, solve2, solve1MU, solve2MU :: String -> Int
 solve1   = solve minScore                 . parse
 solve2   = solve minScore   . tileTimes 5 . parse
-solve1ST = solve minScoreST               . parse
-solve2ST = solve minScoreST . tileTimes 5 . parse
+solve1MU = solve minScoreMU               . parse
+solve2MU = solve minScoreMU . tileTimes 5 . parse
 
 -- 11637
 -- 13813
@@ -99,8 +97,13 @@ parse s =
         , vecValues = V.fromList . fmap (fromIntegral . digitToInt) . concat $ xs
         }
 
-neighbors :: XY -> [XY]
-neighbors (x,y) = [(-1, 0), (1, 0), (0, -1), (0, 1)] <&> \(u,v) -> (x + u, y + v)
+neighbors :: WH -> XY -> [XY]
+neighbors (w,h) (x,y) =
+    [ nXy
+    | (dx,dy) <- [(-1, 0), (1, 0), (0, -1), (0, 1)] -- deltas of 4 neighbors
+    , let nXy@(nx,ny) = (x + dx, y + dy)
+    , nx >= 0 && ny >= 0 && nx < w && ny < h        -- keep traversable ones only
+    ]
 
 tileTimes :: Integral v => Int -> Vec2 v -> Vec2 v
 tileTimes t Vec2{vecWh,vecValues} =
@@ -122,12 +125,6 @@ data Vec2 v where
         { vecWh     :: XY
         , vecValues :: VU.Vector v
         } -> Vec2 v
-
-atMaybe :: Vec2 v -> XY -> Maybe v
-atMaybe (Vec2 (w, h) v) (x, y) =
-    if x < 0 || y < 0 || x >= w || y >= h
-        then Nothing
-        else Just $ v V.! (y * w + x)
 
 i2xy :: WH -> XYI -> XY
 i2xy (w,h) i = (rem i w, quot i h)
