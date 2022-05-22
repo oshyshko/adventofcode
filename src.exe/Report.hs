@@ -6,27 +6,24 @@ import           SysInfo         (SysInfo (..))
 import           Types
 import           Util
 
-header :: IO ()
-header = do
+printHeader :: IO ()
+printHeader = do
     putStrLn "-----------+-----------------------+- part 1 ---------------------+- part 2 ---------------------"
     putStrLn " day       | answers               |    time allocs maxhea maxmem |    time allocs maxhea maxmem "
     putStrLn "-----------+-----------------------+------------------------------+------------------------------"
 
-footer :: SysInfo -> IO ()
-footer i = do
+printFooter :: SysInfo -> IO ()
+printFooter i = do
     putStrLn "-----------+-----------------------+------------------------------+------------------------------"
     putStrLn . unlines . map (" " ++) . lines . showSysInfo $ i
 
-dayPrefix :: DayPrefix -> IO ()
-dayPrefix dayP = do
-    printf " %-9s | " dayP
+printDayPrefix :: DayPrefix -> IO ()
+printDayPrefix dayPrefix = do
+    printf " %-9s | " dayPrefix
     hFlush stdout
 
-dayPrefixToModuleName :: DayPrefix -> ModuleName
-dayPrefixToModuleName = take (length ("YXX.DXX" :: String))
-
-dayResults :: FilePath -> Map ModuleName [AnswerStr] -> DayPrefix -> [ExecResult] -> IO ()
-dayResults answersPath mod2answers dayP results = do
+printDayResults :: FilePath -> Map ModuleName [AnswerStr] -> DayPrefix -> [ExecResult] -> IO ()
+printDayResults answersPath mod2answers dayPrefix results = do
     printf "%-21s | %s %s\n"
         (intercalate ", " $ results <&> output)
         (intercalate " | " $ results <&> \ExecResult{msReal, bytesAllocated, bytesPeak, bytesMaxInUse} ->
@@ -35,12 +32,15 @@ dayResults answersPath mod2answers dayP results = do
                 (maybe "?" size2humanSize bytesAllocated)
                 (maybe "?" size2humanSize bytesPeak)
                 (maybe "?" size2humanSize bytesMaxInUse))
-        (case M.lookup (dayPrefixToModuleName dayP) mod2answers of
-            Nothing -> " <-- couldn't find entry " ++ show dayP ++ " in " ++ show answersPath
+        (case M.lookup (dayPrefixToModuleName dayPrefix) mod2answers of
+            Nothing -> " <-- couldn't find entry " ++ show dayPrefix ++ " in " ++ show answersPath
             Just expected ->
                 if expected /= (results <&> output)
                     then " <-- expected: " ++ intercalate ", " expected
                     else "")
+
+dayPrefixToModuleName :: DayPrefix -> ModuleName
+dayPrefixToModuleName = take (length ("YXX.DXX" :: String))
 
 showSysInfo :: SysInfo -> String
 showSysInfo SysInfo{..} =

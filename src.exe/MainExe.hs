@@ -4,15 +4,15 @@ module Main
 
 import qualified Data.Map.Strict    as M
 import           System.Environment (getArgs, getExecutablePath)
-import           System.Exit        (ExitCode (..))
+import           System.Exit        (ExitCode (..), exitFailure)
 import           System.Process     (readProcessWithExitCode)
 
 import qualified Days
 import           Imports
 import qualified Report
 import qualified SysInfo
-import           Util
 import           Types
+import           Util
 
 -- # day     answer-1  answer-2
 -- Y15.D01   138       1771
@@ -68,13 +68,13 @@ mainArgs args =
             let answersPath = "res/answers.txt"
             mod2answers <- parseAnswers <$> readFile answersPath
 
-            Report.header
+            Report.printHeader
 
             -- run
-            forM_ daysSelected $ \Day{dayPrefix,solvers} -> do
+            errors <- forM daysSelected \Day{dayPrefix,solvers} -> do
                 input <- readInput dayPrefix
 
-                Report.dayPrefix dayPrefix
+                Report.printDayPrefix dayPrefix
 
                 results <- forM (take (length solvers) [0..]) $ \solverIndex -> do
                     runDayViaExec input dayPrefix solverIndex >>= \case
@@ -86,9 +86,14 @@ mainArgs args =
                                 ++ (unlines . takeWhile (\e -> not $ " [(" `isPrefixOf` e) . lines $ err)
                         Right r -> return r
 
-                Report.dayResults answersPath mod2answers dayPrefix results
+                Report.printDayResults answersPath mod2answers dayPrefix results
 
-            Report.footer =<< SysInfo.getSysInfo
+                return $ Just (results <&> output)
+                    /= mod2answers M.!? Report.dayPrefixToModuleName dayPrefix
+
+            Report.printFooter =<< SysInfo.getSysInfo
+
+            when (or errors) exitFailure
 
 -- TODO report failures
 runDayViaDirectCall :: Input -> DayPrefix -> SolverIndex -> IO (Either String ExecResult)

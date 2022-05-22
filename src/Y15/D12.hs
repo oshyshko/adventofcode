@@ -18,8 +18,6 @@ solve digObject =
         Number n -> maybeToList . toBoundedInteger $ n
         _        -> []
 
-solve1 :: String -> Int
+solve1, solve2 :: String -> Int
 solve1 = solve $ const True
-
-solve2 :: String -> Int
-solve2 = solve $ not . M.member "red"
+solve2 = solve $ ("red" `notElem`) . M.elems
