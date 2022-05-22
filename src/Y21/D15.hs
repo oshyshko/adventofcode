@@ -53,7 +53,7 @@ minScoreST start goal risk@Vec2{vecWh,vecValues} = runST $ do
     open      <- S.newSTRef $ Q.singleton start (maxBound::Score) ()
     xyi2score <- VUM.replicate (V.length vecValues) (maxBound::Score)
 
-    VUM.write xyi2score 0 0
+    VUM.write xyi2score start 0
 
     fix \loop -> do
         S.readSTRef open <&> Q.alterMin (,Nothing) >>= \case
@@ -61,20 +61,19 @@ minScoreST start goal risk@Vec2{vecWh,vecValues} = runST $ do
             (Just (current, _, _), openEjected) -> do
                 S.writeSTRef open openEjected
                 score <- VUM.read xyi2score current
-
-                forM_ (neighbors (i2xy vecWh current)) \nXy ->          -- for each neighbor
-                      atMaybe risk nXy                                  -- if traversable
-                    & maybe (return ()) \nRisk -> do
-                        let nXyi   = xy2i vecWh nXy
-                            nScore = fromIntegral nRisk + score
-                        nScoreOld <- VUM.read xyi2score nXyi
-                        when (nScore < nScoreOld) $ do                  -- apply changes
-                            S.modifySTRef' open (Q.insert nXyi nScore ())
-                            VUM.write xyi2score nXyi nScore
-
                 if current == goal                                      -- goal reached?
-                    then VUM.read xyi2score current
-                    else loop
+                    then return score
+                    else do
+                        forM_ (neighbors (i2xy vecWh current)) \nXy ->  -- for each neighbor
+                            atMaybe risk nXy                            -- if traversable
+                            & maybe (return ()) \nRisk -> do
+                                let nXyi   = xy2i vecWh nXy
+                                    nScore = fromIntegral nRisk + score
+                                nScoreOld <- VUM.read xyi2score nXyi
+                                when (nScore < nScoreOld) $ do          -- apply changes
+                                    S.modifySTRef' open (Q.insert nXyi nScore ())
+                                    VUM.write xyi2score nXyi nScore
+                        loop
 
 solve :: (XYI -> XYI -> Vec2 Risk -> Score) -> Vec2 Risk -> Int
 solve minScoreF visit@Vec2{vecWh} =
