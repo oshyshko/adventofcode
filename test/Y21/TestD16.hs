@@ -7,7 +7,7 @@ import           Util
 
 spec :: Spec
 spec = do
-    it "parsePacket" $ do
+    it "packetPadded" $ do
         -- 110 100 10111 11110 00101 000
         -- VVV TTT AAAAA AAAAA AAAAA
         -- ^^^                                                              - 3 - version (6)
@@ -16,7 +16,7 @@ spec = do
         --               ^^^^^                                              - 4 - (not last)
         --                     ^^^^^                                        - 4 - (last)
         --                           ^^^                                    - 3 - padding
-        parseOrDie packet (hex2bin "d2fe28") `shouldBe`
+        parseOrDie packetPadded (hex2bin "d2fe28") `shouldBe`
             Packet 6 (Literal 0b011111100101) []
 
         -- 001 110 0 000000000011011 11010001010 0101001000100100 0000000
@@ -28,7 +28,7 @@ spec = do
         --                           ^^^^^^^^^^^                            - 11? - packet A
         --                                       ^^^^^^^^^^^^^^^^           - 16? - packet B
         --                                                        ^^^^^^^^  - 7   - padding
-        parseOrDie packet (hex2bin "38006f45291200") `shouldBe`
+        parseOrDie packetPadded (hex2bin "38006f45291200") `shouldBe`
             Packet 1 Lesser
                 [ Packet 6 (Literal 10) []
                 , Packet 2 (Literal 20) []
@@ -44,7 +44,7 @@ spec = do
         --                                   ^^^^^^^^^^^                    -     - packet B (literal 2)
         --                                               ^^^^^^^^^^^        -     - packet C (literal 3)
         --                                                           ^^^^^  - 5   - padding
-        parseOrDie packet (hex2bin "ee00d40c823060") `shouldBe`
+        parseOrDie packetPadded (hex2bin "ee00d40c823060") `shouldBe`
             Packet 7 Maximum
                 [ Packet 2 (Literal 1) []
                 , Packet 4 (Literal 2) []
