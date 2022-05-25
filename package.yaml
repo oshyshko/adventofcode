@@ -92,6 +92,7 @@ ghc-options:
 default-extensions:
 - AllowAmbiguousTypes
 - BangPatterns
+- BinaryLiterals
 - BlockArguments
 - ConstraintKinds
 - DeriveFoldable

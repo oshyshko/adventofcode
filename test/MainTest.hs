@@ -10,6 +10,8 @@ import qualified Y15.TestD18
 import qualified Y15.TestD19
 import qualified Y15.TestD21
 
+import qualified Y21.TestD16
+
 main :: IO ()
 main = hspec $ do
     context "Util"    TestUtil.spec
@@ -20,3 +22,5 @@ main = hspec $ do
     context "Y15.D18" Y15.TestD18.spec
     context "Y15.D19" Y15.TestD19.spec
     context "Y15.D21" Y15.TestD21.spec
+
+    context "Y21.D16" Y21.TestD16.spec

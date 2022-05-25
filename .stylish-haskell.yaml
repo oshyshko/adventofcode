@@ -351,16 +351,22 @@ newline: native
 language_extensions:
 - AllowAmbiguousTypes
 - BangPatterns
+- BinaryLiterals
+- BlockArguments
 - ConstraintKinds
+- DeriveFoldable
+- DeriveFunctor
 - DeriveGeneric
+- DuplicateRecordFields
 - FlexibleContexts
 - FlexibleInstances
+- GADTs
 - LambdaCase
 - MultiParamTypeClasses
 - MultiWayIf
 - NamedFieldPuns
 - OverloadedStrings
-- RankNTypes,
+- RankNTypes
 - RecordWildCards
 - ScopedTypeVariables
 - StrictData
