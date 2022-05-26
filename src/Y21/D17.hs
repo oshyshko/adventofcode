@@ -16,20 +16,22 @@ tick (s, i, v, d) = (s, i + 1, v + d, d - 1)
 genXs, genYs :: a ~ Int => a -> a -> a -> [(a, a, a, a)]
 genXs x0 x1 s =
     iterate tick (s, 0, 0, s)
-        & takeWhile (\(_,_,_,d) -> d >=  0)
-        & dropWhile (\(_,_,x,_) -> x <  x0)
-        & takeWhile (\(_,_,x,_) -> x <= x1)
+        & takeWhile (\(_,_,_,d) -> d >=  0)     -- cut infinite fall
+        & dropWhile (\(_,_,x,_) -> x <  x0)     -- cut left
+        & takeWhile (\(_,_,x,_) -> x <= x1)     -- cut right
 genYs y0 y1 s =
     iterate tick (s, 0, 0, s)
-        & dropWhile (\(_,_,y,_) -> y >  y1)
-        & takeWhile (\(_,_,y,_) -> y >= y0)
+        & dropWhile (\(_,_,y,_) -> y >  y1)     -- cut upper
+        & takeWhile (\(_,_,y,_) -> y >= y0)     -- cut lower
 
 solve :: String -> [(Int, Int)]
 solve s =
     let ((x0,x1), (y0,y1)) = parseOrDie area s
+        xSteps = [1..x1]       >>= genXs x0 x1
+        ySteps = [x0,x0-1..y0] >>= genYs y0 y1  -- NOTE if inlined, changes allocs to 800Mb
     in  [ (xs, ys)
-        | (xs, xi, _, xd) <- [0..x1]       >>= genXs x0 x1  -- xs
-        , (ys, yi, _,  _) <- [x0,x0-1..y0] >>= genYs y0 y1  -- ys
+        | (xs, xi, _, xd) <- xSteps
+        , (ys, yi, _,  _) <- ySteps
         , yi == xi || yi > xi && xd == 0
         ]
 
