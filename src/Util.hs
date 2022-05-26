@@ -17,6 +17,9 @@ eol =   try (string "\n\r")
 decimal :: Read a => Parser a
 decimal = read <$> many1 digit
 
+integer :: Read a => Parser a
+integer = read <$> ((<>) <$> option "" (string "-") <*> many1 digit)
+
 pad :: Parser String
 pad = many $ char ' '
 
