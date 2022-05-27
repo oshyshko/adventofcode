@@ -1,10 +1,10 @@
 module Util where
 
-import           Control.DeepSeq               (NFData, force)
-import           Data.Time.Clock.POSIX         (getPOSIXTime)
-import qualified Debug.Trace                   as Trace
-import           Numeric                       (showFFloat)
-import           Text.ParserCombinators.Parsec (parse)
+import           Control.DeepSeq       (NFData, force)
+import           Data.Time.Clock.POSIX (getPOSIXTime)
+import qualified Debug.Trace           as Trace
+import           Numeric               (showFFloat)
+import           Text.Parsec           (parse)
 
 import           Imports
 

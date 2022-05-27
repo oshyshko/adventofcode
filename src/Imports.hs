@@ -21,47 +21,45 @@ module Imports
     , module Data.Set
     , module Data.Word
     , module System.IO
-    , module Text.ParserCombinators.Parsec
+    , module Text.Parsec
+    , module Text.Parsec.String
     , module Text.Printf
     , module Text.Read
     ) where
 
-import           Control.Applicative           (liftA2)
-import           Control.Arrow                 ((&&&))
-import           Control.Exception             (SomeException, catch, evaluate)
-import           Control.Monad                 (forM, forM_, guard, join,
-                                                replicateM, unless, void, when,
-                                                (<=<), (>=>))
-import           Control.Monad.IO.Class        (MonadIO, liftIO)
-import           Control.Monad.Primitive       (PrimMonad (..))
-import           Data.Bool                     (bool)
-import           Data.Char                     (digitToInt, intToDigit,
-                                                isAlphaNum, isAsciiLower,
-                                                isLower, isSpace, isUpper,
-                                                toLower, toUpper)
-import           Data.Foldable                 (foldl', foldlM)
-import           Data.Function                 (fix, (&))
-import           Data.Functor                  (($>), (<&>))
-import           Data.Functor.Identity         (Identity (..))
-import           Data.HashMap.Strict           (HashMap)
-import           Data.Hashable                 (Hashable)
-import           Data.IntMap.Strict            (IntMap)
-import           Data.List                     (dropWhileEnd, group,
-                                                intercalate, isInfixOf,
-                                                isPrefixOf, isSuffixOf, nub,
-                                                partition, permutations, sort,
-                                                sortBy, sortOn, transpose)
-import           Data.List.Split               (chunksOf, divvy, splitOn)
-import           Data.Map.Strict               (Map)
-import           Data.Maybe                    (catMaybes, fromJust, fromMaybe,
-                                                mapMaybe, maybeToList)
-import           Data.Set                      (Set)
-import           Data.Word                     (Word16, Word8)
-import           System.IO                     (hFlush, stdout)
-import           Text.ParserCombinators.Parsec (Parser, between, char, count,
-                                                digit, endBy, endBy1, hexDigit,
-                                                letter, many, many1, manyTill,
-                                                noneOf, oneOf, option, sepBy,
-                                                sepEndBy, string, try, (<|>))
-import           Text.Printf                   (printf)
-import           Text.Read                     (readMaybe)
+import           Control.Applicative     (liftA2)
+import           Control.Arrow           ((&&&))
+import           Control.Exception       (SomeException, catch, evaluate)
+import           Control.Monad           (forM, forM_, guard, join, replicateM,
+                                          unless, void, when, (<=<), (>=>))
+import           Control.Monad.IO.Class  (MonadIO, liftIO)
+import           Control.Monad.Primitive (PrimMonad (..))
+import           Data.Bool               (bool)
+import           Data.Char               (digitToInt, intToDigit, isAlphaNum,
+                                          isAsciiLower, isLower, isSpace,
+                                          isUpper, toLower, toUpper)
+import           Data.Foldable           (foldl', foldlM)
+import           Data.Function           (fix, (&))
+import           Data.Functor            (($>), (<&>))
+import           Data.Functor.Identity   (Identity (..))
+import           Data.HashMap.Strict     (HashMap)
+import           Data.Hashable           (Hashable)
+import           Data.IntMap.Strict      (IntMap)
+import           Data.List               (dropWhileEnd, group, intercalate,
+                                          isInfixOf, isPrefixOf, isSuffixOf,
+                                          nub, partition, permutations, sort,
+                                          sortBy, sortOn, transpose)
+import           Data.List.Split         (chunksOf, divvy, splitOn)
+import           Data.Map.Strict         (Map)
+import           Data.Maybe              (catMaybes, fromJust, fromMaybe,
+                                          mapMaybe, maybeToList)
+import           Data.Set                (Set)
+import           Data.Word               (Word16, Word8)
+import           System.IO               (hFlush, stdout)
+import           Text.Parsec             (between, char, count, digit, endBy,
+                                          endBy1, hexDigit, letter, many, many1,
+                                          manyTill, noneOf, oneOf, option,
+                                          sepBy, sepEndBy, string, try, (<|>), (<?>))
+import           Text.Parsec.String      (Parser)
+import           Text.Printf             (printf)
+import           Text.Read               (readMaybe)
