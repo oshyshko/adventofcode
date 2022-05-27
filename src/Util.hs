@@ -14,8 +14,8 @@ eol =   try (string "\n\r")
     <|>      string "\n"
     <|>      string "\r"
 
-decimal :: Read a => Parser a
-decimal = read <$> many1 digit
+natural :: Read a => Parser a
+natural = read <$> many1 digit
 
 integer :: Read a => Parser a
 integer = read <$> ((<>) <$> option "" (string "-") <*> many1 digit)

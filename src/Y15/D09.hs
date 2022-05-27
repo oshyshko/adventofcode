@@ -17,7 +17,7 @@ defs =
     def :: Parser FromToDist
     def = (,,) <$> many letter <* string " to "
                <*> many letter <* string " = "
-               <*> decimal
+               <*> natural
 
 solve :: [FromToDist] -> [Int]
 solve ftds =

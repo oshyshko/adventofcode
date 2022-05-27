@@ -21,13 +21,13 @@ dotsAndFolds =
         <*> (fold `endBy` eol)
   where
     xy :: Parser YX
-    xy = flip (,) <$> decimal <* char ',' <*> decimal
+    xy = flip (,) <$> natural <* char ',' <*> natural
     fold :: Parser Fold
     fold = do
         string "fold along "
         let fx = char 'x' $> AlongX
             fy = char 'y' $> AlongY
-        (fx <|> fy) <*> (char '=' *> decimal)
+        (fx <|> fy) <*> (char '=' *> natural)
 
 foldOnce :: [YX] -> Fold -> [YX]
 foldOnce dots fold =

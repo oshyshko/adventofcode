@@ -19,7 +19,7 @@ attrs =
         (\from sign n to -> ((from, to), sign * n))
         <$> many letter              <* string " would "
         <*> (s2sign <$> many letter) <* string " " -- gain / lose
-        <*> decimal                  <* string " happiness units by sitting next to "
+        <*> natural                  <* string " happiness units by sitting next to "
         <*> many letter              <* string "."
 
     s2sign = \case

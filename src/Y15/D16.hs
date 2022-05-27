@@ -28,7 +28,7 @@ sue2clues =
     sue2clue :: Parser Sue2Clues
     sue2clue = do
         string "Sue" <* pad
-        sueId <- decimal
+        sueId <- natural
         pad <* char ':' <* pad
         clues <- clue `sepBy` (char ',' <* pad) :: Parser [Clue]
         return (sueId, clues)
@@ -48,7 +48,7 @@ sue2clues =
 
         string ":" <* pad
 
-        v <- decimal
+        v <- natural
         return (k, v)
 
 exactlyOneOrDie :: Show a => [a] -> a

@@ -60,7 +60,7 @@ commands =
         <*> xy
 
     xy :: Parser XY
-    xy = XY <$> decimal <* char ',' <*> decimal
+    xy = XY <$> natural <* char ',' <*> natural
 
     op :: Parser Op
     op =    try (string "turn on")  $> On

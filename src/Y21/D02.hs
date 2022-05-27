@@ -16,7 +16,7 @@ commands =
     command `endBy` eol
   where
     command :: Parser Command
-    command = Command <$> op <* pad <*> decimal
+    command = Command <$> op <* pad <*> natural
 
     op :: Parser Op
     op =    try (string "forward") $> Forward

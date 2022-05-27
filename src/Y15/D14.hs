@@ -35,9 +35,9 @@ specs =
     _spec :: Parser Spec
     _spec = Spec
         <$> many letter <* string " can fly "
-        <*> decimal     <* string " km/s for "
-        <*> decimal     <* string " seconds, but then must rest for "
-        <*> decimal     <* string " seconds."
+        <*> natural     <* string " km/s for "
+        <*> natural     <* string " seconds, but then must rest for "
+        <*> natural     <* string " seconds."
 
 tick :: Racer -> Racer
 tick r@Racer{state} = case state of

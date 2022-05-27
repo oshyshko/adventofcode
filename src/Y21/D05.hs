@@ -20,7 +20,7 @@ lineParser =
     line `endBy` eol
   where
     line = Line <$> xy <* string " -> " <*> xy
-    xy   = XY <$> decimal <* char ',' <*> decimal
+    xy   = XY <$> natural <* char ',' <*> natural
 
 {-# INLINE solve #-}
 solve :: forall k v m. (PrimMonad m, k ~ Int, v ~ Word16) => [Line k] -> m Int

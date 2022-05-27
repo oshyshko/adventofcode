@@ -52,9 +52,9 @@ shopItems =
 -- Armor: 1
 character :: Parser Character
 character = Character
-    <$> (string "Hit Points:" *> pad *> decimal <* eol)
-    <*> (string "Damage:"     *> pad *> decimal <* eol)
-    <*> (string "Armor:"      *> pad *> decimal <* eol)
+    <$> (string "Hit Points:" *> pad *> natural <* eol)
+    <*> (string "Damage:"     *> pad *> natural <* eol)
+    <*> (string "Armor:"      *> pad *> natural <* eol)
 
 combs :: Int -> [a] -> [[a]]
 combs 0 _      = [[]]
