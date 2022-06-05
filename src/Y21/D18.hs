@@ -28,7 +28,7 @@ explode =
                 Pair (Lit lv) (Lit rv) -> Just (Lit 0, Just lv, Just rv)
                 _ -> error $ "Got unexpected Exp at depth " <> show n <> ": " <> show e
 
-            _ -> go (n+1) a & \case                                                 -- try change A (left bracnh)
+            _ -> go (n+1) a & \case                                                 -- try change A (left branch)
                 Just (outA, leftA, rightA) ->                                       -- A changed
                     let outB = maybe b (`waveRight` b) rightA
                     in Just (Pair outA outB, leftA, Nothing)
@@ -52,7 +52,7 @@ split = \case
     Lit x -> if x >= 10
         then Just $ Pair (Lit $ x `div` 2) (Lit $ ceiling (fromIntegral x / 2::Float))
         else Nothing
-    Pair a b -> case split a of
+    Pair a b -> split a & \case
         Just na -> Just $ Pair na b
         Nothing -> split b & \case
             Just nb -> Just $ Pair a nb
