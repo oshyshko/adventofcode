@@ -1,4 +1,4 @@
-resolver: lts-19.8
+resolver: lts-19.10
 
 # workaround for windows + lts-18.19
 flags:
