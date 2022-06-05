@@ -71,12 +71,12 @@ mainArgs args =
             Report.printHeader
 
             -- run
-            errors <- forM daysSelected \Day{dayPrefix,solvers} -> do
+            errors <- or <$> forM daysSelected \Day{dayPrefix,solvers} -> do
                 input <- readInput dayPrefix
 
                 Report.printDayPrefix dayPrefix
 
-                results <- forM (take (length solvers) [0..]) $ \solverIndex -> do
+                results <- forM [0..length solvers - 1] $ \solverIndex -> do
                     runDayViaExec input dayPrefix solverIndex >>= \case
                         -- TODO 1. correctly present error (Left) and continue with the rest of days
                         -- TODO 2. find a better way to remove RTS part that starts with " [("
@@ -93,7 +93,7 @@ mainArgs args =
 
             Report.printFooter =<< SysInfo.getSysInfo
 
-            when (or errors) exitFailure
+            when errors exitFailure
 
 -- TODO report failures
 runDayViaDirectCall :: Input -> DayPrefix -> SolverIndex -> IO (Either String ExecResult)
