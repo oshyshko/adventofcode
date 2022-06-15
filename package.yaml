@@ -30,6 +30,7 @@ library:
   - psqueues
   - scientific
   - split
+  - string-qq
   - time
   - unordered-containers
   - vector

@@ -61,7 +61,7 @@ applyAdapter t msn = case t of
         | (a,m,b) == (''String, ''IO, ''Int)    -> fmap_show_ msn
         | otherwise                             -> die
     -- unknown
-    _ -> die
+    _ -> dieTop
   where
     return_show_ x = InfixE (Just $ return_ "show") (vare ".") (jvare x)
     fmap_show_ x   = InfixE (Just (AppE (vare "fmap") (vare "show"))) (vare ".") (jvare x)
@@ -69,6 +69,7 @@ applyAdapter t msn = case t of
     vare           = VarE . TH.mkName
     jvare          = Just . vare
     die            = error $ "Couldn't make an adapter for solver " <> show msn <> " of type: " ++ show t
+    dieTop         = error $ "Couldn't make an adapter for solver (via top) " <> show msn <> " of type: " ++ show t
 
 -- > benchSuffixToSolverFnNames "src/Y15/D06.hs"
 -- fromList [("",["solve1","solve2"]),("AI",["solve1AI","solve2AI"]), ...]

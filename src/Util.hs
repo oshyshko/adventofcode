@@ -6,6 +6,7 @@ import qualified Debug.Trace           as Trace
 import           Numeric               (showFFloat)
 import           Text.Parsec           (parse)
 
+import           GHC.IO                (unsafePerformIO)
 import           Imports
 
 eol :: Parser String
@@ -55,6 +56,11 @@ traceShow = Trace.traceShow
 
 traceShowId :: Show a => a -> a
 traceShowId = Trace.traceShowId
+
+traceTime :: NFData a => String -> a -> a
+traceTime s f = unsafePerformIO $ do
+    (a, millis) <- timeOf (pure f)
+    pure $ trace (s <> show millis) a
 
 timeOf :: NFData a => IO a -> IO (a, Integer)
 timeOf ioa = do
