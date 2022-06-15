@@ -28,7 +28,7 @@ module Imports
     , module Text.Read
     ) where
 
-import           Control.Applicative     (liftA2)
+import           Control.Applicative     (liftA2, (<|>))
 import           Control.Arrow           ((&&&))
 import           Control.Exception       (SomeException, catch, evaluate)
 import           Control.Monad           (forM, forM_, guard, join, replicateM,
@@ -62,8 +62,7 @@ import           System.IO               (hFlush, stdout)
 import           Text.Parsec             (between, char, count, digit, endBy,
                                           endBy1, hexDigit, letter, many, many1,
                                           manyTill, noneOf, oneOf, option,
-                                          sepBy, sepEndBy, string, try, (<?>),
-                                          (<|>))
+                                          sepBy, sepEndBy, string, try, (<?>))
 import           Text.Parsec.String      (Parser)
 import           Text.Printf             (printf)
 import           Text.Read               (readMaybe)

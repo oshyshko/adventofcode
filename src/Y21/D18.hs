@@ -24,21 +24,18 @@ explode =
     go n = \case
         Lit _        -> Nothing
         e@(Pair a b) -> case n of
-            4 -> case e of                                                          -- reached depth 4
+            4 -> case e of                                          -- reached depth 4
                 Pair (Lit lv) (Lit rv) -> Just (Lit 0, Just lv, Just rv)
                 _ -> error $ "Got unexpected Exp at depth " <> show n <> ": " <> show e
 
-            _ -> go (n+1) a & \case                                                 -- try change A (left branch)
-                Just (outA, leftA, rightA) ->                                       -- A changed
-                    let outB = maybe b (`waveRight` b) rightA
-                    in Just (Pair outA outB, leftA, Nothing)
+            _ ->     (go (n+1) a <&> \(outA, leftA, rightA) ->      -- try change A (left branch)
+                        let outB = maybe b (`waveRight` b) rightA
+                        in (Pair outA outB, leftA, Nothing))
 
-                Nothing ->                                                          -- A not changed (for now)
-                    go (n+1) b & \case                                              -- try change B (right branch)
-                        Just (outB, leftB, rightB) ->
-                            let outA = maybe a (`waveLeft` a) leftB
-                            in Just (Pair outA outB, Nothing, rightB)
-                        Nothing -> Nothing
+                <|>  (go (n+1) b <&> \(outB, leftB, rightB) ->      -- otherwise, try change B (right branch)
+                        let outA = maybe a (`waveLeft` a) leftB
+                        in (Pair outA outB, Nothing, rightB))
+
     waveLeft d = \case
         Lit x    -> Lit $ x + d
         Pair a b -> Pair a (waveLeft d b)
@@ -48,30 +45,23 @@ explode =
         Pair a b -> Pair (waveRight d a) b
 
 split :: Tree -> Maybe Tree
-split = \case
-    Lit x -> if x >= 10
-        then Just $ Pair (Lit $ x `div` 2) (Lit $ ceiling (fromIntegral x / 2::Float))
-        else Nothing
-    Pair a b -> split a & \case
-        Just na -> Just $ Pair na b
-        Nothing -> split b & \case
-            Just nb -> Just $ Pair a nb
-            Nothing -> Nothing
+split (Lit x)
+    | x < 10    = Nothing
+    | otherwise = let (q, r) = divMod x 2 in Just $ Pair (Lit q) (Lit $ q + r)
+
+split (Pair a b) =
+        (split a <&> (`Pair` b))
+    <|> (split b <&> Pair a)
 
 add :: Tree -> Tree -> Tree
 add a b =
-    go $ Pair a b
+    reduce $ Pair a b
   where
-    go e = explode e & \case
-        Just ne -> go ne
-        Nothing -> split e & \case
-            Just ne -> go ne
-            Nothing -> e
+    reduce t = maybe t reduce (explode t <|> split t)
 
 magnitude :: Tree -> Int
-magnitude = \case
-    Lit x    -> x
-    Pair a b -> 3 * magnitude a + 2 * magnitude b
+magnitude (Lit x)    = x
+magnitude (Pair a b) = 3 * magnitude a + 2 * magnitude b
 
 solve1, solve2 :: String -> Int
 solve1 = magnitude . foldl1 add . fmap (parseOrDie tree) . lines
