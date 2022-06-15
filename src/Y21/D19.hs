@@ -118,8 +118,8 @@ findRegionFix as bs =
 
 merge :: Map RegionId Region -> Map RegionId Region -> (RegionId, RegionId) -> Map RegionId Region
 merge rid2r m (aid,bid) =
-    let a    = m     M.! aid
-        b    = rid2r M.! bid
+    let a    = m     M.! aid            -- known, already in the result
+        b    = rid2r M.! bid            -- unknown, to be merged in
         f    = findRegionFix (beacons a) (beacons b)
         bNew = Region{ regionId = bid, scannerXyz = f 0, beacons = f <$> beacons b }
     in M.insert bid bNew m
@@ -127,7 +127,7 @@ merge rid2r m (aid,bid) =
 solve :: [Region] -> Map RegionId Region
 solve rs =
     let rid2r = M.fromList . fmap (\r -> (regionId r, r)) $ rs
-    in findLinks rs                     -- M.fromList [(0,[29,20,17]), (1,[31,8,3]), (2,[4]), ...]
+    in    findLinks rs                  -- M.fromList [(0,[29,20,17]), (1,[31,8,3]), (2,[4]), ...]
         & findMergeOrder (0::RegionId)  -- [(0,29),(0,20),(0,17),(20,24),(24,23),(24,10), ...]
         & foldl' (merge rid2r) (M.singleton (0::RegionId) (rid2r M.! 0))
 
