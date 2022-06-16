@@ -1,10 +1,10 @@
 module Y21.D08 where
 
 import           Imports
-import           Util
+import           Parser
 
+import qualified Data.Map.Strict as M
 import qualified Data.Set        as S
-import qualified Data.Map.Strict  as M
 
 type Pattern = String
 type PSet    = Set Char

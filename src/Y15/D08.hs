@@ -1,7 +1,7 @@
 module Y15.D08 where
 
-import           Util
 import           Imports
+import           Parser
 
 -- "sjdivfriyaaqa\xd2v\"k\"mpcu\"yyu\"en"
 -- "vcqc"

@@ -3,8 +3,10 @@ module Y15.TestD18 where
 import qualified Data.Vector.Unboxed.Mutable as VUM
 import           Test.Hspec
 
-import           Util
 import           Imports
+import           MVec2 (MVec2(..))
+import           Parser
+import           XY
 import           Y15.D18
 
 spec :: Spec
@@ -108,23 +110,32 @@ spec = do
 
     it "getOr" $ do
         b <- mkLights state0
-        let yz = pred . length        $ state0
-            xz = pred . length . head $ state0
 
-        sequence (getOr undefined b
-            <$> [YX yy xx | yy <- [0..yz] , xx <- [0..xz]])
+        let h = length state0
+            w = length . head $ state0
+
+        wh b `shouldBe` XY w h
+
+        sequence
+            [ getOr undefined b (XY xx yy)
+            | yy <- [0..h-1]
+            , xx <- [0..w-1]
+            ]
                 >>= (`shouldBe` join state0)
 
-        getOr True  b (YX (yz+1) (xz+1)) >>= (`shouldBe` True)
-        getOr False b (YX (yz+1) (xz+1)) >>= (`shouldBe` False)
+        getOr True  b (XY w h) >>= (`shouldBe` True)
+        getOr False b (XY w h) >>= (`shouldBe` False)
 
     it "neighboursOnAround" $ do
         b <- mkLights [ [x, x, x]
-                           , [o, x, o]
-                           , [o, x, o] ]
+                      , [o, x, o]
+                      , [o, x, o] ]
 
-        sequence (neighborsOnAround b
-            <$> [YX yy xx | yy <- [-1..3], xx <- [-1..3]])
+        sequence
+            [neighborsOnAround b (XY xx yy)
+            | yy <- [-1..3]
+            , xx <- [-1..3]
+            ]
                 >>= (`shouldBe` join
                     [ [1, 2, 3, 2, 1]
                     , [1, 2, 3, 2, 1]
@@ -142,9 +153,9 @@ spec = do
             , [o, x, o]
             , [o, x, o] ]
 
-        dstVector <- VUM.replicate (VUM.length (vector src)) False
+        dstVec <- VUM.replicate (VUM.length (vec src)) False
 
-        let dst = src{vector=dstVector}
+        let dst = src{vec=dstVec}
 
         tickLights tick1 src dst
 

@@ -15,7 +15,7 @@ import qualified Data.Vector.Storable.Mutable as VSM
 import qualified Data.Vector.Unboxed.Mutable  as VUM
 
 import           Imports
-import           Util
+import           Parser
 
 -- MA - Data.Array.IO.IOUArray
 -- MB - Data.Vector.Mutable (boxed)

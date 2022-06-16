@@ -2,7 +2,7 @@ module Y15.TestD16 where
 
 import           Test.Hspec
 
-import           Util
+import           Parser
 import           Y15.D16
 
 spec :: Spec

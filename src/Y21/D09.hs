@@ -5,26 +5,23 @@ import qualified Data.Vector.Unboxed as VU
 import qualified Data.Set            as S
 
 import           Imports
+import           XY
 
-type XY        = (Int, Int)
 type Height    = Char
 data HeightMap = HeightMap XY (VU.Vector Height)    -- wh values
 
 parse :: String -> HeightMap
 parse s =
     let xs = lines s
-        wh = (length . head $ xs, length xs)
+        wh = XY (length . head $ xs) (length xs)
         v  = VU.fromList . concat $ xs
     in HeightMap wh v
 
-add :: XY -> XY -> XY
-add (x, y) (u, v) = (x + u, y + v)
-
 neighbors :: [XY]
-neighbors = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+neighbors = [XY (-1) 0, XY 1 0, XY 0 (-1), XY 0 1]
 
 atMaybe :: HeightMap -> XY -> Maybe Height      -- 9 or out of bounds = Nothing
-atMaybe (HeightMap (w, h) v) (x, y) =
+atMaybe (HeightMap (XY w h) v) (XY x y) =
     if x < 0 || y < 0 || x >= w || y >= h
         then Nothing
         else (V.!) v (y * w + x) & \height ->
@@ -35,14 +32,14 @@ atMaybe (HeightMap (w, h) v) (x, y) =
 lowPoint :: HeightMap -> XY -> Bool
 lowPoint hm xy =
     atMaybe hm xy & maybe False \c ->
-         all (maybe True (c <) . atMaybe hm . add xy) neighbors
+         all (maybe True (c <) . atMaybe hm . (+ xy)) neighbors
 
 lowPoints :: HeightMap -> [(XY, Height)]
-lowPoints hm@(HeightMap (w, _) v) =
+lowPoints hm@(HeightMap (XY w _) v) =
     V.ifoldl' f [] v
   where
     f ps i value =
-        let xy = (rem i w, quot i w)
+        let xy = XY (rem i w) (quot i w)
         in if lowPoint hm xy then (xy, value):ps else ps
 
 basins :: HeightMap -> [Set XY]
@@ -54,7 +51,7 @@ basins hm =
         | S.member xy s = s
         | otherwise = atMaybe hm xy & \case
             Nothing -> s
-            Just _  -> foldl' (\ss -> flood ss . add xy) (S.insert xy s) neighbors
+            Just _  -> foldl' (\ss -> flood ss . (+ xy)) (S.insert xy s) neighbors
 
 solve1, solve2 :: String -> Int
 solve1 = sum . fmap ((+1) . digitToInt . snd) . lowPoints . parse

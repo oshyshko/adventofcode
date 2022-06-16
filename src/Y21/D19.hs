@@ -4,20 +4,11 @@ import qualified Data.Map.Strict as M
 import qualified Data.Set        as S
 
 import           Imports
-import           Util
+import           Parser
+import           XYZ
 
 type RegionId = Int
 type Coord    = Int
-data XYZ      = XYZ Coord Coord Coord deriving (Eq, Ord, Show)
-
-instance Num XYZ where
-    (XYZ x y z) + (XYZ a b c) = XYZ (x + a)    (y + b)    (z + c)
-    (XYZ x y z) - (XYZ a b c) = XYZ (x - a)    (y - b)    (z - c)
-    (XYZ x y z) * (XYZ a b c) = XYZ (x * a)    (y * b)    (z * c)
-    abs           (XYZ x y z) = XYZ (abs x)    (abs y)    (abs z)
-    negate        (XYZ x y z) = XYZ (negate x) (negate y) (negate z)
-    signum        (XYZ x y z) = XYZ (signum x) (signum y) (signum z)
-    fromInteger x             = let v = fromIntegral x in XYZ v v v
 
 data Region = Region
     { regionId   :: RegionId

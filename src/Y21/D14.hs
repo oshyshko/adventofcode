@@ -3,7 +3,7 @@ module Y21.D14 where
 import qualified Data.Map.Strict as M
 
 import           Imports
-import           Util
+import           Parser
 
 type Elem = Char
 type Poly = [Elem]

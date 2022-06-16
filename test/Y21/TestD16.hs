@@ -2,8 +2,8 @@ module Y21.TestD16 where
 
 import           Test.Hspec
 
+import           Parser
 import           Y21.D16
-import           Util
 
 spec :: Spec
 spec = do

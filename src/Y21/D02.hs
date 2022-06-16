@@ -1,7 +1,7 @@
 module Y21.D02 where
 
 import           Imports
-import           Util
+import           Parser
 
 data Op          = Down | Up | Forward                    deriving Show
 data Command     = Command     { op :: Op, value :: Int } deriving Show

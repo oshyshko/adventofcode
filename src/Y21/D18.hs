@@ -1,7 +1,7 @@
 module Y21.D18 where
 
 import           Imports
-import           Util
+import           Parser
 
 data Tree
     = Lit Int

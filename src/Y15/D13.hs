@@ -3,7 +3,7 @@ module Y15.D13 where
 import qualified Data.HashMap.Strict as M
 
 import           Imports
-import           Util
+import           Parser
 
 type Guest = String
 type Attr = ((Guest, Guest), Int) -- (from, to), attractiveness)

@@ -4,14 +4,8 @@ import qualified Data.Vector.Generic.Mutable as VM
 import qualified Data.Vector.Unboxed.Mutable as VUM
 
 import           Imports
-import           Util
-
-data XY a   = XY   a a           deriving (Show, Functor, Foldable)
-data Line a = Line (XY a) (XY a) deriving Show
-
-instance Applicative XY where
-    pure a = XY a a
-    liftA2 f (XY x0 y0) (XY x1 y1) = XY (f x0 x1) (f y0 y1)
+import           Parser
+import           AXY
 
 -- 0,9 -> 5,9
 -- 8,0 -> 0,8

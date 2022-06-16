@@ -1,55 +1,51 @@
 module Y21.D11 where
 
 import qualified Data.Vector.Generic         as V
-import qualified Data.Vector.Generic.Mutable as VM
 import qualified Data.Vector.Unboxed.Mutable as VUM
 
 import           Imports
+import           XY
+import           MVec2
 
-type XY = (Int, Int)
-data Board m = Board XY (VUM.MVector (PrimState m) Word8) -- wh values
+type Board m = MVec2 m Word8
 
 -- 11111
 -- 19991
 -- 19191
 -- 19991
 -- 11111
---
 parse :: PrimMonad m => String -> m (Board m)
 parse s =
     let xs = lines s
-        wh = (length . head $ xs, length xs)
+        wh = XY (length . head $ xs) (length xs)
         v  = V.thaw . V.fromList . fmap (fromIntegral . digitToInt) . concat $ xs
-    in Board wh <$> v
+    in MVec2 wh <$> v
 
 tick :: forall m. PrimMonad m => Board m -> m Int
-tick (Board (w,h) v) = do
-    forM_ [0..VM.length v-1] $ \i ->        -- inc + cascade
-        inc (rem i w, quot i w)
-    VM.ifoldM countAndReset 0 v             -- count flashes and reset
+tick mv@(MVec2 (XY w h) v) = do
+    mapM_ inc [ XY x y | x <- [0..w], y <- [0..h] ] -- inc + cascade
+    VUM.ifoldM countAndReset 0 v                    -- count flashes and reset
   where
     countAndReset a i x
-        | x == octoFlashing = VM.write v i octoReset >> pure (a + 1)
+        | x == octoFlashing = VUM.write v i octoReset >> pure (a + 1)
         | otherwise         = pure a
 
     inc :: XY -> m ()
-    inc xy@(x, y) = do
-        unless (x < 0 || y < 0 || x >= w || y >= h) do
-            a <- readV xy
-            if | a == octoFlashing  -> pure ()
-               | a < octoMax        -> writeV xy (a+1)
-               | otherwise          -> do
-                   writeV xy octoFlashing
-                   forM_ neighbors (inc . add xy)
+    inc xy = do
+        maybeA <- atMaybe mv xy
+        case maybeA of
+            Nothing -> pure ()
+            Just a ->
+                if | a == octoFlashing  -> pure ()
+                   | a < octoMax        -> write mv xy (a+1)
+                   | otherwise          -> do
+                       write mv xy octoFlashing
+                       forM_ neighbors (inc . (+ xy))
 
-    octoFlashing      = 255
-    octoReset         = 0
-    octoMax           = 9
-
-    readV  (x,y)      = VM.read  v (y * w + x)
-    writeV (x,y)      = VM.write v (y * w + x)
-    add (x, y) (p, q) = (x + p, y + q)
-    neighbors         = [ (x,y) | x <- [-1..1], y <- [-1..1], x /=0 || y /= 0 ]
+    octoFlashing    = 255
+    octoReset       = 0
+    octoMax         = 9
+    neighbors       = [ XY x y | x <- [-1..1], y <- [-1..1], x /=0 || y /= 0 ]
 
 solve1 :: String -> IO Int
 solve1 s =
@@ -57,7 +53,7 @@ solve1 s =
 
 solve2 :: String -> IO Int
 solve2 s = do
-    b@(Board (w, h) _) <- parse s
+    b@(MVec2 (XY w h) _) <- parse s
     flip fix 1 $ \loop i -> do
         n <- tick b
         if n == w * h
@@ -66,6 +62,6 @@ solve2 s = do
 
 -- debug helpers
 showBoard :: PrimMonad m => Board m -> m String
-showBoard (Board (w,_) v) =
+showBoard (MVec2 (XY w _) v) =
     intercalate "\n" . chunksOf w . fmap (intToDigit . fromIntegral) . V.toList
         <$> V.freeze v

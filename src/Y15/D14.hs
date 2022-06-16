@@ -3,7 +3,7 @@ module Y15.D14 where
 import           Data.Ord (Down (..))
 
 import           Imports
-import           Util
+import           Parser
 
 type KmS     = Int
 type Km      = Int

@@ -20,10 +20,9 @@ module Imports
     , module Data.Map.Strict
     , module Data.Maybe
     , module Data.Set
+    , module Data.Tuple.Strict
     , module Data.Word
     , module System.IO
-    , module Text.Parsec
-    , module Text.Parsec.String
     , module Text.Printf
     , module Text.Read
     ) where
@@ -41,7 +40,7 @@ import           Data.Char               (digitToInt, intToDigit, isAlphaNum,
                                           isUpper, toLower, toUpper)
 import           Data.Foldable           (foldl', foldlM, maximumBy, minimumBy)
 import           Data.Function           (fix, on, (&))
-import           Data.Functor            (($>), (<&>), void)
+import           Data.Functor            (void, ($>), (<&>))
 import           Data.Functor.Identity   (Identity (..))
 import           Data.HashMap.Strict     (HashMap)
 import           Data.Hashable           (Hashable)
@@ -57,12 +56,10 @@ import           Data.Map.Strict         (Map)
 import           Data.Maybe              (catMaybes, fromJust, fromMaybe,
                                           mapMaybe, maybeToList)
 import           Data.Set                (Set)
+import           Data.Tuple.Strict       (T4 (..))
 import           Data.Word               (Word16, Word32, Word8)
 import           System.IO               (hFlush, stdout)
-import           Text.Parsec             (between, char, count, digit, endBy,
-                                          endBy1, hexDigit, letter, many, many1,
-                                          manyTill, noneOf, oneOf, option,
-                                          sepBy, sepEndBy, string, try, (<?>))
-import           Text.Parsec.String      (Parser)
 import           Text.Printf             (printf)
 import           Text.Read               (readMaybe)
+
+

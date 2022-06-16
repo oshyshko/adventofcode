@@ -4,9 +4,9 @@ import qualified Data.Map.Strict as M
 import qualified Data.Set        as S
 
 import           Imports
-import           Util
+import           Parser
+import           XY
 
-type YX   = (Int, Int)
 data Fold = AlongX Int | AlongY Int deriving Show
 
 -- 6,10
@@ -15,13 +15,13 @@ data Fold = AlongX Int | AlongY Int deriving Show
 -- fold along y=7
 -- fold along x=5
 --
-dotsAndFolds :: Parser ([YX], [Fold])
+dotsAndFolds :: Parser ([XY], [Fold])
 dotsAndFolds =
     (,) <$> (xy `endBy` eol) <* eol
         <*> (fold `endBy` eol)
   where
-    xy :: Parser YX
-    xy = flip (,) <$> natural <* char ',' <*> natural
+    xy :: Parser XY
+    xy =  XY <$> natural <* char ',' <*> natural
     fold :: Parser Fold
     fold = do
         string "fold along "
@@ -29,11 +29,11 @@ dotsAndFolds =
             fy = char 'y' $> AlongY
         (fx <|> fy) <*> (char '=' *> natural)
 
-foldOnce :: [YX] -> Fold -> [YX]
+foldOnce :: [XY] -> Fold -> [XY]
 foldOnce dots fold =
     let wrap = case fold of
-            AlongX alongX -> \yx@(y,x) -> if x > alongX then (y, 2*alongX-x) else yx
-            AlongY alongY -> \yx@(y,x) -> if y > alongY then (2*alongY-y, x) else yx
+            AlongX alongX -> \xy@(XY x y) -> if x > alongX then XY (2*alongX-x) y else xy
+            AlongY alongY -> \xy@(XY x y) -> if y > alongY then XY x( 2*alongY-y) else xy
     in fmap wrap dots
 
 --  ##    ## #  #  ##  #### #  # #  # #  #
@@ -43,14 +43,14 @@ foldOnce dots fold =
 -- #  # #  # #  # #  # #    #  # # #  #  #
 --  ##   ##  #  # #  # #### #  # #  #  ##
 --
-showDots :: [YX] -> String
-showDots yxs =
-    let maxY = maximum . fmap fst $ yxs
-        maxX = maximum . fmap snd $ yxs
-        s    = S.fromList yxs
+showDots :: [XY] -> String
+showDots xys =
+    let maxX = maximum . fmap getX $ xys
+        maxY = maximum . fmap getY $ xys
+        s    = S.fromList xys
     in unlines $ flip fmap [0..maxY] \y ->
         flip fmap [0..maxX] \x ->
-            bool ' ' '#' (S.member (y,x) s)
+            bool ' ' '#' (S.member (XY x y) s)
 
 solve1 :: String -> Int
 solve1 =

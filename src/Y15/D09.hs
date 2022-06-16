@@ -1,10 +1,9 @@
 module Y15.D09 where
 
-import qualified Data.List                     as L
-import qualified Data.Map                      as M
+import qualified Data.List as L
+import qualified Data.Map  as M
 
-import           Util
-import           Imports
+import           Parser
 
 type FromToDist = (String, String, Int)
 

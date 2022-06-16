@@ -2,8 +2,8 @@ module Y21.TestD18 where
 
 import           Test.Hspec
 
-import           Util
 import           Imports
+import           Parser
 import           Y21.D18
 
 spec :: Spec

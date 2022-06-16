@@ -1,7 +1,7 @@
 module Y15.D16 where
 
-import           Util
 import           Imports
+import           Parser
 
 data Key
     = Akitas
@@ -27,11 +27,9 @@ sue2clues =
   where
     sue2clue :: Parser Sue2Clues
     sue2clue = do
-        string "Sue" <* pad
-        sueId <- natural
-        pad <* char ':' <* pad
-        clues <- clue `sepBy` (char ',' <* pad) :: Parser [Clue]
-        return (sueId, clues)
+        sueId <- string "Sue" *> padded natural <* char ':'
+        clues <- padded clue `sepBy` char ',' :: Parser [Clue]
+        pure (sueId, clues)
     clue :: Parser Clue
     clue = do
         -- TODO refactor: generalize
@@ -46,10 +44,8 @@ sue2clues =
             <|> try (string "cars"        $> Cars)
             <|> try (string "perfumes"    $> Perfumes)
 
-        string ":" <* pad
-
-        v <- natural
-        return (k, v)
+        v <- string ":" *> pad *> natural
+        pure (k, v)
 
 exactlyOneOrDie :: Show a => [a] -> a
 exactlyOneOrDie = \case

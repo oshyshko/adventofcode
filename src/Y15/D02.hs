@@ -1,19 +1,20 @@
 module Y15.D02 where
 
 import Imports
+import XYZ
 
 -- 29x13x26
 -- 11x11x14
-parseWHL :: String -> [(Int, Int, Int)]
+parseWHL :: String -> [XYZ]
 parseWHL =
     map whl . lines
   where
-    whl = (\[w, h, l] -> (w, h, l)) . map read . splitOn "x"
+    whl = (\[w, h, l] -> XYZ w h l) . map read . splitOn "x"
 
 solve1 :: String -> Int
 solve1 =
       sum
-    . map (\(w, h, l) ->
+    . map (\(XYZ w h l) ->
            let a = w * h
                b = h * l
                c = w * l
@@ -23,5 +24,5 @@ solve1 =
 solve2 :: String -> Int
 solve2 =
       sum
-    . map (\(w, h, l) -> (w*h*l) + 2 * minimum [w+h, h+l, w+l])
+    . map (\(XYZ w h l) -> (w*h*l) + 2 * minimum [w+h, h+l, w+l])
     . parseWHL

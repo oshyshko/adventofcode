@@ -1,27 +1,28 @@
 module Y15.D03 where
 
-import           Imports
+import qualified Data.Set as S
 
-char2move :: Char -> (Int, Int)
+import           Imports
+import           XY
+
+char2move :: Char -> XY
 char2move = \case
-    '<' -> (-1,  0)
-    '^' -> ( 0, -1)
-    '>' -> ( 1,  0)
-    'v' -> ( 0,  1)
+    '<' -> XY (-1)   0
+    '^' -> XY   0  (-1)
+    '>' -> XY   1    0
+    'v' -> XY   0    1
     x   ->  error $ "Unexpected character: " ++ [x]
 
 -- ^^<<v<<v><v^^<><>^^ ...
-moves2houses :: String -> [(Int, Int)]
-moves2houses =
-    scanl (\(xa,ya) (x,y) -> (xa+x, ya+y)) (0, 0)
-    . map char2move
+moves2houses :: String -> [XY]
+moves2houses = scanl (+) 0 . map char2move
 
 solve1 :: String -> Int
-solve1 = length . nub . moves2houses
+solve1 = S.size . S.fromList . moves2houses
 
 solve2 :: String -> Int
 solve2 xs =
     let (santaPairs, robotPairs) = partition (even . fst) $ zip [(0::Int)..] xs
         santaHouses              = moves2houses $ snd <$> santaPairs
         robotHouses              = moves2houses $ snd <$> robotPairs
-    in length . nub $ santaHouses ++ robotHouses
+    in S.size . S.fromList $ santaHouses ++ robotHouses

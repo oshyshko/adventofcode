@@ -1,7 +1,7 @@
 module Y21.D16 where
 
 import           Imports
-import           Util
+import           Parser
 
 data Packet = Packet
     { version :: Int

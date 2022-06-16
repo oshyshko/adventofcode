@@ -4,7 +4,7 @@ import qualified Data.Map.Strict as M
 import qualified Data.Set        as S
 
 import           Imports
-import           Util
+import           Parser
 
 type Part     = String
 type Molecule = String

@@ -5,7 +5,7 @@ import           Data.Bits           (complement, shiftL, shiftR, (.&.), (.|.))
 import qualified Data.HashMap.Strict as M
 
 import           Imports
-import           Util
+import           Parser
 
 type RefId = String
 type Def   = (RefId, Exp)

@@ -1,7 +1,7 @@
 module Y15.D21 where
 
 import           Imports
-import           Util
+import           Parser
 
 data ItemClass = Weapon | Armor | Ring
     deriving (Show, Eq)

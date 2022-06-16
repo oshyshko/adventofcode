@@ -6,7 +6,7 @@ import qualified Data.Vector.Generic.Mutable as VM
 import qualified Data.Vector.Unboxed         as VU
 
 import           Imports
-import           Util
+import           Parser
 
 type PrimV m s v a = (PrimMonad m, s ~ PrimState m, VM.MVector v a, a ~ Number)
 
