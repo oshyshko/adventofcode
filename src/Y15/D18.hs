@@ -1,23 +1,14 @@
-
 module Y15.D18 where
 
 import qualified Data.Vector.Unboxed         as VU
 import qualified Data.Vector.Unboxed.Mutable as VUM
 
 import           Imports
-import           MVec2 (MVec2(..))
+import           MVec2
 import           Parser
 import           XY
 
 type Board m = MVec2 m Bool
-
--- NOTE: copied from MVec2 to get 532MB -> 486MB allocation savin
--- NOTE: how to make it work without copying?
-getOr :: (PrimMonad m, VUM.Unbox v) => v -> MVec2 m v -> XY -> m v
-getOr orV (MVec2 wh@(XY w h) vec) xy@(XY x y) =
-    if x < 0 || y < 0 || x >= w || y >= h
-        then return orV
-        else VUM.read vec (xy2i wh xy)
 
 type TickFn = WH -> XY -> Bool -> Int -> Bool
 
@@ -43,14 +34,14 @@ unLights (MVec2 (XY w _) vec) =
     chunksOf w . VU.toList <$> VU.freeze vec
 
 neighborsOnAround :: PrimMonad m => MVec2 m Bool -> XY -> m Int
-neighborsOnAround b (XY x y) =
-    length . filter id <$> mapM (getOr False b)
-        [ XY (x-1) (y-1) , XY  x (y-1), XY (x+1) (y-1)
-        , XY (x-1)  y    ,              XY (x+1)  y
-        , XY (x-1) (y+1) , XY  x (y+1), XY (x+1) (y+1)
+neighborsOnAround v xy =
+    length . filter id <$> mapM (getOr False v . (+ xy))
+        [ XY (-1) (-1), XY  0 (-1), XY   1  (-1)
+        , XY (-1)   0 ,             XY   1    0
+        , XY (-1)   1 , XY  0   1 , XY   1    1
         ]
-        -- NOTE: alternative, produces 486MB -> 814MB allocations
-        -- [ xy + XY xx yy | xx <- [-1..1], yy <- [-1..1], x /=0 || y /= 0 ]
+        -- NOTE: alternative, produces 486MB -> 569MB allocations
+        -- [ XY x y | x <- [-1,0,1], y <- [-1,0,1], x /=0 || y /= 0 ]
 
 tickLights :: PrimMonad m => TickFn -> MVec2 m Bool -> Board m -> m ()
 tickLights f src@(MVec2 wh@(XY w h) _) dst =

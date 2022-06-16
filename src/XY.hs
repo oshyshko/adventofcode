@@ -14,22 +14,17 @@ instance Num XY where
     signum     (XY x y) = XY (signum x) (signum y)
     fromInteger x       = let v = fromIntegral x in XY v v
 
-{-# INLINE getX #-}
 getX :: XY -> Int
 getX (XY x _) = x
 
-{-# INLINE getY #-}
 getY :: XY -> Int
 getY (XY _ y) = y
 
-{-# INLINE scale #-}
 scale :: XY -> Int -> XY
 scale (XY x y ) n = XY (x * n) (y * n)
 
-{-# INLINE i2xy #-}
 i2xy :: WH -> Int -> XY
 i2xy (XY w h) i = XY (rem i w) (quot i h)
 
-{-# INLINE xy2i #-}
 xy2i :: WH -> XY -> Int
 xy2i (XY w _) (XY x y) = y * w + x
