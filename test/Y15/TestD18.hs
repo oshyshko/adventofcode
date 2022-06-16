@@ -4,7 +4,7 @@ import qualified Data.Vector.Unboxed.Mutable as VUM
 import           Test.Hspec
 
 import           Imports
-import           MVec2 (MVec2(..))
+import           MVec2
 import           Parser
 import           XY
 import           Y15.D18
