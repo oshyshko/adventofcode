@@ -12,13 +12,13 @@ solve startsWithZeros s =
         [1..]
 
 solve1 :: String -> Int
-solve1 = solve $ \bs ->
+solve1 = solve \bs ->
        0 == B.index bs 0
     && 0 == B.index bs 1
     && 0 == B.index bs 2 .&. 0xF0
 
 solve2 :: String -> Int
-solve2 = solve $ \bs ->
+solve2 = solve \bs ->
        0 == B.index bs 0
     && 0 == B.index bs 1
     && 0 == B.index bs 2

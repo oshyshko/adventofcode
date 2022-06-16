@@ -7,9 +7,9 @@ type StringReversed = String
 -- TODO optimize: skip invalid steps instead of generating all of them
 isValid :: StringReversed -> Bool
 isValid s =
-    not (containsIOL s)
-        && containsPairs (2::Int) s
-        && contains3consequent s
+       not (containsIOL s)
+    && containsPairs (2::Int) s
+    && contains3consequent s
   where
     containsIOL = any (\x -> x == 'i' || x == 'o' || x == 'l')
     containsPairs n = \case
