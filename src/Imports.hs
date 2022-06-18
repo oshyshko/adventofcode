@@ -44,7 +44,7 @@ import           Data.Functor            (void, ($>), (<&>))
 import           Data.Functor.Identity   (Identity (..))
 import           Data.HashMap.Strict     (HashMap)
 import           Data.Hashable           (Hashable)
-import           Data.Int                (Int16, Int32, Int8)
+import           Data.Int                (Int16, Int32, Int64, Int8)
 import           Data.IntMap.Strict      (IntMap)
 import           Data.List               (delete, dropWhileEnd, group,
                                           intercalate, isInfixOf, isPrefixOf,

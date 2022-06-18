@@ -110,9 +110,11 @@ default-extensions:
 - MultiWayIf
 - NamedFieldPuns
 - OverloadedStrings
+- QuasiQuotes
 - RankNTypes
 - RecordWildCards
 - ScopedTypeVariables
+- StandaloneDeriving
 - StrictData
 - TupleSections
 - TypeApplications

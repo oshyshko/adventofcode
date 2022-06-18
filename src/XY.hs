@@ -24,7 +24,7 @@ scale :: XY -> Int -> XY
 scale (XY x y ) n = XY (x * n) (y * n)
 
 i2xy :: WH -> Int -> XY
-i2xy (XY w h) i = XY (rem i w) (quot i h)
+i2xy (XY w _) i = XY (rem i w) (quot i w)
 
 xy2i :: WH -> XY -> Int
 xy2i (XY w _) (XY x y) = y * w + x

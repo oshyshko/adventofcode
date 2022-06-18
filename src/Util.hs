@@ -3,9 +3,9 @@ module Util where
 import           Control.DeepSeq       (NFData, force)
 import           Data.Time.Clock.POSIX (getPOSIXTime)
 import qualified Debug.Trace           as Trace
+import           GHC.IO                (unsafePerformIO)
 import           Numeric               (showFFloat)
 
-import           GHC.IO                (unsafePerformIO)
 import           Imports
 
 replaceAll :: Eq a => [a] -> [a] -> [a] -> [a]
