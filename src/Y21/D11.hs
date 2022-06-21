@@ -4,8 +4,9 @@ import qualified Data.Vector.Generic         as V
 import qualified Data.Vector.Unboxed.Mutable as VUM
 
 import           Imports
-import           XY
 import           MVec2
+import           Util
+import           XY
 
 type Board m = MVec2 m Word8
 
@@ -54,7 +55,7 @@ solve1 s =
 solve2 :: String -> IO Int
 solve2 s = do
     b@(MVec2 (XY w h) _) <- parse s
-    flip fix 1 $ \loop i -> do
+    fix1 1 \loop i -> do
         n <- tick b
         if n == w * h
             then pure i

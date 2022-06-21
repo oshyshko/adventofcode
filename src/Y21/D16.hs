@@ -2,6 +2,7 @@ module Y21.D16 where
 
 import           Imports
 import           Parser
+import           Util
 
 data Packet = Packet
     { version :: Int
@@ -31,7 +32,7 @@ packetPadded =
         uncurry (Packet ver {- op args -}) <$>
             if tid == 4
             then -- (Literal x, [])
-                (,[]) . Literal . bin2int <$> flip fix [] \loop xs -> do
+                (,[]) . Literal . bin2int <$> fix1 [] \loop xs -> do
                     c:bits4 <- count 5 bit
                     (if c == '1' then loop else pure) (xs ++ bits4)
             else -- (<all other Ops>, [args])

@@ -5,6 +5,7 @@ import qualified Data.Set        as S
 
 import           Imports
 import           Parser
+import           Util
 
 type Part     = String
 type Molecule = String
@@ -44,7 +45,7 @@ solve2 :: String -> Int
 solve2 s =
     let (rrs, i) = parseOrDie replacementsAndInitial s
         v2ks = M.fromListWith (++) $ (\(k, v) -> (v, [k])) <$> rrs
-    in flip fix [(1, i)] $ \loop -> \case
+    in fix1 [(1, i)] $ \loop -> \case
         [] -> error "no solution"
         ((stepCount,m):remaining) ->
             let replacements = S.fromList $ singleReplacements v2ks m

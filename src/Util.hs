@@ -57,7 +57,7 @@ timeOf ioa = do
 
 size2humanSize :: Integer -> String
 size2humanSize i =
-    flip fix (fromIntegral i::Float, "BKMGTPEZY") $ \l (n, u:units) ->
+    fix1 (fromIntegral i::Float, "BKMGTPEZY") $ \l (n, u:units) ->
         if n <= 999.9 || null units
             then showFFloat (Just $ if u == 'B' then 0 else 1) n [u]
             else l (n / 1024, units)
