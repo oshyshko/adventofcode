@@ -67,7 +67,15 @@ tests:
     ghc-options:
     - -rtsopts
 
+dependencies:
+- haskell-stack-trace-plugin
+
 ghc-options:
+# enable stack traces: uncomment 2 lines, comment 1 line
+# - -fplugin=StackTrace.Plugin
+# - -Wno-redundant-constraints
+- -Wredundant-constraints
+
 - -Wall
 - -Werror=missing-methods
 - -Werror=type-defaults
@@ -84,7 +92,6 @@ ghc-options:
 # - -Wmissing-deriving-strategies   <--  8.8.1
 # exclude these for etlas:
 - -Wcompat
-- -Wredundant-constraints
 - -Wpartial-fields
 - -fhide-source-paths
 - -freverse-errors
