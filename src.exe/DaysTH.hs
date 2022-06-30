@@ -52,12 +52,19 @@ callF moduleName solverFnName = do
 applyAdapter :: Type -> ModuleNameSolverFnName -> Exp
 applyAdapter t msn = case t of
     -- (a -> b)
-    AppT (AppT ArrowT (ConT a)) (ConT b)
+    AppT        (AppT ArrowT (ConT a)) (ConT b)
+        | (a,b) == (''String, ''Int)            -> return_show_ msn
+        | (a,b) == (''String, ''String)         -> return_ msn
+        | otherwise                             -> die
+    ForallT _ _ (AppT (AppT ArrowT (ConT a)) (ConT b))
         | (a,b) == (''String, ''Int)            -> return_show_ msn
         | (a,b) == (''String, ''String)         -> return_ msn
         | otherwise                             -> die
     -- (a -> m b)
-    AppT (AppT ArrowT (ConT a)) (AppT (ConT m) (ConT b))
+    AppT         (AppT ArrowT (ConT a)) (AppT (ConT m) (ConT b))
+        | (a,m,b) == (''String, ''IO, ''Int)    -> fmap_show_ msn
+        | otherwise                             -> die
+    ForallT _ _ (AppT (AppT ArrowT (ConT a)) (AppT (ConT m) (ConT b)))
         | (a,m,b) == (''String, ''IO, ''Int)    -> fmap_show_ msn
         | otherwise                             -> die
     -- unknown

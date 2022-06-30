@@ -8,13 +8,13 @@ import           Util
 
 printHeader :: IO ()
 printHeader = do
-    putStrLn "-----------+------------------------+- part 1 ---------------------+- part 2 ---------------------"
-    putStrLn " day       | answers                |    time allocs maxhea maxmem |    time allocs maxhea maxmem "
-    putStrLn "-----------+------------------------+------------------------------+------------------------------"
+    putStrLn "-----------+--------------------------+- part 1 ---------------------+- part 2 ---------------------"
+    putStrLn " day       | answers                  |    time allocs maxhea maxmem |    time allocs maxhea maxmem "
+    putStrLn "-----------+--------------------------+------------------------------+------------------------------"
 
 printFooter :: SysInfo -> IO ()
 printFooter i = do
-    putStrLn "-----------+------------------------+------------------------------+------------------------------"
+    putStrLn "-----------+--------------------------+------------------------------+------------------------------"
     putStrLn . unlines . map (" " ++) . lines . showSysInfo $ i
 
 printDayPrefix :: DayPrefix -> IO ()
@@ -24,7 +24,7 @@ printDayPrefix dayPrefix = do
 
 printDayResults :: FilePath -> Map ModuleName [AnswerStr] -> DayPrefix -> [ExecResult] -> IO ()
 printDayResults answersPath mod2answers dayPrefix results = do
-    printf "%-22s | %s %s\n"
+    printf "%-24s | %s %s\n"
         (intercalate ", " $ results <&> output)
         (intercalate " | " $ results <&> \ExecResult{msReal, bytesAllocated, bytesPeak, bytesMaxInUse} ->
             printf "%5dms %6s %6s %6s"
