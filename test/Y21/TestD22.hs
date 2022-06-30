@@ -6,7 +6,7 @@ import           Imports
 import           XYZ
 import           Y21.D22
 
-t, f :: Octo
+t, f :: Octo Bool
 t = Leaf True
 f = Leaf False
 
@@ -54,33 +54,29 @@ spec = do
                                                         --   ^3456
         bestSplitCenter (l 0 9) (l 2 6) `shouldBe` 2    -- 012345678
                                                         --   ^34567
-        evaluate (bestSplitCenter (l 0 9) (l 2 8)) `shouldThrow`
-            errorCall "bestSplitCenter: Expected cuboid to be inside: outer=Line 0 9, inner=Line 2 8"
 
-        evaluate (bestSplitCenter (l 0 2) (l 0 2)) `shouldThrow`
-            errorCall "bestSplitCenter: Didn't expect outer == inner: outer=Line 0 2, inner=Line 0 2"
-
-    it "getCuboids" $ do
-        getCuboids (l 10 9) 15 `shouldBe`
-            T8  (l (XYZ 10 10 10) (XYZ 5 5 5))
-                (l (XYZ 10 10 15) (XYZ 5 5 4))
-                (l (XYZ 10 15 10) (XYZ 5 4 5))
-                (l (XYZ 10 15 15) (XYZ 5 4 4))
-                (l (XYZ 15 10 10) (XYZ 4 5 5))
-                (l (XYZ 15 10 15) (XYZ 4 5 4))
-                (l (XYZ 15 15 10) (XYZ 4 4 5))
-                (l (XYZ 15 15 15) (XYZ 4 4 4))
+    it "split" $ do
+        split (l 10 9) 15 `shouldBe`
+            [ l (XYZ 10 10 10) (XYZ 5 5 5)
+            , l (XYZ 10 10 15) (XYZ 5 5 4)
+            , l (XYZ 10 15 10) (XYZ 5 4 5)
+            , l (XYZ 10 15 15) (XYZ 5 4 4)
+            , l (XYZ 15 10 10) (XYZ 4 5 5)
+            , l (XYZ 15 10 15) (XYZ 4 5 4)
+            , l (XYZ 15 15 10) (XYZ 4 4 5)
+            , l (XYZ 15 15 15) (XYZ 4 4 4)
+            ]
 
     it "set" $ do
         (t & set t (l 0 1)) `shouldBe` t
         (f & set f (l 0 1)) `shouldBe` f
         (f & set f (l 0 2)) `shouldBe` f
 
-        (f & set t (l 0 1)) `shouldBe` Split 0 f f f f f f f (Split 1 t f f f f f f f)
-        (f & set t (l 0 4)) `shouldBe` Split 0 f f f f f f f (Split 4 t f f f f f f f)
+        (f & set t (l 0 1)) `shouldBe` Split 0 [f, f, f, f, f, f, f, Split 1 [t, f, f, f, f, f, f, f]]
+        (f & set t (l 0 4)) `shouldBe` Split 0 [f, f, f, f, f, f, f, Split 4 [t, f, f, f, f, f, f, f]]
 
-        (f & set t (l 0 1) & set t (l (-9) 9))  `shouldBe`
-            Split 0 (Split (-9) f f f f f f f t) f f f f f f (Split 1 t f f f f f f f)
+        (f & set t (l 0 1) & set t (l (-9) 9)) `shouldBe`
+            Split 0 [Split (-9) [f, f, f, f, f, f, f, t], f, f, f, f, f, f, Split 1 [t, f, f, f, f, f, f, f]]
 
     it "list" $ do
         let lpm = fmap snd . filter fst . list
