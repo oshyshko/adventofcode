@@ -1,9 +1,4 @@
-resolver: lts-19.13
+resolver: lts-19.14
 
 extra-deps:
 - haskell-stack-trace-plugin-0.1.3.0
-
-# workaround for windows + lts-18.19
-flags:
-  mintty:
-    Win32-2-13-1: false
