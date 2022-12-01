@@ -67,8 +67,8 @@ tests:
     ghc-options:
     - -rtsopts
 
-dependencies:
-- haskell-stack-trace-plugin
+# dependencies:
+# - haskell-stack-trace-plugin
 
 ghc-options:
 # enable stack traces: uncomment 2 lines, comment 1 line
