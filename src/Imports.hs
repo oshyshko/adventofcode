@@ -42,8 +42,8 @@ import           Data.Foldable           (foldl', foldlM, maximumBy, minimumBy)
 import           Data.Function           (fix, on, (&))
 import           Data.Functor            (void, ($>), (<&>))
 import           Data.Functor.Identity   (Identity (..))
-import           Data.HashMap.Strict     (HashMap)
 import           Data.Hashable           (Hashable)
+import           Data.HashMap.Strict     (HashMap)
 import           Data.Int                (Int16, Int32, Int64, Int8)
 import           Data.IntMap.Strict      (IntMap)
 import           Data.List               (delete, dropWhileEnd, group,
@@ -51,7 +51,7 @@ import           Data.List               (delete, dropWhileEnd, group,
                                           isSuffixOf, nub, partition,
                                           permutations, sort, sortBy, sortOn,
                                           transpose)
-import           Data.List.Split         (chunksOf, divvy, splitOn)
+import           Data.List.Split         (chunksOf, divvy, splitOn, splitWhen)
 import           Data.Map.Strict         (Map)
 import           Data.Maybe              (catMaybes, fromJust, fromMaybe,
                                           mapMaybe, maybeToList)
