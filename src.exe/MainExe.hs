@@ -20,7 +20,7 @@ import           Util
 {-# ANN parseAnswers ("HLint: ignore Use map once" :: String) #-}
 parseAnswers :: String -> Map DayPrefix [String]
 parseAnswers =
-      M.fromList
+      M.fromListWithKey (\k _ _ -> error $ "Got a dupicate answer for: " ++ k)
     . map (\case
         day:answers -> (day, answers)
         x           -> error $ "Couldn't parse answers: " ++ show x)
@@ -65,8 +65,7 @@ mainArgs args =
                     ++ ".\nAvailable days are: " ++ intercalate ", " (M.keys Days.moduleName2day) ++ ".\n"
 
             -- read answers.txt
-            let answersPath = "res/answers.txt"
-            mod2answers <- parseAnswers <$> readFile answersPath
+            !mod2answers <- parseAnswers <$> readFile "res/answers.txt" -- NOTE err before printing the header
 
             Report.printHeader
 
@@ -86,7 +85,7 @@ mainArgs args =
                                 ++ (unlines . takeWhile (\e -> not $ " [(" `isPrefixOf` e) . lines $ err)
                         Right r -> return r
 
-                Report.printDayResults answersPath mod2answers dayPrefix results
+                Report.printDayResults mod2answers dayPrefix results
 
                 return $ Just (results <&> output)
                     /= mod2answers M.!? Report.dayPrefixToModuleName dayPrefix

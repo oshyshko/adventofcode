@@ -22,8 +22,8 @@ printDayPrefix dayPrefix = do
     printf " %-9s | " dayPrefix
     hFlush stdout
 
-printDayResults :: FilePath -> Map ModuleName [AnswerStr] -> DayPrefix -> [ExecResult] -> IO ()
-printDayResults answersPath mod2answers dayPrefix results = do
+printDayResults :: Map ModuleName [AnswerStr] -> DayPrefix -> [ExecResult] -> IO ()
+printDayResults mod2answers dayPrefix results = do
     printf "%-24s | %s %s\n"
         (intercalate ", " $ results <&> output)
         (intercalate " | " $ results <&> \ExecResult{msReal, bytesAllocated, bytesPeak, bytesMaxInUse} ->
@@ -33,7 +33,7 @@ printDayResults answersPath mod2answers dayPrefix results = do
                 (maybe "?" size2humanSize bytesPeak)
                 (maybe "?" size2humanSize bytesMaxInUse))
         (case M.lookup (dayPrefixToModuleName dayPrefix) mod2answers of
-            Nothing -> " <-- couldn't find entry " ++ show dayPrefix ++ " in " ++ show answersPath
+            Nothing -> " <-- couldn't find answer"
             Just expected ->
                 if expected /= (results <&> output)
                     then " <-- expected: " ++ intercalate ", " expected
