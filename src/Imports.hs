@@ -5,6 +5,7 @@ module Imports
     , module Control.Monad
     , module Control.Monad.IO.Class
     , module Control.Monad.Primitive
+    , module Data.Bifunctor
     , module Data.Bool
     , module Data.Char
     , module Data.Foldable
@@ -34,6 +35,7 @@ import           Control.Monad           (forM, forM_, guard, join, replicateM,
                                           unless, when, (<=<), (>=>))
 import           Control.Monad.IO.Class  (MonadIO, liftIO)
 import           Control.Monad.Primitive (PrimMonad (..))
+import           Data.Bifunctor          (bimap, first, second)
 import           Data.Bool               (bool)
 import           Data.Char               (digitToInt, intToDigit, isAlphaNum,
                                           isAsciiLower, isLower, isSpace,
@@ -46,7 +48,7 @@ import           Data.Hashable           (Hashable)
 import           Data.HashMap.Strict     (HashMap)
 import           Data.Int                (Int16, Int32, Int64, Int8)
 import           Data.IntMap.Strict      (IntMap)
-import           Data.List               (delete, dropWhileEnd, group,
+import           Data.List               (delete, dropWhileEnd, foldl1', group,
                                           intercalate, isInfixOf, isPrefixOf,
                                           isSuffixOf, nub, partition,
                                           permutations, sort, sortBy, sortOn,
