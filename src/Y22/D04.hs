@@ -21,5 +21,5 @@ solve2 =
     length . filter overlap . parseOrDie teams
   where
     overlap ((a,b), (x,y)) =
-           ((a <= x || b <= y) && x <= b)       -- a(x)b, x(b)y
-        || ((x <= a || y <= b) && a <= y)       -- a(y)b, x(a)y
+           (a <= x || b <= y) && x <= b         -- a(x)b, x(b)y
+        || (x <= a || y <= b) && a <= y         -- a(y)b, x(a)y
