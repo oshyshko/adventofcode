@@ -60,8 +60,8 @@ uniquePairs []     = []
 uniquePairs (x:xs) = ((x,) <$> xs) <> uniquePairs xs
 
 findLinks :: [Region] ->  Map RegionId [RegionId]
-findLinks rs = rs
-    & fmap (\r -> (r, diffsProducts (beacons r)))
+findLinks rs =
+      fmap (\r -> (r, diffsProducts (beacons r))) rs
     & uniquePairs
     & concatMap (\((arid, api), (brid, bpi)) ->
         let c = intersectionCount (S.fromList api) bpi
@@ -118,13 +118,13 @@ merge rid2r m (aid,bid) =
 solve :: [Region] -> Map RegionId Region
 solve rs =
     let rid2r = M.fromList . fmap (\r -> (regionId r, r)) $ rs
-    in    findLinks rs                  -- M.fromList [(0,[29,20,17]), (1,[31,8,3]), (2,[4]), ...]
+    in findLinks rs                     -- M.fromList [(0,[29,20,17]), (1,[31,8,3]), (2,[4]), ...]
         & findMergeOrder (0::RegionId)  -- [(0,29),(0,20),(0,17),(20,24),(24,23),(24,10), ...]
         & foldl' (merge rid2r) (M.singleton (0::RegionId) (rid2r M.! 0))
 
 solve1, solve2 :: String -> Int
-solve1 = S.size . S.fromList . concatMap beacons              . solve . parseOrDie regions
-solve2 = maximum . distances . fmap      scannerXyz . M.elems . solve . parseOrDie regions
+solve1 = S.size . S.fromList . concatMap beacons         . solve . parseOrDie regions
+solve2 = maximum . distances . fmap scannerXyz . M.elems . solve . parseOrDie regions
   where
     distances ss = [ manhattan a b | a <- ss, b <- ss ]
     manhattan a b =

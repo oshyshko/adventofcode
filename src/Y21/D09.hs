@@ -21,13 +21,11 @@ neighbors :: [XY]
 neighbors = [XY (-1) 0, XY 1 0, XY 0 (-1), XY 0 1]
 
 atMaybe :: HeightMap -> XY -> Maybe Height      -- 9 or out of bounds = Nothing
-atMaybe (HeightMap (XY w h) v) (XY x y) =
-    if x < 0 || y < 0 || x >= w || y >= h
-        then Nothing
-        else (V.!) v (y * w + x) & \height ->
-            if height == '9'
-                then Nothing
-                else Just height
+atMaybe (HeightMap (XY w h) v) (XY x y)
+    | x < 0 || y < 0 || x >= w || y >= h = Nothing
+    | otherwise =
+        let height = v V.! (y * w + x)
+        in if height == '9' then Nothing else Just height
 
 lowPoint :: HeightMap -> XY -> Bool
 lowPoint hm xy =

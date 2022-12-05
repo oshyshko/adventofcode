@@ -27,9 +27,9 @@ parse :: String -> Map Cave [Cave]
 parse =
     M.fromListWith (<>) . expand . parseOrDie links
   where
-      expand = (=<<) \(k,v) -> [(k,[v]), (v, [k])]
-      links  = link `endBy` eol
-      link   = (,) <$> many letter <* string "-" <*> many letter
+    expand = (=<<) \(k,v) -> [(k,[v]), (v, [k])]
+    links  = link `endBy` eol
+    link   = (,) <$> many letter <* string "-" <*> many letter
 
 solve1 :: String -> Int
 solve1 s =

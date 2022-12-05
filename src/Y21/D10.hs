@@ -7,16 +7,15 @@ import           Imports
 opener2closer :: Map Char Char
 opener2closer = M.fromList $ zip "([{<" ")]}>"
 
-reduce :: String -> String -> (String, String)      -- stack -> input -> (stack, input)
-reduce stack [] = (stack, [])                       -- stop     (exhausted input)
-reduce stack (i:input) =
-    if i `M.member` opener2closer
-        then reduce (i:stack) input                 -- continue (push opener)
-        else case stack of
-            []     -> (stack, i:input)              -- stop     (unexpected closer)
-            (x:xs) -> if opener2closer M.! x == i
-                then reduce xs input                -- continue (pop opener)
-                else (stack, i:input)               -- stop     (closer doesn't match opener)
+reduce :: String -> String -> (String, String)              -- stack -> input -> (stack, input)
+reduce stack [] = (stack, [])                               -- stop     (exhausted input)
+reduce stack (i:input)
+    | i `M.member` opener2closer = reduce (i:stack) input   -- continue (push opener)
+    | otherwise = case stack of
+        [] -> (stack, i:input)                              -- stop     (unexpected closer)
+        (x:xs)
+            | opener2closer M.! x == i -> reduce xs input   -- continue (pop opener)
+            | otherwise -> (stack, i:input)                 -- stop     (closer doesn't match opener)
 
 solve1 :: String -> Int
 solve1 =

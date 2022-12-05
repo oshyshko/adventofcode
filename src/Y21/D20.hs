@@ -34,15 +34,15 @@ image = Image 0 . fromList <$> many1 bit `endBy` eol
 
 getReplacementIndex :: Bit -> Image -> XY -> Int
 getReplacementIndex d Image{vec2} xy =
-            get 256 (XY (-1) (-1))
-        .|. get 128 (XY   0  (-1))
-        .|. get  64 (XY   1  (-1))
-        .|. get  32 (XY (-1)   0 )
-        .|. get  16 (XY   0    0 )
-        .|. get   8 (XY   1    0 )
-        .|. get   4 (XY (-1)   1 )
-        .|. get   2 (XY   0    1 )
-        .|. get   1 (XY   1    1 )
+        get 256 (XY (-1) (-1))
+    .|. get 128 (XY   0  (-1))
+    .|. get  64 (XY   1  (-1))
+    .|. get  32 (XY (-1)   0 )
+    .|. get  16 (XY   0    0 )
+    .|. get   8 (XY   1    0 )
+    .|. get   4 (XY (-1)   1 )
+    .|. get   2 (XY   0    1 )
+    .|. get   1 (XY   1    1 )
  where
     get :: Int -> XY -> Int
     get v dxy = if unBit $ getOr d vec2 (xy + dxy) then v else 0

@@ -48,7 +48,6 @@ split :: Tree -> Maybe Tree
 split (Lit x)
     | x < 10    = Nothing
     | otherwise = let (q, r) = divMod x 2 in Just $ Pair (Lit q) (Lit $ q + r)
-
 split (Pair a b) =
         (split a <&> (`Pair` b))
     <|> (split b <&> Pair a)

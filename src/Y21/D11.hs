@@ -36,12 +36,12 @@ tick mv@(MVec2 (XY w h) v) = do
         maybeA <- atMaybe mv xy
         case maybeA of
             Nothing -> pure ()
-            Just a ->
-                if | a == octoFlashing  -> pure ()
-                   | a < octoMax        -> write mv xy (a+1)
-                   | otherwise          -> do
-                       write mv xy octoFlashing
-                       forM_ neighbors (inc . (+ xy))
+            Just a
+                | a == octoFlashing -> pure ()
+                | a < octoMax       -> write mv xy (a+1)
+                | otherwise         -> do
+                    write mv xy octoFlashing
+                    forM_ neighbors (inc . (+ xy))
 
     octoFlashing    = 255
     octoReset       = 0

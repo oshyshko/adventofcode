@@ -8,6 +8,7 @@ import qualified Data.Vector.Generic         as V
 import qualified Data.Vector.Unboxed.Mutable as VUM
 
 import           Imports
+import           Util
 import           Vec2
 import           XY
 
@@ -16,7 +17,7 @@ type Score  = Word16
 
 minScore :: Index -> Index -> Vec2 Risk -> Score
 minScore start goal Vec2{wh,vec} =
-    (flip . flip fix)
+    fix2
         (Q.singleton start maxBound ())  -- open
         (M.singleton start 0)            -- xy2score
         \loop open xyi2score ->
