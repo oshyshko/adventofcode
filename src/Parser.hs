@@ -1,5 +1,6 @@
 module Parser
-    ( module Text.Parsec
+    ( module Control.Applicative
+    , module Text.Parsec
     , module Text.Parsec.String
     , eol
     , integer
@@ -10,11 +11,11 @@ module Parser
     ) where
 
 import           Control.Applicative ((<|>))
+import qualified Text.Parsec         as P
 import           Text.Parsec         (between, char, count, digit, endBy,
                                       endBy1, hexDigit, letter, many, many1,
                                       manyTill, noneOf, oneOf, option, sepBy,
                                       sepEndBy, string, try, (<?>))
-import qualified Text.Parsec         as P
 import           Text.Parsec.String  (Parser)
 
 eol :: Parser String
