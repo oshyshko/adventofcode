@@ -48,11 +48,11 @@ import           Data.Hashable           (Hashable)
 import           Data.HashMap.Strict     (HashMap)
 import           Data.Int                (Int16, Int32, Int64, Int8)
 import           Data.IntMap.Strict      (IntMap)
-import           Data.List               (delete, dropWhileEnd, foldl1', group,
-                                          intercalate, isInfixOf, isPrefixOf,
-                                          isSuffixOf, nub, partition,
-                                          permutations, sort, sortBy, sortOn,
-                                          transpose)
+import           Data.List               (delete, dropWhileEnd, findIndex,
+                                          foldl1', group, intercalate,
+                                          isInfixOf, isPrefixOf, isSuffixOf,
+                                          nub, partition, permutations, sort,
+                                          sortBy, sortOn, transpose)
 import           Data.List.Split         (chunksOf, divvy, splitOn, splitWhen)
 import           Data.Map.Strict         (Map)
 import           Data.Maybe              (catMaybes, fromJust, fromMaybe,
