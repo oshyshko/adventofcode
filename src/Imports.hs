@@ -53,7 +53,7 @@ import           Data.List               (delete, dropWhileEnd, findIndex,
                                           foldl1', group, intercalate,
                                           isInfixOf, isPrefixOf, isSuffixOf,
                                           nub, partition, permutations, sort,
-                                          sortBy, sortOn, transpose)
+                                          sortBy, sortOn, tails, transpose)
 import           Data.List.Split         (chunksOf, divvy, splitOn, splitWhen)
 import           Data.Map.Strict         (Map)
 import           Data.Maybe              (catMaybes, fromJust, fromMaybe,
