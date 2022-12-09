@@ -40,7 +40,8 @@ import           Data.Bool               (bool)
 import           Data.Char               (digitToInt, intToDigit, isAlphaNum,
                                           isAsciiLower, isLower, isSpace,
                                           isUpper, toLower, toUpper)
-import           Data.Foldable           (foldl', foldlM, maximumBy, minimumBy)
+import           Data.Foldable           (find, foldl', foldlM, maximumBy,
+                                          minimumBy)
 import           Data.Function           (fix, on, (&))
 import           Data.Functor            (void, ($>), (<&>))
 import           Data.Functor.Identity   (Identity (..))
