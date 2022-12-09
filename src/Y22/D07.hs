@@ -18,7 +18,7 @@ mkPath2Size =
         | "$ cd "   `isPrefixOf` x = s {cwd = drop (length @[] "$ cd ") x : cwd}
         | otherwise =
             s {path2size = foldl' (addSize $ readSize x) path2size (tails cwd) }
-    -- ascend ["a", "b", "c"] => [["a","b","c"],["b","c"],["c"],[]]
+    -- tails ["a", "b", "c"] => [["a","b","c"],["b","c"],["c"],[]]
     tails = (++ [[]]) . takeWhile (not . null) . iterate (drop 1)
     readSize = read . head . words
     addSize size p2s path = M.insertWith (+) path size p2s
