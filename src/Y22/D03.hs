@@ -1,7 +1,6 @@
 module Y22.D03 where
 
 import qualified Data.Set as S
-
 import           Imports
 
 priority :: Char -> Int

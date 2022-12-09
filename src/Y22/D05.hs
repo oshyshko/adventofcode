@@ -44,7 +44,7 @@ move f stacks (n, from, to) =
     -- (old -> (ejected, new)) -> index -> values -> (ejected, new-values)
     adjust :: (a -> (a, a)) -> Int -> [a] -> (a, [a])
     adjust f i xs =
-        let (l,x:r) = splitAt i $ xs
+        let (l,x:r) = splitAt i xs
             (ejected, new) = f x
         in (ejected, l ++ new : r)
 
