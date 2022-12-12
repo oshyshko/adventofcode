@@ -35,7 +35,7 @@ solve1 :: String -> Int
 solve1 =
       length
     . filter id
-    . fmap (foldl' (||) False)
+    . fmap or
     . withEveryTree (unobstructed False)
   where
     unobstructed acc origin = \case
@@ -45,7 +45,7 @@ solve1 =
 solve2 :: String -> Int
 solve2 =
       maximum
-    . fmap (foldl' (*) 1)
+    . fmap product
     . withEveryTree (scenery 0)
   where
     scenery acc origin = \case
