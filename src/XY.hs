@@ -1,7 +1,10 @@
 module XY where
 
-data XY = XY Int Int deriving (Show, Eq, Ord)
+data XY = XY Int Int deriving (Eq, Ord)
 type WH = XY
+
+instance Show XY where
+    show (XY x y) = "(" ++ show x ++ "," ++ show y ++ ")"
 
 data Line = Line XY XY deriving (Show, Eq, Ord)
 
