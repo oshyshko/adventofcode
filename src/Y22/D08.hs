@@ -14,21 +14,15 @@ withEveryTree foldBeamFn s =
     & V.fromList
     & \v@Vec2{wh} ->
         let (XY w h) = wh
-        in  [   [ beam v    y    up    xy
-                , beam v    x    left  xy
-                , beam v (h-y-1) down  xy
-                , beam v (w-x-1) right xy
+        in  [   [ beam v    y    (XY   0 (-1)) xy   -- up
+                , beam v    x    (XY (-1)  0)  xy   -- left
+                , beam v (h-y-1) (XY   0   1)  xy   -- down
+                , beam v (w-x-1) (XY   1   0)  xy   -- right
                 ]
             | y <- [0..h-1]
             , x <- [0..w-1]
             , let xy = XY x y ]
   where
-    up, down, left, right :: XY
-    up    = XY   0 (-1)
-    down  = XY   0   1
-    left  = XY (-1)  0
-    right = XY   1   0
-
     beam :: Vec2 Height -> Int -> XY -> XY -> a
     beam v n dxy sxy =
           iterate (+ dxy) sxy
@@ -44,9 +38,9 @@ solve1 =
     . fmap (foldl' (||) False)
     . withEveryTree (unobstructed False)
   where
-    unobstructed c origin = \case
+    unobstructed acc origin = \case
         []     -> True
-        (t:ts) -> (t < origin) && unobstructed c origin ts
+        (t:ts) -> (t < origin) && unobstructed acc origin ts
 
 solve2 :: String -> Int
 solve2 =
@@ -54,6 +48,6 @@ solve2 =
     . fmap (foldl' (*) 1)
     . withEveryTree (scenery 0)
   where
-    scenery c origin = \case
-        []     -> c
-        (t:ts) -> if t < origin then scenery (c + 1) origin ts else c + 1
+    scenery acc origin = \case
+        []     -> acc
+        (t:ts) -> if t < origin then scenery (acc + 1) origin ts else acc + 1
