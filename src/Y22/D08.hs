@@ -36,11 +36,7 @@ solve1 =
       length
     . filter id
     . fmap or
-    . withEveryTree (unobstructed False)
-  where
-    unobstructed acc origin = \case
-        []     -> True
-        (t:ts) -> (t < origin) && unobstructed acc origin ts
+    . withEveryTree \origin -> all (< origin)
 
 solve2 :: String -> Int
 solve2 =
@@ -49,5 +45,7 @@ solve2 =
     . withEveryTree (scenery 0)
   where
     scenery acc origin = \case
-        []     -> acc
-        (t:ts) -> if t < origin then scenery (acc + 1) origin ts else acc + 1
+        [] -> acc
+        (t:ts)
+            | t < origin -> scenery (acc + 1) origin ts
+            | otherwise  -> acc + 1
