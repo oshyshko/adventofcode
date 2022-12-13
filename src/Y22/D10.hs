@@ -4,7 +4,7 @@ import           Imports
 import qualified Letters as L
 import           Parser
 
-data Op     = AddX Int | Noop  deriving Show
+data Op = AddX Int | Noop
 
 -- addx 1
 -- noop
@@ -15,27 +15,23 @@ ops =
     op =    (AddX <$> (string "addx" *> pad *> integer))
         <|> (Noop <$ string "noop")
 
-states :: [Op] -> [Int]
-states =
-      concatMap snd
-    . scanl (\(x, _) -> \case
-        AddX a -> let x' = x + a in (x', [x, x'])
-        Noop   -> (x, [x]))
-        (1, [1])
+xStates :: [Op] -> [Int]
+xStates =
+      scanl (+) 1
+    . concatMap \case
+        AddX a -> [0, a]
+        Noop   -> [0]
 
 solve1 :: String -> Int
 solve1 =
       sum
     . (\cycles -> fmap (\c -> c * cycles !! (c-1)) [20,60..220])
-    . states
+    . xStates
     . parseOrDie ops
 
 solve2 :: String -> String
 solve2 =
-      L.parse
-    . renderCrt
-    . states
-    . parseOrDie ops
+    L.parse . renderCrt . xStates . parseOrDie ops
   where
     renderCrt =
           divvy 40 40
