@@ -1,9 +1,9 @@
 module Y21.D13 where
 
-import qualified Data.Map.Strict as M
-import qualified Data.Set        as S
+import qualified Data.Set as S
 
 import           Imports
+import qualified Letters  as L
 import           Parser
 import           XY
 
@@ -61,26 +61,8 @@ solve1 =
 
 solve2 :: String -> String
 solve2 =
-      fmap ((pat2char M.!) . (concat . take 4))
-    . divvy 4 5
-    . transpose
+      L.parse
     . lines
     . showDots
     . uncurry (foldl' foldOnce)
     . parseOrDie dotsAndFolds
-  where
-    pat2char :: Map String Char
-    pat2char =
-        M.fromList $ zip
-            (fmap concat $ divvy 4 5 $ transpose $ drop 1 rawChars)
-            (fmap head $ divvy 1 5 $ head rawChars)
-    rawChars :: [String]
-    rawChars =
-        [ "A    B    C    E    F    G    H    J    K    L    P    R    U    Z   "
-        , " ##  ###   ##  #### ####  ##  #  #   ## #  # #    ###  ###  #  # ####"
-        , "#  # #  # #  # #    #    #  # #  #    # # #  #    #  # #  # #  #    #"
-        , "#  # ###  #    ###  ###  #    ####    # ##   #    #  # #  # #  #   # "
-        , "#### #  # #    #    #    # ## #  #    # # #  #    ###  ###  #  #  #  "
-        , "#  # #  # #  # #    #    #  # #  # #  # # #  #    #    # #  #  # #   "
-        , "#  # ###   ##  #### #     ### #  #  ##  #  # #### #    #  #  ##  ####"
-        ]
