@@ -7,7 +7,7 @@ import           Parser
 
 type Index = Int
 type Worry = Int
-type ItemsInspections = (Map Index [Worry], Map Index Int)
+type State = (Map Index [Worry], Map Index Int)     -- (items, inspections)
 
 data Monkey = Monkey
     { index       :: Index
@@ -41,14 +41,14 @@ monkeys =
     arg = padded $ (Old <$ string "old") <|> (Lit <$> natural)
     fn  = padded $ (Add <$ string "+")   <|> (Mul <$ string "*")
 
-playAllMonkeys :: (Worry -> Worry) -> Map Index Monkey -> ItemsInspections -> ItemsInspections
+playAllMonkeys :: (Worry -> Worry) -> Map Index Monkey -> State -> State
 playAllMonkeys dropWorry i2m (i2is,i2vs) =
     foldl'
         (\ms index -> playMonkey dropWorry (i2m M.! index) ms)
         (i2is, i2vs)
         (sort $ M.keys i2is)
 
-playMonkey :: (Worry -> Worry) -> Monkey -> ItemsInspections -> ItemsInspections
+playMonkey :: (Worry -> Worry) -> Monkey -> State -> State
 playMonkey dropWorry m@Monkey{index} (i2is,i2vs) =
     let is = i2is M.! index
         i2isNew = foldl'
@@ -72,16 +72,17 @@ whereTo dropWorry Monkey{operation,divisibleBy,onTrue,onFalse} worry =
 
 solve :: Int -> (Worry -> Worry) -> [Monkey] -> Int
 solve n dropWorry ms =
-      fmap (\m -> (index m, m)) ms
+      fmap (\m@Monkey{index} -> (index, m)) ms
     & M.fromList                    -- Map Index Monkey
-    & states                        -- [ItemsInspections]
+    & states                        -- [State]
     & (!! n)                        -- (Map Index [W], Map Index Int)
-    & snd                           -- index-to-inspections
-    & M.elems
+    & snd
+    & M.elems                       -- inspections by every monkey
     & sortOn Down
-    & take 2                        -- top 2
+    & take 2
     & product
   where
+    states :: Map Index Monkey -> [State]
     states i2m =
         iterate
             (playAllMonkeys dropWorry i2m)
