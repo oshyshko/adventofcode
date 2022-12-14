@@ -34,6 +34,9 @@ tr s x = trace (s <> ": " <> show x) x
 trace :: String -> a -> a
 trace = Trace.trace
 
+traceLabel :: Show a => String -> a -> a
+traceLabel s x = Trace.trace (s ++ "=" ++ show x) x
+
 traceShow :: Show a => a -> b -> b
 traceShow = Trace.traceShow
 

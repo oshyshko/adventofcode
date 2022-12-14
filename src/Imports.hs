@@ -62,7 +62,7 @@ import           Data.Set                (Set)
 import           Data.Tuple.Strict       (T1 (..), T2 (..), T3 (..), T4 (..),
                                           T5 (..), T6 (..), T7 (..), T8 (..),
                                           scurry, sfst, ssnd, sswap, suncurry)
-import           Data.Word               (Word16, Word32, Word8)
+import           Data.Word               (Word16, Word32, Word64, Word8)
 import           System.IO               (hFlush, stdout)
 import           Text.Printf             (printf)
 import           Text.Read               (readMaybe)
