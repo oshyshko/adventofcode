@@ -5,20 +5,20 @@ import           Imports
 import           Parser
 import           XY
 
-moves :: Parser [(XY, Int)]
+moves :: Parser [(Int, XY)]
 moves =
     move `endBy` eol
   where
-    move = (,) <$> dxy <* pad <*> natural
+    move = flip (,) <$> dxy <* pad <*> natural
     dxy =   char 'U' $> XY   0 (-1)
         <|> char 'D' $> XY   0   1
         <|> char 'L' $> XY (-1)  0
         <|> char 'R' $> XY   1   0
 
-iterations :: Int -> [(XY, Int)] -> [[XY]]
+iterations :: Int -> [(Int, XY)] -> [[XY]]
 iterations ropeLength =
       scanl (flip applyMove) (replicate ropeLength 0)
-    . concatMap (\(dxy, n) -> replicate n dxy)
+    . concatMap (uncurry replicate)
   where
     applyMove :: XY -> [XY] -> [XY]
     applyMove dxy = \case
