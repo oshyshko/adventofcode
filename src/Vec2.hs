@@ -4,6 +4,7 @@ import qualified Data.Vector.Generic as V
 import qualified Data.Vector.Unboxed as VU
 
 import           Imports
+import           MVec2               (MVec2 (..))
 import           XY
 
 type Index  = Int
@@ -16,8 +17,26 @@ data Vec2 a where
 
 deriving instance Eq a => Eq (Vec2 a)
 
-instance Show (Vec2 a) where
-  show v@Vec2{} = ("\n" <> ) . intercalate "\n" $ fmap (concatMap show) . toList $ v
+instance (VU.Unbox a, Show a) => Show (Vec2 a) where
+  show v@Vec2{vec} =
+    let maxWidth = maximum . fmap (length . show) . V.toList $ vec
+        showCell = printf ("%" ++ show maxWidth ++ "s") . show
+    in  ("\n" <> )
+      . concatMap ((++ "\n") . unwords . fmap showCell)
+      . toList
+      $ v
+
+map :: (VU.Unbox a, VU.Unbox b, Show b) => (a -> b) -> Vec2 a -> Vec2 b
+map f Vec2{wh,vec} = Vec2 wh (V.map f vec)
+
+ifoldl' :: (a -> XY -> b -> a) -> a -> Vec2 b -> a
+ifoldl' f acc Vec2{wh,vec} = V.ifoldl' (\a i b -> f a (i2xy wh i) b) acc vec
+
+thaw :: (PrimMonad m) =>Vec2 v -> m (MVec2 m v)
+thaw Vec2{wh,vec} = MVec2 wh <$> V.thaw vec
+
+freeze :: (PrimMonad m, Show a) => MVec2 m a -> m (Vec2 a)
+freeze MVec2{wh,vec} = Vec2 wh <$> V.freeze vec
 
 toList :: VU.Unbox a => Vec2 a -> [[a]]
 toList (Vec2 (XY w _) vec) = chunksOf w (VU.toList vec)
@@ -45,3 +64,7 @@ atMaybe (Vec2 wh@(XY w h) v) xy@(XY x y)
 {-# INLINE[1] getOr #-}
 getOr :: v -> Vec2 v -> XY -> v
 getOr orV v xy = fromMaybe orV $ atMaybe v xy
+
+{-# INLINE[1] findIndex #-}
+findIndex :: (v -> Bool) -> Vec2 v -> Maybe XY
+findIndex f Vec2{wh,vec} = V.findIndex f vec <&> i2xy wh

@@ -1,53 +1,43 @@
 module Y21.D09 where
 
-import qualified Data.Vector.Generic as V
-import qualified Data.Vector.Unboxed as VU
-import qualified Data.Set            as S
-
+import qualified Data.Set as S
 import           Imports
+import qualified Vec2     as V
+import           Vec2     (Vec2 (..))
 import           XY
 
-type Height    = Char
-data HeightMap = HeightMap XY (VU.Vector Height)    -- wh values
+type Height = Char
 
-parse :: String -> HeightMap
-parse s =
-    let xs = lines s
-        wh = XY (length . head $ xs) (length xs)
-        v  = VU.fromList . concat $ xs
-    in HeightMap wh v
+parse :: String -> Vec2 Height
+parse = V.fromList . lines
 
 neighbors :: [XY]
 neighbors = [XY (-1) 0, XY 1 0, XY 0 (-1), XY 0 1]
 
-atMaybe :: HeightMap -> XY -> Maybe Height      -- 9 or out of bounds = Nothing
-atMaybe (HeightMap (XY w h) v) (XY x y)
-    | x < 0 || y < 0 || x >= w || y >= h = Nothing
-    | otherwise =
-        let height = v V.! (y * w + x)
-        in if height == '9' then Nothing else Just height
+atMaybe :: Vec2 Height -> XY -> Maybe Height
+atMaybe v xy =
+    V.atMaybe v xy >>= \h ->
+        if h == '9' then Nothing else Just h
 
-lowPoint :: HeightMap -> XY -> Bool
-lowPoint hm xy =
-    atMaybe hm xy & maybe False \c ->
-         all (maybe True (c <) . atMaybe hm . (+ xy)) neighbors
+lowPoint :: Vec2 Height -> XY -> Bool
+lowPoint v xy =
+    atMaybe v xy & maybe False \c ->
+        all (maybe True (c <) . atMaybe v . (+ xy)) neighbors
 
-lowPoints :: HeightMap -> [(XY, Height)]
-lowPoints hm@(HeightMap (XY w _) v) =
+lowPoints :: Vec2 Height -> [(XY, Height)]
+lowPoints v =
     V.ifoldl' f [] v
   where
-    f ps i value =
-        let xy = XY (rem i w) (quot i w)
-        in if lowPoint hm xy then (xy, value):ps else ps
+    f ps xy value = if lowPoint v xy then (xy, value):ps else ps
 
-basins :: HeightMap -> [Set XY]
-basins hm =
-    flood S.empty . fst <$> lowPoints hm
+basins :: Vec2 Height -> [Set XY]
+basins v =
+    flood S.empty . fst <$> lowPoints v
   where
     flood :: Set XY -> XY -> Set XY
     flood s xy
         | S.member xy s = s
-        | otherwise = atMaybe hm xy & \case
+        | otherwise = atMaybe v xy & \case
             Nothing -> s
             Just _  -> foldl' (\ss -> flood ss . (+ xy)) (S.insert xy s) neighbors
 

@@ -65,6 +65,5 @@ import           Data.Tuple.Strict       (T1 (..), T2 (..), T3 (..), T4 (..),
 import           Data.Word               (Word16, Word32, Word64, Word8)
 import           System.IO               (hFlush, stdout)
 import           Text.Printf             (printf)
-import           Text.Read               (readMaybe)
 
 

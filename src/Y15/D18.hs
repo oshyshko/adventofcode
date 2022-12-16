@@ -1,11 +1,12 @@
 module Y15.D18 where
 
-import qualified Data.Vector.Unboxed         as VU
 import qualified Data.Vector.Unboxed.Mutable as VUM
 
 import           Imports
-import           MVec2
+import           MVec2                       (MVec2 (..))
+import qualified MVec2                       as MV
 import           Parser
+import qualified Vec2                        as V
 import           XY
 
 type Board m = MVec2 m Bool
@@ -23,19 +24,9 @@ lights =
     light = char '#' $> True
         <|> char '.' $> False
 
-mkLights :: PrimMonad m => [[Bool]] -> m (MVec2 m Bool)
-mkLights xs =
-    let h = length xs
-        w = length . head $ xs
-    in MVec2 (XY w h) <$> (VU.thaw . VU.fromList $ join xs)
-
-unLights :: PrimMonad m  => MVec2 m Bool -> m [[Bool]]
-unLights (MVec2 (XY w _) vec) =
-    chunksOf w . VU.toList <$> VU.freeze vec
-
 neighborsOnAround :: PrimMonad m => MVec2 m Bool -> XY -> m Int
 neighborsOnAround v xy =
-    length . filter id <$> mapM (getOr False v . (+ xy))
+    length . filter id <$> mapM (MV.readOr False v . (+ xy))
         [ XY (-1) (-1), XY  0 (-1), XY   1  (-1)
         , XY (-1)   0 ,             XY   1    0
         , XY (-1)   1 , XY  0   1 , XY   1    1
@@ -71,7 +62,7 @@ tickTimes tick b n = do
 
 solve :: TickFn -> String -> IO Int
 solve tick s = do
-    b <- mkLights (parseOrDie lights s)
+    b <- V.thaw . V.fromList . parseOrDie lights $ s
     tickTimes tick b 100
     VUM.foldl' (\a x -> a + bool 0 1 x) 0  (vec b)
 
@@ -82,12 +73,11 @@ tick1 _ _ v n =
        (    v && (n == 2 || n == 3))
     || (not v && n == 3)
 
+solve1 :: String -> IO Int
+solve1 = solve tick1
+
 -- four lights, one in each corner, are stuck on and can't be turned off.
-tick2 :: TickFn
-tick2 wh@(XY w h) xy@(XY x y) v n =
+solve2 :: String -> IO Int
+solve2 = solve \wh@(XY w h) xy@(XY x y) v n ->
     (x == 0 || x == w - 1) && (y == 0 || y == h - 1)
         || tick1 wh xy v n
-
-solve1, solve2 :: String -> IO Int
-solve1 = solve tick1
-solve2 = solve tick2

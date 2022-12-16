@@ -1,28 +1,29 @@
 module Y21.D11 where
 
-import qualified Data.Vector.Generic         as V
 import qualified Data.Vector.Unboxed.Mutable as VUM
 
 import           Imports
-import           MVec2
+import           MVec2                       (MVec2 (..))
+import qualified MVec2                       as MV
 import           Util
+import qualified Vec2                        as V
 import           XY
 
-type Board m = MVec2 m Word8
+type Energy = Word8
 
 -- 11111
 -- 19991
 -- 19191
 -- 19991
 -- 11111
-parse :: PrimMonad m => String -> m (Board m)
-parse s =
-    let xs = lines s
-        wh = XY (length . head $ xs) (length xs)
-        v  = V.thaw . V.fromList . fmap (fromIntegral . digitToInt) . concat $ xs
-    in MVec2 wh <$> v
+parse :: PrimMonad m => String -> m (MVec2 m Energy)
+parse =
+      V.thaw
+    . V.fromList
+    . fmap (fmap $ fromIntegral . digitToInt)
+    . lines
 
-tick :: forall m. PrimMonad m => Board m -> m Int
+tick :: forall m. PrimMonad m => MVec2 m Energy -> m Int
 tick mv@(MVec2 (XY w h) v) = do
     mapM_ inc [ XY x y | x <- [0..w], y <- [0..h] ] -- inc + cascade
     VUM.ifoldM countAndReset 0 v                    -- count flashes and reset
@@ -33,14 +34,14 @@ tick mv@(MVec2 (XY w h) v) = do
 
     inc :: XY -> m ()
     inc xy = do
-        maybeA <- atMaybe mv xy
+        maybeA <- MV.readMaybe mv xy
         case maybeA of
             Nothing -> pure ()
             Just a
                 | a == octoFlashing -> pure ()
-                | a < octoMax       -> write mv xy (a+1)
+                | a < octoMax       -> MV.write mv xy (a+1)
                 | otherwise         -> do
-                    write mv xy octoFlashing
+                    MV.write mv xy octoFlashing
                     forM_ neighbors (inc . (+ xy))
 
     octoFlashing    = 255
@@ -49,20 +50,16 @@ tick mv@(MVec2 (XY w h) v) = do
     neighbors       = [ XY x y | x <- [-1..1], y <- [-1..1], x /=0 || y /= 0 ]
 
 solve1 :: String -> IO Int
-solve1 s =
-    parse s >>= (replicateM 100 . tick) <&> sum
+solve1 s = parse s >>= replicateM 100 . tick <&> sum
 
 solve2 :: String -> IO Int
-solve2 s = do
-    b@(MVec2 (XY w h) _) <- parse s
+solve2 s = parse s >>= \v@(MVec2 (XY w h) _) ->
     fix1 1 \loop i -> do
-        n <- tick b
+        n <- tick v
         if n == w * h
             then pure i
             else loop (i+1)
 
 -- debug helpers
-showBoard :: PrimMonad m => Board m -> m String
-showBoard (MVec2 (XY w _) v) =
-    intercalate "\n" . chunksOf w . fmap (intToDigit . fromIntegral) . V.toList
-        <$> V.freeze v
+showBoard :: PrimMonad m => MVec2 m Energy -> m String
+showBoard = fmap (show . V.map (intToDigit . fromIntegral)) . V.freeze

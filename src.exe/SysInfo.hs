@@ -3,11 +3,12 @@ module SysInfo
        , SysInfo(..)
        ) where
 
-import qualified Data.Version      as V
-import qualified System.Info       as SI
-import           System.Process    (readProcessWithExitCode)
+import qualified Data.Version   as V
+import qualified System.Info    as SI
+import           System.Process (readProcessWithExitCode)
+import           Text.Read      (readMaybe)
 
-import Imports
+import           Imports
 
 data SysInfo = SysInfo
     { osName       :: Maybe String
