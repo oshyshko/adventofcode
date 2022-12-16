@@ -93,6 +93,6 @@ solve1 = solve 20 (`quot` 3) . parseOrDie monkeys
 
 solve2 :: String -> Int
 solve2 s =
-    let ms = parseOrDie monkeys s
-        wraparound = (`rem` foldl' lcm 1 (fmap divisibleBy ms))
-    in solve 10000 wraparound ms
+    let ms   = parseOrDie monkeys s
+        lcm' = foldl' lcm 1 (fmap divisibleBy ms)
+    in solve 10000 (`rem` lcm') ms
