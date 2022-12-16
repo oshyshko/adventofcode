@@ -25,7 +25,6 @@ module Imports
     , module Data.Word
     , module System.IO
     , module Text.Printf
-    , module Text.Read
     ) where
 
 import           Control.Applicative     (liftA2, (<|>))
