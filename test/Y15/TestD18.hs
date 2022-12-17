@@ -6,8 +6,15 @@ import           Test.Hspec
 import           Imports
 import           MVec2
 import           Parser
+import qualified Vec2                        as V
 import           XY
 import           Y15.D18
+
+mkLights :: PrimMonad m => [[Bool]] -> m (MVec2 m Bool)
+mkLights = V.thaw . V.fromList
+
+unLights :: PrimMonad m  => MVec2 m Bool -> m [[Bool]]
+unLights = fmap V.toList . V.freeze
 
 spec :: Spec
 spec = do
@@ -117,14 +124,14 @@ spec = do
         wh b `shouldBe` XY w h
 
         sequence
-            [ getOr undefined b (XY xx yy)
+            [ readOr undefined b (XY xx yy)
             | yy <- [0..h-1]
             , xx <- [0..w-1]
             ]
                 >>= (`shouldBe` join state0)
 
-        getOr True  b (XY w h) >>= (`shouldBe` True)
-        getOr False b (XY w h) >>= (`shouldBe` False)
+        readOr True  b (XY w h) >>= (`shouldBe` True)
+        readOr False b (XY w h) >>= (`shouldBe` False)
 
     it "neighboursOnAround" $ do
         b <- mkLights [ [x, x, x]

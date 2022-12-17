@@ -9,8 +9,6 @@ import           Parser
 import qualified Vec2                        as V
 import           XY
 
-type Board m = MVec2 m Bool
-
 type TickFn = WH -> XY -> Bool -> Int -> Bool
 
 lights :: Parser [[Bool]]
@@ -34,7 +32,7 @@ neighborsOnAround v xy =
         -- NOTE: alternative, produces 486MB -> 569MB allocations
         -- [ XY x y | x <- [-1,0,1], y <- [-1,0,1], x /=0 || y /= 0 ]
 
-tickLights :: PrimMonad m => TickFn -> MVec2 m Bool -> Board m -> m ()
+tickLights :: PrimMonad m => TickFn -> MVec2 m Bool ->  MVec2 m Bool -> m ()
 tickLights f src@(MVec2 wh@(XY w h) _) dst =
     forM_ [ (XY x y, y * w + x)
           | y <- [0..h-1]
@@ -73,11 +71,12 @@ tick1 _ _ v n =
        (    v && (n == 2 || n == 3))
     || (not v && n == 3)
 
-solve1 :: String -> IO Int
-solve1 = solve tick1
-
 -- four lights, one in each corner, are stuck on and can't be turned off.
-solve2 :: String -> IO Int
-solve2 = solve \wh@(XY w h) xy@(XY x y) v n ->
+tick2 :: TickFn
+tick2 wh@(XY w h) xy@(XY x y) v n =
     (x == 0 || x == w - 1) && (y == 0 || y == h - 1)
         || tick1 wh xy v n
+
+solve1, solve2 :: String -> IO Int
+solve1 = solve tick1
+solve2 = solve tick2
