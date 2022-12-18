@@ -7,8 +7,6 @@ import           Imports
 import           MVec2               (MVec2 (..))
 import           XY
 
-type Index  = Int
-
 data Vec2 a where
     Vec2 :: (VU.Unbox a, Show a) =>
         { wh  :: XY
@@ -41,6 +39,7 @@ freeze MVec2{wh,vec} = Vec2 wh <$> V.freeze vec
 toList :: VU.Unbox a => Vec2 a -> [[a]]
 toList (Vec2 (XY w _) vec) = chunksOf w (VU.toList vec)
 
+{-# INLINE[1] fromList #-}
 fromList :: (VU.Unbox a, Show a) => [[a]] -> Vec2 a
 fromList xs =
     -- TODO assert xs has equal lengths for all elements
