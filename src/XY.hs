@@ -2,6 +2,7 @@ module XY where
 
 data XY = XY Int Int deriving (Eq, Ord)
 type WH = XY
+type XYI = Int
 
 instance Show XY where
     show (XY x y) = "(" ++ show x ++ "," ++ show y ++ ")"
