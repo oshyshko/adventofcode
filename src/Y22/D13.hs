@@ -3,17 +3,17 @@ module Y22.D13 where
 import           Imports
 import           Parser
 
-data Value
+data Packet
     = V Int
-    | L [Value]
+    | L [Packet]
     deriving (Show, Eq)
 
 -- [[1],[2,3,4]]
-value :: Parser Value
-value = char '[' *> (L <$> value `sepBy` char ',') <* char ']'
+packet :: Parser Packet
+packet = char '[' *> (L <$> packet `sepBy` char ',') <* char ']'
     <|> (V <$> natural)
 
-instance Ord Value where
+instance Ord Packet where
     compare    (V l)  (V r) = compare l r
     compare    (L l)  (L r) = compare l r
     compare l@(L _) r@(V _) = compare l       (L [r])
@@ -28,7 +28,7 @@ solve1 =
     . fmap (uncurry compare)
     . parseOrDie (pair `sepBy` eol)
   where
-    pair = (,) <$> value <* eol <*> value <* eol
+    pair = (,) <$> packet <* eol <*> packet <* eol
 
 solve2 :: String -> Int
 solve2 =
@@ -37,6 +37,6 @@ solve2 =
     . (\vs -> fmap (fmap succ . (`elemIndex` vs)) ds)
     . sort
     . (++ ds)
-    . parseOrDie (value `endBy` many eol)
+    . parseOrDie (packet `endBy` many eol)
   where
-    ds = parseOrDie value <$> ["[[2]]", "[[6]]"]
+    ds = parseOrDie packet <$> ["[[2]]", "[[6]]"]
