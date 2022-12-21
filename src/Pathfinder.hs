@@ -16,25 +16,25 @@ import           Util
 {-# INLINE[1] minScoreIntMap #-} -- TODO remove?
 minScoreIntMap :: (p ~ Int, Bounded s, Ord s, Num s)
     => (p -> [p]) -> (p -> v) -> (v -> s)                               -- board
-    -> p -> p -> s                                                      -- start goal
+    -> p -> p -> Maybe s                                                -- start goal
 minScoreIntMap = minScore M.empty (M.findWithDefault maxBound) M.insert
 
 {-# INLINE[1] minScore #-} -- TODO remove?
 minScore :: (p ~ Int, Bounded s, Ord s, Num s)
     => ss -> (p -> ss -> s) -> (p -> s -> ss -> ss)                     -- score storage
     -> (p -> [p]) -> (p -> v) -> (v -> s)                               -- board
-    -> p -> p -> s                                                      -- start goal
+    -> p -> p -> Maybe s                                                -- start goal
 minScore ssEmpty getScore setScore neighbors at score start goal =
     fix2
         (Q.singleton start maxBound ())                                 -- open
         (setScore start 0 ssEmpty)                                      -- xy2score
         \loop open ss ->
             Q.alterMin (,Nothing) open & \case
-                (Nothing, _) -> error "No path"                         -- exhausted ?
+                (Nothing, _) -> Nothing                                 -- exhausted ?
                 (Just (current, _, _), openEjected) ->
                     let currentScore = getScore current ss
                     in if current == goal                               -- goal reached?
-                        then currentScore
+                        then Just currentScore
                         else
                               neighbors current                         -- for each neighbor
                             & foldl'                                    -- apply collected changes
@@ -55,7 +55,7 @@ minScore ssEmpty getScore setScore neighbors at score start goal =
 minScoreMVector :: (p ~ Int, Bounded s, Ord s, Num s, VUM.Unbox s)
     => Int                                                              -- score storage (size)
     -> (p -> [p]) -> (p -> v) -> (v -> s)                               -- board
-    -> p -> p -> s                                                      -- start goal
+    -> p -> p -> Maybe s                                                -- start goal
 minScoreMVector scoreStorageSize neighbors at score start goal =
     runST $ do
         let mkStoreStorage    = VUM.replicate scoreStorageSize maxBound
@@ -68,11 +68,11 @@ minScoreMVector scoreStorageSize neighbors at score start goal =
 
         fix \loop -> do
             S.readSTRef open <&> Q.alterMin (,Nothing) >>= \case
-                (Nothing, _) -> error "No path"                         -- exhausted ?
+                (Nothing, _) -> pure Nothing                            -- exhausted ?
                 (Just (current, _, _), openEjected) -> do
                     currentScore <- readScore current ss
                     if current == goal                                  -- goal reached?
-                        then pure currentScore
+                        then pure $ Just currentScore
                         else do
                             S.writeSTRef open openEjected
                             forM_ (neighbors current) \nXyi -> do       -- for each neighbor

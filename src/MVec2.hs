@@ -13,6 +13,13 @@ data MVec2 m v where
         , vec :: VUM.MVector (PrimState m) v
         } -> MVec2 m v
 
+{-# INLINE[1] read #-}
+read :: (PrimMonad m, VUM.Unbox v) => MVec2 m v -> XY -> m v
+read (MVec2 wh@(XY w h) v) xy@(XY x y)
+    | x < 0 || y < 0 || x >= w || y >= h =
+        error $ "Out of bounds: " ++ show xy ++ " for size " ++ show wh
+    | otherwise = VUM.read v (xy2i wh xy)
+
 {-# INLINE[1] readMaybe #-}
 readMaybe :: MVec2 m v -> XY -> m (Maybe v)
 readMaybe (MVec2 wh@(XY w h) v) xy@(XY x y) =
