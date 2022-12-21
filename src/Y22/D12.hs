@@ -28,30 +28,23 @@ parseMapStartEnd =
         | 'E' == h             = cost 'z'
         | otherwise            = error $ "Unexpected height: " ++ show h
 
-at :: Vec2 Height -> XYI -> Height
-at Vec2{vec} = (vec VG.!)
-
--- TODO consider reducing value lookups by merging 'at' with 'neighbors`
-neighbors :: Vec2 Height -> XY -> [XYI]
-neighbors Vec2{wh,vec} xy =
-    [ nXyi
-    | d <- [XY 0 (-1), XY 0 1, XY (-1) 0, XY 1 0]
-    , let nXy@(XY nx ny) = xy + d
-    , let (XY w h ) = wh
-    , nx >= 0 && ny >= 0 && nx < w && ny < h
-    , let nXyi = xy2i wh nXy
-    , (vec VG.! nXyi - 1) <= vec VG.! xy2i wh xy
-    ]
-
 minScore :: Vec2 Height -> XY -> XY -> Maybe Int
-minScore v@Vec2{wh,vec} start goal =
-    Pathfinder.minScoreMVector
-        (VG.length vec)
-        (neighbors v . i2xy wh)
-        (at v)
-        (const 1)
-        (xy2i wh start)
-        (xy2i wh goal)
+minScore Vec2{wh,vec} start goal =
+    Pathfinder.minScoreMVector (VG.length vec) (neighbors . i2xy wh) at (const 1) (xy2i wh start) (xy2i wh goal)
+  where
+    -- TODO consider reducing value lookups by merging 'at' with 'neighbors`
+    at :: XYI -> Height
+    at = (vec VG.!)
+    neighbors :: XY -> [XYI]
+    neighbors xy =
+        [ nXyi
+        | d <- [XY 0 (-1), XY 0 1, XY (-1) 0, XY 1 0]
+        , let nXy@(XY nx ny) = xy + d
+        , let (XY w h ) = wh
+        , nx >= 0 && ny >= 0 && nx < w && ny < h
+        , let nXyi = xy2i wh nXy
+        , (vec VG.! nXyi - 1) <= vec VG.! xy2i wh xy
+        ]
 
 solve1 :: String -> Int
 solve1 s =
