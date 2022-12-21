@@ -8,20 +8,9 @@ data Value
     | L [Value]
     deriving (Show, Eq)
 
--- [1,1,3,1,1]
--- [1,1,5,1,1]
---
 -- [[1],[2,3,4]]
--- [[1],4]
-pairs :: Parser [(Value, Value)]
-pairs =
-    pair `sepBy` eol
-  where
-    pair = (,) <$> value <* eol <*> value <* eol
-
 value :: Parser Value
-value =
-        char '[' *> (L <$> value `sepBy` char ',') <* char ']'
+value = char '[' *> (L <$> value `sepBy` char ',') <* char ']'
     <|> (V <$> natural)
 
 instance Ord Value where
@@ -37,7 +26,9 @@ solve1 =
     . filter ((== LT) . snd)
     . zip [1..]
     . fmap (uncurry compare)
-    . parseOrDie pairs
+    . parseOrDie (pair `sepBy` eol)
+  where
+    pair = (,) <$> value <* eol <*> value <* eol
 
 solve2 :: String -> Int
 solve2 =
