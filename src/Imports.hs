@@ -36,9 +36,10 @@ import           Control.Monad.IO.Class  (MonadIO, liftIO)
 import           Control.Monad.Primitive (PrimMonad (..))
 import           Data.Bifunctor          (bimap, first, second)
 import           Data.Bool               (bool)
-import           Data.Char               (digitToInt, intToDigit, isAlphaNum,
-                                          isAsciiLower, isLower, isSpace,
-                                          isUpper, toLower, toUpper)
+import           Data.Char               (chr, digitToInt, intToDigit,
+                                          isAlphaNum, isAsciiLower, isLower,
+                                          isSpace, isUpper, ord, toLower,
+                                          toUpper)
 import           Data.Foldable           (find, foldl', foldlM, maximumBy,
                                           minimumBy)
 import           Data.Function           (fix, on, (&))
