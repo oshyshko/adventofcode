@@ -48,11 +48,12 @@ minScore Vec2{wh,vec} start goal =
 
 solve1 :: String -> Int
 solve1 s =
-    let (v,start,goal) = parseMapStartEnd s
-    in fromJust $ minScore v start goal
+    parseMapStartEnd s & \(v,start,goal) ->
+        fromJust $ minScore v start goal
 
 solve2 :: String -> Int
 solve2 s =
-    let (v@Vec2{wh,vec},_,goal) = parseMapStartEnd s
-        starts = VG.ifoldl' (\a i b -> if b == 0 then i:a else a) [] vec
-    in minimum $ mapMaybe (\start -> minScore v (i2xy wh start) goal) starts
+    parseMapStartEnd s & \(v@Vec2{wh,vec},_,goal) ->
+          VG.ifoldl' (\a i b -> if b == 0 then i:a else a) [] vec   -- starting points
+        & mapMaybe (\start -> minScore v (i2xy wh start) goal)
+        & minimum
