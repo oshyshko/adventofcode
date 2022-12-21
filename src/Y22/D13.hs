@@ -34,10 +34,9 @@ solve2 :: String -> Int
 solve2 =
       product
     . catMaybes
-    . (\vs -> fmap (fmap succ . (`elemIndex` vs)) [d0, d1])
+    . (\vs -> fmap (fmap succ . (`elemIndex` vs)) ds)
     . sort
-    . (++ [d0, d1])
+    . (++ ds)
     . parseOrDie (value `endBy` many eol)
   where
-    d0 = parseOrDie value "[[2]]"
-    d1 = parseOrDie value "[[6]]"
+    ds = parseOrDie value <$> ["[[2]]", "[[6]]"]
