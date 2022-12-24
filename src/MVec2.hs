@@ -15,32 +15,31 @@ data MVec2 m v where
 
 {-# INLINE[1] read #-}
 read :: (PrimMonad m, VUM.Unbox v) => MVec2 m v -> XY -> m v
-read (MVec2 wh@(XY w h) v) xy@(XY x y)
-    | x < 0 || y < 0 || x >= w || y >= h =
-        error $ "Out of bounds: " ++ show xy ++ " for size " ++ show wh
-    | otherwise = VUM.read v (xy2i wh xy)
+read v@(MVec2 wh vec) xy
+    | xy `notWithin` v  = error $ "Out of bounds: " ++ show xy ++ " for size " ++ show wh
+    | otherwise         = VUM.read vec (xy2i wh xy)
 
 {-# INLINE[1] readMaybe #-}
 readMaybe :: MVec2 m v -> XY -> m (Maybe v)
-readMaybe (MVec2 wh@(XY w h) v) xy@(XY x y) =
-    if x < 0 || y < 0 || x >= w || y >= h
-        then pure Nothing
-        else Just <$> VUM.read v (xy2i wh xy)
+readMaybe v@(MVec2 wh vec) xy
+    | xy `notWithin` v  = pure Nothing
+    | otherwise         = Just <$> VUM.read vec (xy2i wh xy)
 
 {-# INLINE[1] readOr #-}
 readOr :: (PrimMonad m, VUM.Unbox v) => v -> MVec2 m v -> XY -> m v
-readOr orV (MVec2 wh@(XY w h) vec) xy@(XY x y) =
-    if x < 0 || y < 0 || x >= w || y >= h
-        then return orV
-        else VUM.read vec (xy2i wh xy)
+readOr orV v@(MVec2 wh vec) xy
+    | xy `notWithin` v  = return orV
+    | otherwise         = VUM.read vec (xy2i wh xy)
 
 {-# INLINE[1] write #-}
 write :: MVec2 m v -> XY -> v -> m ()
 write MVec2{wh,vec} xy = VUM.write vec (xy2i wh xy)
 
-{-# INLINE[1] getOr #-} -- reduces allocations in Y15.D18: 532MB -> 486MB
-getOr :: (PrimMonad m, VUM.Unbox v) => v -> MVec2 m v -> XY -> m v
-getOr orV (MVec2 wh@(XY w h) vec) xy@(XY x y) =
-    if x < 0 || y < 0 || x >= w || y >= h
-        then return orV
-        else VUM.read vec (xy2i wh xy)
+replicate :: (PrimMonad m, VUM.Unbox v) => WH -> v -> m (MVec2 m v)
+replicate wh@(XY w h) v = MVec2 wh <$> VUM.replicate (w * h) v
+
+{-# INLINE[1] within #-}
+{-# INLINE[1] notWithin #-}
+within, notWithin :: XY -> MVec2 m v -> Bool
+within    (XY x y) (MVec2 (XY w h) _) = x >= 0 && y >= 0 && x < w && y < h
+notWithin (XY x y) (MVec2 (XY w h) _) = x < 0 || y < 0 || x >= w || y >= h

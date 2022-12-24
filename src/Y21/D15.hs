@@ -37,7 +37,7 @@ atTiled Vec2{wh,vec} wht i =
         & pred & (`mod` 9) & succ                                       -- wrap around
 
 solve1, solve2, solve1IM, solve2IM :: String -> Int
-solve1   = (\v@Vec2{wh,vec} ->                           fromJust $ Pathfinder.minScoreMVector (        VG.length vec) (neighbors wh  . i2xy wh)  (at v)          fromIntegral 0 (        VG.length vec - 1)) <$> parse
-solve2   = (\v@Vec2{wh,vec} -> let wht = wh `scale` 5 in fromJust $ Pathfinder.minScoreMVector (5 * 5 * VG.length vec) (neighbors wht . i2xy wht) (atTiled v wht) fromIntegral 0 (5 * 5 * VG.length vec - 1)) <$> parse
-solve1IM = (\v@Vec2{wh,vec} ->                           fromJust $ Pathfinder.minScoreIntMap                          (neighbors wh  . i2xy wh)  (at v)          fromIntegral 0 (        VG.length vec - 1)) <$> parse
-solve2IM = (\v@Vec2{wh,vec} -> let wht = wh `scale` 5 in fromJust $ Pathfinder.minScoreIntMap                          (neighbors wht . i2xy wht) (atTiled v wht) fromIntegral 0 (5 * 5 * VG.length vec - 1)) <$> parse
+solve1   = (\v@Vec2{wh,vec} ->                            fromJust $ Pathfinder.minScoreMVector (        VG.length vec) (neighbors wh  . i2xy wh)  (at v)          fromIntegral 0 (        VG.length vec - 1)) <$> parse
+solve2   = (\v@Vec2{wh,vec} -> let wht = xyMap (*5) wh in fromJust $ Pathfinder.minScoreMVector (5 * 5 * VG.length vec) (neighbors wht . i2xy wht) (atTiled v wht) fromIntegral 0 (5 * 5 * VG.length vec - 1)) <$> parse
+solve1IM = (\v@Vec2{wh,vec} ->                            fromJust $ Pathfinder.minScoreIntMap                          (neighbors wh  . i2xy wh)  (at v)          fromIntegral 0 (        VG.length vec - 1)) <$> parse
+solve2IM = (\v@Vec2{wh,vec} -> let wht = xyMap (*5) wh in fromJust $ Pathfinder.minScoreIntMap                          (neighbors wht . i2xy wht) (atTiled v wht) fromIntegral 0 (5 * 5 * VG.length vec - 1)) <$> parse

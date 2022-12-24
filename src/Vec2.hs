@@ -24,6 +24,16 @@ instance (VU.Unbox a, Show a) => Show (Vec2 a) where
       . toList
       $ v
 
+showBits :: Vec2 Bit -> String
+showBits =
+        ("\n" <> )
+      . concatMap ((++ "\n") . unwords . fmap showBit)
+      . toList
+  where
+    showBit = \case
+        Bit True  -> "#"
+        Bit False -> "."
+
 map :: (VU.Unbox a, VU.Unbox b, Show b) => (a -> b) -> Vec2 a -> Vec2 b
 map f Vec2{wh,vec} = Vec2 wh (V.map f vec)
 
@@ -49,16 +59,15 @@ fromList xs =
 
 {-# INLINE[1] (!) #-}
 (!) :: Vec2 v -> XY -> v
-(!) (Vec2 wh@(XY w h) v) xy@(XY x y)
-    | x < 0 || y < 0 || x >= w || y >= h =
-        error $ "Out of bounds: " ++ show xy ++ " for size " ++ show wh
-    | otherwise = (V.!) v (xy2i wh xy)
+(!) v@(Vec2 wh vec) xy
+    | xy `notWithin` v  = error $ "Out of bounds: " ++ show xy ++ " for size " ++ show wh
+    | otherwise         = (V.!) vec (xy2i wh xy)
 
 {-# INLINE[1] atMaybe #-}
 atMaybe :: Vec2 v -> XY -> Maybe v
-atMaybe (Vec2 wh@(XY w h) v) xy@(XY x y)
-    | x < 0 || y < 0 || x >= w || y >= h = Nothing
-    | otherwise = Just $ (V.!) v (xy2i wh xy)
+atMaybe v@(Vec2 wh vec) xy
+    | xy `notWithin` v  = Nothing
+    | otherwise         = Just $ (V.!) vec (xy2i wh xy)
 
 {-# INLINE[1] getOr #-}
 getOr :: v -> Vec2 v -> XY -> v
@@ -67,3 +76,9 @@ getOr orV v xy = fromMaybe orV $ atMaybe v xy
 {-# INLINE[1] findIndex #-}
 findIndex :: (v -> Bool) -> Vec2 v -> Maybe XY
 findIndex f Vec2{wh,vec} = V.findIndex f vec <&> i2xy wh
+
+{-# INLINE[1] within #-}
+{-# INLINE[1] notWithin #-}
+within, notWithin :: XY -> Vec2 v -> Bool
+within    (XY x y) (Vec2 (XY w h) _) = x >= 0 && y >= 0 && x < w && y < h
+notWithin (XY x y) (Vec2 (XY w h) _) = x < 0 || y < 0 || x >= w || y >= h

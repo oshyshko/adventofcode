@@ -24,8 +24,11 @@ getX (XY x _) = x
 getY :: XY -> Int
 getY (XY _ y) = y
 
-scale :: XY -> Int -> XY
-scale (XY x y ) n = XY (x * n) (y * n)
+xyMap ::  (Int -> Int) -> XY -> XY
+xyMap f (XY x y) = XY (f x) (f y)
+
+xyBiMap ::  (Int -> Int -> Int) -> XY -> XY -> XY
+xyBiMap f (XY x y) (XY a b)  = XY (f x a) (f y b)
 
 i2xy :: WH -> Int -> XY
 i2xy (XY w _) i = XY (rem i w) (quot i w)

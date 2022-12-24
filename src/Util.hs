@@ -27,6 +27,12 @@ fix2 a b loop = fix loop a b
 fix3 :: a -> b -> c -> ((a -> b -> c -> d) -> a -> b -> c -> d) -> d
 fix3 a b c loop = fix loop a b c
 
+-- divvy
+divvy2 :: Int -> [a] -> [(a, a)]
+divvy2 n xs = divvy 2 n xs & fmap \case
+    [a,b] -> (a,b)
+    _     -> error "Should never reach here"
+
 -- trace
 tr :: Show a => String -> a -> a
 tr s x = trace (s <> ": " <> show x) x
