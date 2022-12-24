@@ -28,7 +28,7 @@ parseCave =
 
     line2dots ::  XY -> XY -> [XY]
     line2dots a b =
-        let dx = signum $ b - a                         -- TODO assert |dx| = 1
+        let dx = signum $ b - a                             -- TODO assert |dx| = 1
             n  = abs (b - a) & \(XY x y) -> x + y
         in take (1+n) (iterate (+ dx) a)
 
@@ -42,14 +42,14 @@ fillCave stop occupied cave start =
     let minXy = foldl' (xyBiMap min) maxBound $ start : M.keys cave
         maxXy = foldl' (xyBiMap max) minBound $ start : M.keys cave
     in fix2 start (Right cave) \loop xy e ->
-        e >>= \m ->                                     -- shortcut on Left Cave, continue on Right Cave
-            if | stop minXy maxXy m xy     -> Left m    -- out of the board => stop
-               | occupied minXy maxXy m xy -> Right m   -- occupied => fallback
+        e >>= \m ->                                         -- shortcut on Left Cave, continue on Right Cave
+            if | stop minXy maxXy m xy     -> Left m        -- out of the board => stop
+               | occupied minXy maxXy m xy -> Right m       -- occupied => fallback
                | otherwise ->
-                       fmap (M.insert xy True)          -- map remaining sand blocks (at rest)
-                   . loop (xy + XY 1 1)                 -- ... down-right
-                   . loop (xy + XY (-1) 1)              -- ... down-left
-                   . loop (xy + XY 0 1) $ Right m       -- ... down (start with it)
+                       fmap (M.insert xy True)              -- map remaining sand blocks (at rest)
+                   . loop (xy + XY 1 1)                     -- ... down-right
+                   . loop (xy + XY (-1) 1)                  -- ... down-left
+                   . loop (xy + XY 0 1) $ Right m           -- ... down (start with it)
 
 solve
     :: (XY -> XY -> Cave -> XY -> Bool)
@@ -59,8 +59,8 @@ solve stop occupied s =
     let cave       = parseCave s
         caveFilled = fillCave stop occupied cave (XY 500 0)
     in subtract (M.size cave) case caveFilled of
-        Left n  -> M.size n                             -- sand blocks falling out of the map
-        Right n -> M.size n                             -- no space for sand blocks to be added
+        Left n  -> M.size n                                 -- sand blocks falling out of the map
+        Right n -> M.size n                                 -- no space for sand blocks to be added
 
 solve1 :: String -> Int
 solve1 = solve
