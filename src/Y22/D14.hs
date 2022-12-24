@@ -12,7 +12,7 @@ type Cave = Map XY Bool
 
 parseCave :: String -> Cave
 parseCave =
-        foldl' (\m xy -> M.insert xy True m) M.empty
+      foldl' (\m xy -> M.insert xy True m) M.empty
     . concatMap (\(a,b) -> line2dots a b)
     . concatMap (divvy2 1)
     . parseOrDie traces
