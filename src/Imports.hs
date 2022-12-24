@@ -6,6 +6,7 @@ module Imports
     , module Control.Monad.IO.Class
     , module Control.Monad.Primitive
     , module Data.Bifunctor
+    , module Data.Bit
     , module Data.Bool
     , module Data.Char
     , module Data.Foldable
@@ -35,6 +36,7 @@ import           Control.Monad           (forM, forM_, guard, join, replicateM,
 import           Control.Monad.IO.Class  (MonadIO, liftIO)
 import           Control.Monad.Primitive (PrimMonad (..))
 import           Data.Bifunctor          (bimap, first, second)
+import           Data.Bit                (Bit (..), unBit)
 import           Data.Bool               (bool)
 import           Data.Char               (chr, digitToInt, intToDigit,
                                           isAlphaNum, isAsciiLower, isLower,
@@ -66,5 +68,3 @@ import           Data.Tuple.Strict       (T1 (..), T2 (..), T3 (..), T4 (..),
 import           Data.Word               (Word16, Word32, Word64, Word8)
 import           System.IO               (hFlush, stdout)
 import           Text.Printf             (printf)
-
-

@@ -1,6 +1,6 @@
 module XY where
 
-data XY = XY Int Int deriving (Eq, Ord)
+data XY = XY Int Int deriving (Eq, Ord, Bounded)
 type WH = XY
 type XYI = Int
 

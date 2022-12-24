@@ -1,6 +1,6 @@
 module Y21.D03 where
 
-import           Imports
+import           Imports hiding (Bit)
 
 type Bit = Bool
 

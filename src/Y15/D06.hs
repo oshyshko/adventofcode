@@ -5,7 +5,6 @@ module Y15.D06 where
 import qualified Data.Array.Base              as AB
 import           Data.Array.IO                (IOUArray)
 import           Data.Array.MArray            (MArray)
-import           Data.Bit                     (Bit (..))
 import qualified Data.HashMap.Strict          as MH
 import qualified Data.IntMap.Strict           as MI
 import qualified Data.Map.Strict              as MS
