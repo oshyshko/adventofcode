@@ -23,13 +23,13 @@ fillCave :: (Cave -> XY -> Decision) -> Cave -> XY -> Either Cave Cave
 fillCave decide cave startXy =
     fix2 startXy (Right cave) \loop xy ecc ->
         ecc >>= \m -> case decide m xy of           -- shortcut on Left, continue on Right
-            Answer   -> Left m                      -- out of the board => stop
-            Skip     -> Right m                     -- occupied => fallback
-            Continue ->
-                  fmap (M.insert xy True)           -- map remaining sand blocks (at rest)
-                . loop (xy + XY   1  1)             -- ... down-right
-                . loop (xy + XY (-1) 1)             -- ... down-left
-                . loop (xy + XY   0  1) $ Right m   -- ... down
+            Answer   -> Left m
+            Skip     -> Right m
+            Continue -> Right m
+                & loop (xy + XY   0  1)             -- down
+                & loop (xy + XY (-1) 1)             -- down-left
+                & loop (xy + XY   1  1)             -- down-right
+                & fmap (M.insert xy True)           -- map remaining sand blocks (at rest)
 
 solve :: (Int -> Cave -> XY -> Decision) -> String -> Int
 solve decide s =
