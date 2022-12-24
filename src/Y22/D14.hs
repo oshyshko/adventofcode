@@ -7,6 +7,7 @@ import           Util            (divvy2, fix2)
 import           XY
 
 type Cave = Map XY Bool
+data Decision = Answer | Skip | Continue
 
 -- 498,4 -> 498,6 -> 496,6
 -- 503,4 -> 502,4 -> 502,9 -> 494,9
@@ -17,32 +18,28 @@ traces =
     trace' = xy `sepBy` padded (string "->")
     xy = XY <$> natural <* char ',' <*> natural
 
-fillCave
-    :: (Cave -> XY -> Bool)                         -- interrupt    (e.g. when falling out of the cave)
-    -> (Cave -> XY -> Bool)                         -- skip         (e.g. when occupied or reached floor)
-    -> Cave                                         -- cave
-    -> XY                                           -- startXy
-    -> Either Cave Cave                             -- left = infinitely dropping, right = nowhere to place
-fillCave interrupt skip cave startXy =
-    fix2 startXy (Right cave) \loop xy e ->
-        e >>= \m ->                                 -- shortcut on Left Cave, continue on Right Cave
-            if | interrupt m xy -> Left m           -- out of the board => stop
-               | skip m xy      -> Right m          -- occupied => fallback
-               | otherwise ->
-                     fmap (M.insert xy True)        -- map remaining sand blocks (at rest)
-                   . loop (xy + XY 1 1)             -- ... down-right
-                   . loop (xy + XY (-1) 1)          -- ... down-left
-                   . loop (xy + XY 0 1) $ Right m   -- ... down (start with it)
+-- Left = infinitely dropping, Right = nowhere to place
+fillCave :: (Cave -> XY -> Decision) -> Cave -> XY -> Either Cave Cave
+fillCave decide cave startXy =
+    fix2 startXy (Right cave) \loop xy ecc ->
+        ecc >>= \m -> case decide m xy of           -- shortcut on Left, continue on Right
+            Answer   -> Left m                      -- out of the board => stop
+            Skip     -> Right m                     -- occupied => fallback
+            Continue ->
+                  fmap (M.insert xy True)           -- map remaining sand blocks (at rest)
+                . loop (xy + XY   1  1)             -- ... down-right
+                . loop (xy + XY (-1) 1)             -- ... down-left
+                . loop (xy + XY   0  1) $ Right m   -- ... down
 
-solve :: (Int -> Cave -> XY -> Bool) -> (Int -> Cave -> XY -> Bool) -> String -> Int
-solve interrupt skip s =
+solve :: (Int -> Cave -> XY -> Decision) -> String -> Int
+solve decide s =
     let cave           = parseOrDie traces s
                             & concatMap (divvy2 1)
                             & concatMap (uncurry line2dots)
                             & foldl' (\m xy -> M.insert xy True m) M.empty
         startXy        = XY 500 0
         maxY           = foldl' max minBound . fmap getY $ startXy : M.keys cave
-        caveFilled     = fillCave (interrupt maxY) (skip maxY) cave startXy
+        caveFilled     = fillCave (decide maxY) cave startXy
         caveFilledSize = M.size case caveFilled of Left n -> n; Right n -> n
     in caveFilledSize - M.size cave
   where
@@ -53,12 +50,12 @@ solve interrupt skip s =
         in take (1+n) (iterate (+ dx) a)
 
 solve1 :: String -> Int
-solve1 = solve
-    (\maxY _ (XY _ y) -> y > maxY)                  -- interrupt = when falling through the floor
-    (\_ m xy -> xy `M.member` m)                    -- skip      = when obstructed
+solve1 = solve \maxY m xy@(XY _ y) ->
+    if | y > maxY        -> Answer
+       | xy `M.member` m -> Skip
+       | otherwise       -> Continue
 
 solve2 :: String -> Int
-solve2 = solve
-    (\_ _ _ -> False)                               -- interrupt = no (fill until nowhere to place)
-    (\maxY m xy@(XY _ y) ->                         -- skip      = when obstructed or reached the floor
-        xy `M.member` m || y >= maxY + 2)
+solve2 = solve \maxY m xy@(XY _ y) ->
+    if | y >= maxY + 2 || xy `M.member` m -> Skip
+       | otherwise                        -> Continue
