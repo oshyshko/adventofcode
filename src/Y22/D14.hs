@@ -22,7 +22,7 @@ traces =
 fillCave :: (Cave -> XY -> Outcome) -> Cave -> XY -> Either Cave Cave
 fillCave at cave startXy =
     fix2 startXy (Right cave) \loop xy ecc ->
-        ecc >>= \m -> case at m xy of           -- shortcut on Left, continue on Right
+        ecc >>= \m -> case at m xy of               -- short-circuit on Left, continue on Right
             Terminate -> Left m
             ContinueOccupied -> Right m
             ContinueFall -> Right m
