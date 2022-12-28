@@ -34,8 +34,7 @@ withEveryTree foldBeamFn s =
 solve1 :: String -> Int
 solve1 =
       length
-    . filter id
-    . fmap or
+    . filter or
     . withEveryTree \origin -> all (< origin)
 
 solve2 :: String -> Int
