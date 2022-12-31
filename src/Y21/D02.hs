@@ -30,10 +30,10 @@ solve1 =
     . parseOrDie commands
   where
     move :: PosDepth -> Command -> PosDepth
-    move pd@(PosDepth p d) (Command op v) = case op of
-        Down    -> pd {depth = d + v}
-        Up      -> pd {depth = d - v}
-        Forward -> pd {pos   = p + v}
+    move pd@(PosDepth{pos,depth}) (Command{op,value}) = case op of
+        Down    -> pd {depth = depth + value}
+        Up      -> pd {depth = depth - value}
+        Forward -> pd {pos   = pos + value}
 
 solve2 :: String -> Int
 solve2 =
@@ -42,7 +42,7 @@ solve2 =
     . parseOrDie commands
   where
     move :: PosDepthAim -> Command -> PosDepthAim
-    move pda@(PosDepthAim p d a) (Command op v) = case op of
-        Down    -> pda {aim = a + v}
-        Up      -> pda {aim = a - v}
-        Forward -> pda {pos = p + v, depth = d + (a * v)}
+    move pda@(PosDepthAim{pos,depth,aim}) (Command{op,value}) = case op of
+        Down    -> pda {aim = aim + value}
+        Up      -> pda {aim = aim - value}
+        Forward -> pda {pos = pos + value, depth = depth + (aim * value)}

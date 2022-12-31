@@ -45,7 +45,7 @@ maxHappiness ms =
         & sum
 
     -- like Data.HashMap.Strict.!, but prints missing key in case of error
-    (!) :: (Eq k, Hashable k, Show k) => HashMap k v -> k -> v
+    (!) :: (Hashable k, Show k) => HashMap k v -> k -> v
     (!) m k = fromMaybe
         (error $ "Couldn't find key: " ++ show k)
         (M.lookup k m)

@@ -1,6 +1,5 @@
 module Y21.D20 where
 
-import           Data.Bit            (Bit (..))
 import           Data.Bits           ((.|.))
 import qualified Data.Vector.Unboxed as VU
 

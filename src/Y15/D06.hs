@@ -184,7 +184,7 @@ zolve1MZ = solveMonadic @(VUM.MVector (PrimState IO) L1B) @L1B @IO
 
 
 -- monadic instances
-instance (Monad m, MArray IOUArray v m, k ~ Side) => StorageMonadic (IOUArray k v) v m where
+instance (MArray IOUArray v m, k ~ Side) => StorageMonadic (IOUArray k v) v m where
     emptySM k     = AB.newArray (0, k - 1)
     alterSM s f k = AB.unsafeRead s k >>= AB.unsafeWrite s k . f
     foldlSM f a s = AB.getNumElements s >>= \n -> go a (n-1)
