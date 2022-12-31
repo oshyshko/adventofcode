@@ -33,7 +33,7 @@ mkEmptySysInfo = SysInfo
     , cpuCores     = Nothing
     , ramTotal     = Nothing
     , ramClock     = Nothing
-    , compiler     = Just $ SI.compilerName ++ "-" ++ V.showVersion SI.compilerVersion
+    , compiler     = Just $ SI.compilerName ++ "-" ++ V.showVersion SI.fullCompilerVersion
     , compilerArch = Just SI.arch
     }
 
