@@ -1,7 +1,16 @@
 module XYZ where
 
-data XYZ  = XYZ Int Int Int deriving (Eq, Ord)
-data Line = Line XYZ XYZ    deriving (Eq, Ord, Show)
+import           Point
+
+data XYZ = XYZ X Y Z deriving (Eq, Ord)
+type X = Int
+type Y = Int
+type Z = Int
+
+type WHD = XYZ
+type W = Int
+type H = Int
+type D = Int
 
 instance Show XYZ where
     show (XYZ x y z) =
@@ -18,11 +27,20 @@ instance Num XYZ where
     signum        (XYZ x y z) = XYZ (signum x) (signum y) (signum z)
     fromInteger x             = let v = fromIntegral x in XYZ v v v
 
-xyzmap :: (Int -> Int) -> XYZ -> XYZ
-xyzmap f (XYZ x y z) = XYZ (f x) (f y) (f z)
+instance Point XYZ Int where
+    map     = xyzMap
+    fold    = xyzFold
+    append  = xyzAppend
+    foldMap = xyzFoldMap
 
-xyzfold :: (Int -> Int -> Int) -> XYZ -> Int
-xyzfold f (XYZ x y z) = f z $ f x y
+xyzMap :: (Int -> Int) -> XYZ -> XYZ
+xyzMap f (XYZ x y z) = XYZ (f x) (f y) (f z)
 
-xyzzip :: (Int -> Int -> Int) -> XYZ -> XYZ -> XYZ
-xyzzip f (XYZ ax ay az) (XYZ bx by bz) = XYZ (f ax bx) (f ay by) (f az bz)
+xyzFold :: (Int -> Int -> Int) -> XYZ -> Int
+xyzFold f (XYZ x y z) = f z $ f x y
+
+xyzAppend :: (Int -> Int -> Int) -> XYZ -> XYZ -> XYZ
+xyzAppend f (XYZ x y z) (XYZ a b c) = XYZ (f x a) (f y b) (f z c)
+
+xyzFoldMap :: (v -> v -> v) -> (Int -> v) -> XYZ -> v
+xyzFoldMap f g (XYZ x y z) = (g x `f` g y) `f` g z

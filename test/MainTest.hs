@@ -2,6 +2,8 @@ module Main where
 
 import           Test.Hspec
 
+import qualified TestBox
+import qualified TestSpatial
 import qualified TestUtil
 
 import qualified Y15.TestD15
@@ -19,6 +21,8 @@ import qualified Y21.TestD22
 
 main :: IO ()
 main = hspec $ do
+    context "Box"     TestBox.spec
+    context "Spatial" TestSpatial.spec
     context "Util"    TestUtil.spec
 
     context "Y15.D15" Y15.TestD15.spec

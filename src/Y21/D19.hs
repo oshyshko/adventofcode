@@ -6,6 +6,7 @@ import qualified Data.Set        as S
 import           Imports
 import           Parser
 import           XYZ
+import qualified Point
 
 type RegionId = Int
 type Coord    = Int
@@ -126,7 +127,4 @@ solve1, solve2 :: String -> Int
 solve1 = S.size . S.fromList . concatMap beacons         . solve . parseOrDie regions
 solve2 = maximum . distances . fmap scannerXyz . M.elems . solve . parseOrDie regions
   where
-    distances ss = [ manhattan a b | a <- ss, b <- ss ]
-    manhattan a b =
-        let XYZ x y z = abs (a - b)
-        in x + y + z
+    distances ss = [ Point.distanceManhattan a b | a <- ss, b <- ss ]

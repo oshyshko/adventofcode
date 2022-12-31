@@ -31,7 +31,7 @@ fillCave at cave startXy =
                 & loop (xy + XY   1  1)             -- down-right
                 & fmap (M.insert xy True)           -- map remaining sand blocks (at rest)
 
-solve :: (Int -> Cave -> XY -> Outcome) -> String -> Int
+solve :: (Y -> Cave -> XY -> Outcome) -> String -> Int
 solve atMaxY s =
     let cave       = parseOrDie traces s
                         & concatMap (divvy2 1)
