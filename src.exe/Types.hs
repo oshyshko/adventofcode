@@ -20,18 +20,10 @@ data Day = Day
     , solvers   :: [Solver]
     }
 
-instance Show Day where
-    show Day{dayPrefix,benchmark,solvers} =
-        "Day"
-            <> "{ dayPrefix="   <> show dayPrefix
-            <> ", benchmark="   <> show benchmark
-            <> ", solvers="     <> show (length solvers)
-            <> "}"
-
-data ExecResult = ExecResult
+data RunResult = RunResult
     { output         :: AnswerStr
     , msReal         :: Integer
-    , bytesAllocated :: Maybe Integer
-    , bytesPeak      :: Maybe Integer
-    , bytesMaxInUse  :: Maybe Integer
-    } deriving (Show)
+    , bytesAllocated :: Integer
+    , bytesPeak      :: Integer
+    , bytesMaxInUse  :: Integer
+    } deriving Show

@@ -1,5 +1,5 @@
 module Main
-    ( main, mainArgs
+    ( main
     ) where
 
 import qualified Data.Map.Strict    as M
@@ -13,6 +13,8 @@ import qualified Report
 import qualified SysInfo
 import           Types
 import           Util
+
+-- TODO refactor this mess + in DaysTH
 
 -- # day     answer-1  answer-2
 -- Y15.D01   138       1771
@@ -30,16 +32,15 @@ parseAnswers =
     . lines
 
 main :: IO ()
-main = getArgs >>= mainArgs
-
-mainArgs :: [String] -> IO ()
-mainArgs args =
+main = do
+    args <- getArgs
     case args of
         -- TODO refactor: encode dayNs in a type?
         ["runday", moduleName, dayNs] ->
             case M.lookup moduleName Days.moduleName2day of
                 Nothing           -> error $ "Couldn't find day for prefix" ++ moduleName ++ ", solver " ++ dayNs
-                Just Day{solvers} -> getContents >>= (solvers !! read dayNs) >>= putStr
+                Just Day{solvers} ->
+                    getContents >>= (solvers !! read dayNs) >>= putStr
 
         _ -> do
             -- select day(s)
@@ -70,75 +71,57 @@ mainArgs args =
             Report.printHeader
 
             -- run
-            errors <- or <$> forM daysSelected \Day{dayPrefix,solvers} -> do
+            dayPrefixR12s <- forM daysSelected \Day{dayPrefix} -> do
                 input <- readInput dayPrefix
 
                 Report.printDayPrefix dayPrefix
+                hFlush stdout
 
-                results <- forM [0..length solvers - 1] $ \solverIndex -> do
-                    runDayViaExec input dayPrefix solverIndex >>= \case
+                [r1,r2] <- forM [0,1] $ \solverIndex -> do
+                    runDay input dayPrefix solverIndex >>= \case
                         -- TODO 1. correctly present error (Left) and continue with the rest of days
                         -- TODO 2. find a better way to remove RTS part that starts with " [("
                         Left err -> error $
                                 "solver with index "
                                 ++ show solverIndex ++ " failed: "
                                 ++ (unlines . takeWhile (\e -> not $ " [(" `isPrefixOf` e) . lines $ err)
-                        Right r -> return r
+                        Right r -> pure r
 
-                Report.printDayResults mod2answers dayPrefix results
+                Report.printDayResults mod2answers dayPrefix r1 r2
 
-                return $ Just (results <&> output)
-                    /= mod2answers M.!? Report.dayPrefixToModuleName dayPrefix
+                pure (dayPrefix, r1, r2)
 
-            Report.printFooter =<< SysInfo.getSysInfo
+            Report.printFooter dayPrefixR12s =<< SysInfo.getSysInfo
 
-            when errors exitFailure
+            let allAnswersCorrect = and $ dayPrefixR12s <&> \(dayPrefix,r1,r2) ->
+                    let expected = mod2answers M.!? Report.dayPrefixToModuleName dayPrefix
+                        actual   = Just ([r1,r2] <&> output)
+                    in expected == actual
 
--- TODO report failures
-runDayViaDirectCall :: Input -> DayPrefix -> SolverIndex -> IO (Either String ExecResult)
-runDayViaDirectCall input dayPrefix solverIndex = do
-    let Day{solvers} =  fromMaybe
-            (error $ "Couldn't find day: " ++ dayPrefix)
-            (M.lookup dayPrefix Days.moduleName2day)
 
-    (out, ms) <- timeOf $ (solvers !! solverIndex) input
-    return . Right $ ExecResult
-        { output         = out
-        , msReal         = ms
-        , bytesAllocated = Nothing
-        , bytesPeak      = Nothing
-        , bytesMaxInUse  = Nothing
-        }
+            unless allAnswersCorrect exitFailure
 
-runDayViaExec :: Input -> DayPrefix -> SolverIndex -> IO (Either String ExecResult)
-runDayViaExec input dayPrefix solverIndex = do
+runDay :: Input -> DayPrefix -> SolverIndex -> IO (Either String RunResult)
+runDay input dayPrefix solverIndex = do
     selfPath <- getExecutablePath
+    (e, out, err) <- readProcessWithExitCode
+        selfPath
+        ["runday", dayPrefix, show solverIndex, "+RTS", "-t", "--machine-readable", "-RTS"]
+        input
 
-    if "ghc" `isSuffixOf` selfPath
-        -- fallback to direct call if we are in a REPL
-        then runDayViaDirectCall input dayPrefix solverIndex
-        else do
-            (e, out, err) <- readProcessWithExitCode
-                selfPath
-                ["runday", dayPrefix, show solverIndex, "+RTS", "-t", "--machine-readable", "-RTS"]
-                input
+    case e of
+        -- TODO move error to stdout? (to separate from stats in stderr)
+        ExitFailure _ -> pure . Left $ err
+        ExitSuccess -> do
+            -- TODO handle parse error in stdout
+            let s = M.fromList @String @String $ read err
 
-            case e of
-                -- TODO move error to stdout? (to separate from stats in stderr)
-                ExitFailure _ -> return . Left $ err
-                ExitSuccess -> do
-                    -- TODO handle parse error in stdout
-                    let s :: Map String String = M.fromList $ read err
-
-                    -- total_cpu_seconds, total_wall_seconds
-                    --   mut_cpu_seconds,   mut_wall_seconds
-                    return . Right $ ExecResult
-                        { output         = out
-                        , msReal         = maybe (-1)
-                                                (ceiling . (* 1000))
-                                                (M.lookup "total_wall_seconds" s
-                                                    <&> (read :: String -> Double))
-                        , bytesAllocated = M.lookup "allocated_bytes" s <&> read
-                        , bytesPeak      = M.lookup "max_live_bytes" s  <&> read
-                        , bytesMaxInUse  = M.lookup "max_mem_in_use_bytes" s  <&> read
-                        }
+            -- total_cpu_seconds, total_wall_seconds
+            --   mut_cpu_seconds,   mut_wall_seconds
+            pure . Right $ RunResult
+                { output         = out
+                , msReal         = ceiling @Double . (* 1000) . read $ s M.! "total_wall_seconds"
+                , bytesAllocated = read $ s M.! "allocated_bytes"
+                , bytesPeak      = read $ s M.! "max_live_bytes"
+                , bytesMaxInUse  = read $ s M.! "max_mem_in_use_bytes"
+                }
