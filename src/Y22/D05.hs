@@ -2,6 +2,7 @@ module Y22.D05 where
 
 import           Imports
 import           Parser
+import           Util    (shouldNeverReachHere)
 
 type Crate  = Char
 type Move   = (Int, Int, Int)   -- (count, from, to)
@@ -37,16 +38,16 @@ stacksAndMoves =
 
 move :: ([Crate] -> [Crate]) -> [[Crate]] -> Move -> [[Crate]]
 move f stacks (n, from, to) =
-    let (ejected, stacks')  = adjust (splitAt n) (from - 1) stacks
-        (_,       stacks'') = adjust ((undefined,) . (f ejected ++)) (to - 1) stacks'
+    let (ejected, stacks')  = adjust (splitAt n)                                (from - 1) stacks
+        (_,       stacks'') = adjust ((shouldNeverReachHere,) . (f ejected ++)) (to - 1)   stacks'
         in stacks''
   where
     -- (old -> (ejected, new)) -> index -> values -> (ejected, new-values)
     adjust :: (a -> (a, a)) -> Int -> [a] -> (a, [a])
-    adjust f i xs =
-        let (l,x:r) = splitAt i xs
-            (ejected, new) = f x
-        in (ejected, l ++ new : r)
+    adjust g i xs =
+        splitAt i xs & \case
+            (l,x:r) -> g x <&> (\new -> l ++ new : r)   -- (ejected, new-values)
+            _       -> shouldNeverReachHere
 
 solve1, solve2 :: String -> String
 solve1 = mapMaybe listToMaybe . uncurry (foldl' $ move reverse) . parseOrDie stacksAndMoves

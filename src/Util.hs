@@ -66,7 +66,12 @@ timeOf ioa = do
 
 size2humanSize :: Integer -> String
 size2humanSize i =
-    fix1 (fromIntegral i::Float, "BKMGTPEZY") $ \l (n, u:units) ->
-        if n <= 999.9 || null units
-            then showFFloat (Just $ if u == 'B' then 0 else 1) n [u]
-            else l (n / 1024, units)
+    fix1 (fromIntegral i::Float, "BKMGTPEZY") $ \l -> \case
+        (n, u:units) ->
+            if n <= 999.9 || null units
+                then showFFloat (Just $ if u == 'B' then 0 else 1) n [u]
+                else l (n / 1024, units)
+        _ -> shouldNeverReachHere
+
+shouldNeverReachHere :: a
+shouldNeverReachHere = error "should never reach here"
