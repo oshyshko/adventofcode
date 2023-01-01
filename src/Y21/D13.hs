@@ -2,10 +2,10 @@ module Y21.D13 where
 
 import qualified Data.Set as S
 
+import           Geom.XY
 import           Imports
 import qualified Letters  as L
 import           Parser
-import           XY
 
 data Fold = AlongX Int | AlongY Int deriving Show
 

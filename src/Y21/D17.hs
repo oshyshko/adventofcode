@@ -1,10 +1,10 @@
 module Y21.D17 where
 
-import           Data.Ord          (Down (..))
+import           Data.Ord (Down (..))
 
+import           Geom.XY
 import           Imports
 import           Parser
-import           XY
 
 -- target area: x=20..30, y=-10..-5
 area :: Parser (XY,XY)

@@ -2,8 +2,8 @@ module Y15.D03 where
 
 import qualified Data.Set as S
 
+import           Geom.XY
 import           Imports
-import           XY
 
 char2move :: Char -> XY
 char2move = \case

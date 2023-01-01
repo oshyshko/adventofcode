@@ -3,10 +3,10 @@ module Y21.D19 where
 import qualified Data.Map.Strict as M
 import qualified Data.Set        as S
 
+import qualified Geom.Point      as P
+import           Geom.XYZ
 import           Imports
 import           Parser
-import           XYZ
-import qualified Point
 
 type RegionId = Int
 type Coord    = Int
@@ -127,4 +127,4 @@ solve1, solve2 :: String -> Int
 solve1 = S.size . S.fromList . concatMap beacons         . solve . parseOrDie regions
 solve2 = maximum . distances . fmap scannerXyz . M.elems . solve . parseOrDie regions
   where
-    distances ss = [ Point.distanceManhattan a b | a <- ss, b <- ss ]
+    distances ss = [ P.distanceManhattan a b | a <- ss, b <- ss ]

@@ -1,7 +1,7 @@
-module Box where
+module Geom.Box where
 
-import           Point   (Point)
-import qualified Point
+import           Geom.Point (Point)
+import qualified Geom.Point as P
 
 -- p = point, e.g. XY, XYZ
 -- c = component, e.g. Int
@@ -18,28 +18,28 @@ instance Show (Box p c) where
 {-# INLINE contains #-}
 contains :: forall p c. Point p c => Box p c -> Box p c -> Bool
 (Box ao as) `contains` (Box bo bs) =
-       Point.foldMap @p @c (&&) (<= (0::c)) (ao - bo)
-    && Point.foldMap @p @c (&&) (>= (0::c)) (ao + as - (bo + bs))
+       P.foldMap @p @c (&&) (<= (0::c)) (ao - bo)
+    && P.foldMap @p @c (&&) (>= (0::c)) (ao + as - (bo + bs))
 
 {-# INLINE intersects #-}
 intersects :: forall p c. (Point p c) => Box p c -> Box p c -> Bool
 (Box ao as) `intersects` (Box bo bs) =
-    let o = Point.append @p @c max ao bo
-        s = Point.append @p @c min (ao + as) (bo + bs) - o
-    in not $ Point.foldMap @p @c (||) (<= (0::c)) s
+    let o = P.append @p @c max ao bo
+        s = P.append @p @c min (ao + as) (bo + bs) - o
+    in not $ P.foldMap @p @c (||) (<= (0::c)) s
 
 {-# INLINE intersection #-}
 intersection :: forall p c. (Point p c) => Box p c -> Box p c -> Maybe (Box p c)
 intersection (Box ao as) (Box bo bs) =
-    let o = Point.append @p @c max ao bo
-        s = Point.append @p @c min (ao + as) (bo + bs) - o
-    in if Point.foldMap @p @c (||) (<= (0::c)) s
+    let o = P.append @p @c max ao bo
+        s = P.append @p @c min (ao + as) (bo + bs) - o
+    in if P.foldMap @p @c (||) (<= (0::c)) s
         -- w <= 0 || h <= 0 || d <= 0
         then Nothing
         else Just $ Box @p @c o s
 
 center :: forall p c. Box p c -> p
-center (Box o s) = o + Point.map @p @c (`quot` (2 :: c)) s
+center (Box o s) = o + P.map @p @c (`quot` (2 :: c)) s
 
 {-# INLINE offset #-}
 offset :: Box p c -> p

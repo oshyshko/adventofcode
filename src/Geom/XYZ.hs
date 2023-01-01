@@ -1,6 +1,6 @@
-module XYZ where
+module Geom.XYZ where
 
-import           Point
+import           Geom.Point
 
 data XYZ = XYZ X Y Z deriving (Eq, Ord)
 type X = Int

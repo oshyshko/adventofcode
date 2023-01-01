@@ -1,11 +1,11 @@
-module Spatial where
+module Geom.Spatial where
 
-import           Box     (Box (..), center, intersection)
+import           Geom.Box   (Box (..), center, intersection)
+import           Geom.Point (Point)
+import qualified Geom.Point as P
+import           Geom.XY    (XY (..))
+import           Geom.XYZ   (XYZ (..))
 import           Imports
-import           Point   (Point)
-import qualified Point
-import           XY      (XY (..))
-import           XYZ     (XYZ (..))
 
 -- p = coordinate, e.g. XY, XYZ
 -- c = component, e.g. Int
@@ -120,7 +120,7 @@ bestSplitCenter a b =
     let aCenter = center @p @c a
     in    corners @p @c b
         & filter (not . onCorner @p @c a)
-        & fmap (\p -> (Point.distanceManhattan @p @c aCenter p, p)) -- the most close to outer center
+        & fmap (\p -> (P.distanceManhattan @p @c aCenter p, p)) -- the most close to outer center
         & sortBy (compare `on` fst)
         & minimumBy (compare `on` fst)
         & snd

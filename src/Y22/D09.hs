@@ -1,9 +1,9 @@
 module Y22.D09 where
 
 import qualified Data.Set as S
+import           Geom.XY
 import           Imports
 import           Parser
-import           XY
 
 moves :: Parser [(XY, Int)]
 moves =

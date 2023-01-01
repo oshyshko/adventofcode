@@ -3,11 +3,11 @@ module Y15.TestD18 where
 import qualified Data.Vector.Unboxed.Mutable as VUM
 import           Test.Hspec
 
+import           Geom.XY
 import           Imports
 import           MVec2
 import           Parser
 import qualified Vec2                        as V
-import           XY
 import           Y15.D18
 
 mkLights :: PrimMonad m => [[Bool]] -> m (MVec2 m Bool)

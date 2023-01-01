@@ -2,12 +2,12 @@ module Y15.D18 where
 
 import qualified Data.Vector.Unboxed.Mutable as VUM
 
+import           Geom.XY
 import           Imports
 import           MVec2                       (MVec2 (..))
 import qualified MVec2                       as MV
 import           Parser
 import qualified Vec2                        as V
-import           XY
 
 type TickFn = WH -> XY -> Bool -> Int -> Bool
 

@@ -6,8 +6,8 @@ import qualified Data.Set        as S
 import           Data.String.QQ
 import           Test.Hspec
 
+import           Geom.XYZ
 import           Parser
-import           XYZ
 import           Y21.D19
 
 spec :: Spec

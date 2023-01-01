@@ -3,10 +3,10 @@ module Y21.D20 where
 import           Data.Bits           ((.|.))
 import qualified Data.Vector.Unboxed as VU
 
+import           Geom.XY
 import           Imports
 import           Parser
 import           Vec2
-import           XY
 
 type Replacements = VU.Vector Bit
 

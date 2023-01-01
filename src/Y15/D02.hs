@@ -1,7 +1,7 @@
 module Y15.D02 where
 
-import Imports
-import XYZ
+import           Geom.XYZ
+import           Imports
 
 -- 29x13x26
 -- 11x11x14

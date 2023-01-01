@@ -1,10 +1,10 @@
 module Y22.D14 where
 
 import qualified Data.Map.Strict as M
+import           Geom.XY
 import           Imports
 import           Parser
 import           Util            (divvy2, fix2)
-import           XY
 
 type Cave = Map XY Bool
 data Outcome = Terminate | ContinueOccupied | ContinueFall

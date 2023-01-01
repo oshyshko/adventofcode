@@ -1,4 +1,4 @@
-module Point where
+module Geom.Point where
 
 -- p = point, e.g. XY, XYZ
 -- c = component, e.g. Int
@@ -15,4 +15,4 @@ instance Point Int Int where
   foldMap   _ = id
 
 distanceManhattan :: (Point p c) => p -> p -> c
-distanceManhattan a b = Point.fold (+) (abs $ a - b)
+distanceManhattan a b = fold (+) (abs $ a - b)

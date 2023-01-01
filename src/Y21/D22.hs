@@ -1,10 +1,10 @@
 module Y21.D22 where
 
-import           Box     (Box (..), intersection)
+import           Geom.Box     (Box (..), intersection)
+import           Geom.Spatial
+import           Geom.XYZ
 import           Imports
 import           Parser
-import           Spatial
-import           XYZ
 
 -- on x=10..12,y=10..12,z=-12..-10
 -- off x=9..11,y=9..11,z=9..11

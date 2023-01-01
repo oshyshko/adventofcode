@@ -1,9 +1,9 @@
-module TestBox where
+module Geom.TestBox where
 
 import           Test.Hspec
 
-import           Box
-import           XYZ
+import           Geom.Box
+import           Geom.XYZ
 
 b :: XYZ -> XYZ -> Box XYZ Int
 b (XYZ x y z) (XYZ w h d) =

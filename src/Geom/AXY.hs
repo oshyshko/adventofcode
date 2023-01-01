@@ -1,4 +1,4 @@
-module AXY where
+module Geom.AXY where
 
 import           Imports
 

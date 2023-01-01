@@ -2,10 +2,10 @@ module Y21.TestD22 where
 
 import           Test.Hspec
 
-import           Box
+import           Geom.Box
+import           Geom.Spatial
+import           Geom.XYZ
 import           Imports
-import           Spatial
-import           XYZ
 import           Y21.D22
 
 t, f :: Tree XYZ Int Bool

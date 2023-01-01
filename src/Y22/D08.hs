@@ -1,9 +1,9 @@
 module Y22.D08 where
 
+import           Geom.XY
 import           Imports
-import qualified Vec2     as V
-import           Vec2     (Vec2 (..))
-import           XY
+import qualified Vec2    as V
+import           Vec2    (Vec2 (..))
 
 type Height = Int8
 

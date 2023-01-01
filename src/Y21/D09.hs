@@ -1,10 +1,10 @@
 module Y21.D09 where
 
 import qualified Data.Set as S
+import           Geom.XY
 import           Imports
 import qualified Vec2     as V
 import           Vec2     (Vec2 (..))
-import           XY
 
 type Height = Char
 

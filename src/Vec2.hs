@@ -3,9 +3,9 @@ module Vec2 where
 import qualified Data.Vector.Generic as V
 import qualified Data.Vector.Unboxed as VU
 
+import           Geom.XY
 import           Imports
 import           MVec2               (MVec2 (..))
-import           XY
 
 data Vec2 a where
     Vec2 :: (VU.Unbox a, Show a) =>

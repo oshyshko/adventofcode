@@ -1,11 +1,11 @@
-module TestSpatial where
+module Geom.TestSpatial where
 
 import           Test.Hspec
 
-import           Box
+import           Geom.Box
+import           Geom.Spatial
+import           Geom.XYZ
 import           Imports
-import           Spatial
-import           XYZ
 
 t, f :: Tree XYZ Int Bool
 t = Leaf True

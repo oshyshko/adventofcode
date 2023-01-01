@@ -3,10 +3,10 @@ module Y21.D05 where
 import qualified Data.Vector.Generic.Mutable as VM
 import qualified Data.Vector.Unboxed.Mutable as VUM
 
+import qualified Geom.Point                  as P
+import           Geom.XY
 import           Imports
 import           Parser
-import qualified Point
-import           XY
 
 -- 0,9 -> 5,9
 -- 8,0 -> 0,8
@@ -29,7 +29,7 @@ solve ls = do
     addLine side s (xy0,xy1) =
         let diff = xy1 - xy0
             step = signum diff
-            len  = 1 + Point.fold max (abs diff)
+            len  = 1 + P.fold max (abs diff)
 
             go :: Int -> XY -> m ()
             go 0 _ = return ()

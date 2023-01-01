@@ -1,6 +1,6 @@
 module Y22.D04 where
 
-import           Box
+import           Geom.Box
 import           Parser
 
 teams :: Parser [(Box Int Int, Box Int Int)]

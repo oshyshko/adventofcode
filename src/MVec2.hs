@@ -2,8 +2,8 @@ module MVec2 where
 
 import qualified Data.Vector.Unboxed.Mutable as VUM
 
+import           Geom.XY
 import           Imports
-import           XY
 
 type Index  = Int
 
