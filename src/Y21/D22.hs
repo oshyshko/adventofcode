@@ -25,7 +25,7 @@ rebootSteps =
         pure (v, Box (XYZ x y z) (XYZ (a-x+1) (b-y+1) (c-z+1)))
 
 volume :: Tree XYZ Int Bool -> Int
-volume = sum . fmap (\(v,Box _ whd) -> if v then xyzFold (*) whd else 0) . toList
+volume = sum . fmap (\(Box _ whd,v) -> if v then xyzFold (*) whd else 0) . toList
 
 solve1, solve2 :: String -> Int
 solve1 =

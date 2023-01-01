@@ -126,14 +126,14 @@ bestSplitCenter a b =
         & snd
 
 {-# INLINE toList #-}
-toList :: forall p c v. Spatial p c => Tree p c v -> [(v, Box p c)]
+toList :: forall p c v. Spatial p c => Tree p c v -> [(Box p c, v)]
 toList =
     go (bounds @p @c)
   where
     {-# INLINE go #-}
-    go :: Box p c -> Tree p c v -> [(v, Box p c)]
+    go :: Box p c -> Tree p c v -> [(Box p c, v)]
     go outer = \case
-        Leaf v     -> [(v, outer)]
+        Leaf v     -> [(outer, v)]
         Split r os -> concat $ zipWith go (split @p @c outer r) os
 
 {-# INLINE bounds #-}

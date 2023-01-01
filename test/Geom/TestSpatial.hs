@@ -62,7 +62,7 @@ spec = do
             Split 0 [Split (-9) [f, f, f, f, f, f, f, t], f, f, f, f, f, f, Split 1 [t, f, f, f, f, f, f, f]]
 
     it "toList" $ do
-        let lpm = fmap snd . filter fst . toList
+        let lpm = fmap fst . filter snd . toList
 
         lpm f `shouldBe` []
         lpm (f & set True (b 0 1))                                  `shouldBe` [b 0 1]
