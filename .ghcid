@@ -1,1 +1,1 @@
---allow-eval --reverse -W
+-W -S --clear --reverse --allow-eval --command="stack ghci +RTS -M1g"
