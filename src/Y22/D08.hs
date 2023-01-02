@@ -35,7 +35,7 @@ solve1 :: String -> Int
 solve1 =
       length
     . filter or
-    . withEveryTree \origin -> all (< origin)
+    . withEveryTree (all . (>))         -- origin > all other
 
 solve2 :: String -> Int
 solve2 =
