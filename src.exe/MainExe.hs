@@ -71,13 +71,13 @@ main = do
             Report.printHeader
 
             -- run
-            dayPrefixR12s <- forM daysSelected \Day{dayPrefix} -> do
+            dayPrefix2results <- forM daysSelected \Day{dayPrefix} -> do
                 input <- readInput dayPrefix
 
                 Report.printDayPrefix dayPrefix
                 hFlush stdout
 
-                [r1,r2] <- forM [0,1] $ \solverIndex -> do
+                results <- forM [0,1] $ \solverIndex -> do
                     runDay input dayPrefix solverIndex >>= \case
                         -- TODO 1. correctly present error (Left) and continue with the rest of days
                         -- TODO 2. find a better way to remove RTS part that starts with " [("
@@ -87,17 +87,16 @@ main = do
                                 ++ (unlines . takeWhile (\e -> not $ " [(" `isPrefixOf` e) . lines $ err)
                         Right r -> pure r
 
-                Report.printDayResults mod2answers dayPrefix r1 r2
+                Report.printDayResults mod2answers dayPrefix results
 
-                pure (dayPrefix, r1, r2)
+                pure (dayPrefix, results)
 
-            Report.printFooter dayPrefixR12s =<< SysInfo.getSysInfo
+            Report.printFooter dayPrefix2results =<< SysInfo.getSysInfo
 
-            let allAnswersCorrect = and $ dayPrefixR12s <&> \(dayPrefix,r1,r2) ->
+            let allAnswersCorrect = and $ dayPrefix2results <&> \(dayPrefix,results) ->
                     let expected = mod2answers M.!? Report.dayPrefixToModuleName dayPrefix
-                        actual   = Just ([r1,r2] <&> output)
+                        actual   = Just (results <&> output)
                     in expected == actual
-
 
             unless allAnswersCorrect exitFailure
 

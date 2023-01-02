@@ -12,12 +12,28 @@ printHeader = do
     putStrLn " day       | answers                  |    time allocs maxhea maxmem |    time allocs maxhea maxmem "
     putStrLn "-----------+--------------------------+------------------------------+------------------------------"
 
-printFooter :: [(DayPrefix,RunResult, RunResult)] -> SysInfo -> IO ()
-printFooter results i = do
+printDayPrefix :: DayPrefix -> IO ()
+printDayPrefix = printf " %-9s | "
+
+printDayResults :: Map ModuleName [AnswerStr] -> DayPrefix -> [RunResult] -> IO ()
+printDayResults mod2answers dayPrefix results = do
+    printf "%-24s |%s %s\n"
+        (intercalate ", "  $ results <&> output)
+        (intercalate " |" $ results <&> formatRunResult)
+        (case M.lookup (dayPrefixToModuleName dayPrefix) mod2answers of
+            Nothing -> " <-- couldn't find answer"
+            Just expected ->
+                if expected /= (results <&> output)
+                    then " <-- expected: " ++ intercalate ", " expected
+                    else "")
+
+printFooter :: [(DayPrefix,[RunResult])] -> SysInfo -> IO ()
+printFooter dayPrefix2results i = do
+    let mergedResults = foldl1' (zipWith append) (snd <$> dayPrefix2results)
+
     putStrLn "-----------+--------------------------+------------------------------+------------------------------"
-    let (_,r1,r2) = foldl1' (\(_,x,y) (_,a,b) -> ("",append x a, append y b)) results   -- TODO refactor: remove ""
-    printf " Total:                               | %s\n"
-        (intercalate " | " $ [r1,r2] <&> formatRunResult)
+    printf " Total:                               |%s\n"
+        (intercalate " |" $ mergedResults <&> formatRunResult)
 
     putStrLn ""
     putStrLn . unlines . map (" " ++) . lines . showSysInfo $ i
@@ -32,25 +48,9 @@ printFooter results i = do
             , bytesMaxInUse  = bytesMaxInUse a  + bytesMaxInUse b
             }
 
-printDayPrefix :: DayPrefix -> IO ()
-printDayPrefix = printf " %-9s | "
-
-printDayResults :: Map ModuleName [AnswerStr] -> DayPrefix -> RunResult -> RunResult -> IO ()
-printDayResults mod2answers dayPrefix r1 r2 = do
-    let results = [r1,r2]
-    printf "%-24s | %s %s\n"
-        (intercalate ", "  $ results <&> output)
-        (intercalate " | " $ results <&> formatRunResult)
-        (case M.lookup (dayPrefixToModuleName dayPrefix) mod2answers of
-            Nothing -> " <-- couldn't find answer"
-            Just expected ->
-                if expected /= (results <&> output)
-                    then " <-- expected: " ++ intercalate ", " expected
-                    else "")
-
 formatRunResult :: RunResult -> String
 formatRunResult RunResult{msReal,bytesAllocated,bytesPeak,bytesMaxInUse} =
-    printf "%5dms %6s %6s %6s"
+    printf "%6dms %6s %6s %6s"
         msReal
         (size2humanSize bytesAllocated)
         (size2humanSize bytesPeak)
