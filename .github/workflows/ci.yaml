@@ -6,35 +6,36 @@ on:
 
 jobs:
     stack:
-        name: ${{ matrix.os }}, ${{ matrix.resolver }}
+        name: ${{ matrix.os }}
+        # name: ${{ matrix.os }}, ${{ matrix.resolver }}
         runs-on: ${{ matrix.os }}-latest
         strategy:
             fail-fast: false
             matrix:
                 os: [macOS, ubuntu, windows]
-                resolver: [lts-20.4]
-                stack: [latest]
+                # resolver: [lts-20.5, nightly-2023-01-01]
 
         env:
-            STACK     : stack --resolver ${{ matrix.resolver }}
-            CACHE_DIR : ${{ matrix.os == 'windows' && '~/AppData/Roaming/stack' || '~/.stack' }}
-            BINARY    : ./dist/adventofcode-exe${{ matrix.os == 'windows' && '.exe' || '' }}
+            STACK:     stack
+            # STACK:     stack --resolver ${{ matrix.resolver }}
+            CACHE_DIR: ${{ matrix.os == 'windows' && '~/AppData/Roaming/stack' || '~/.stack' }}
+            BINARY:    ./dist/adventofcode-exe${{ matrix.os == 'windows' && '.exe' || '' }}
 
         steps:
-        - uses: actions/checkout@v2
+        - name: Checkout
+        - uses: actions/checkout@v3
 
         - name: Install stack
-          uses: haskell/actions/setup@v1
+          uses: haskell/actions/setup@v2
           with:
-              stack-version: ${{ matrix.stack }}
-              enable-stack: true
+              enable-stack:    true
               stack-no-global: true
 
         - name: Cache ${{ env.CACHE_DIR }}
-          uses: actions/cache@v2.1.3
+          uses: actions/cache@v3
           with:
               path: ${{ env.CACHE_DIR }}
-              key: ${{ runner.os }}-${{ matrix.resolver }}-stack-cache-5
+              key:  ${{ runner.os }}-${{ matrix.resolver }}
 
         - name: Clean
           run: ${{ env.STACK }} clean
