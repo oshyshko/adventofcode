@@ -14,13 +14,10 @@ rebootSteps =
   where
     record :: Parser (Box XYZ Int, Bool)
     record = do
-        v  <- try (string "on" $> True) <|> (string "off" $> False)
-        x <- string " x=" *> integer
-        a <- string ".."  *> integer
-        y <- string ",y=" *> integer
-        b <- string ".."  *> integer
-        z <- string ",z=" *> integer
-        c <- string ".."  *> integer
+        v <- try (string "on" $> True) <|> (string "off" $> False)
+        x <- string " x=" *> integer; a <- string ".." *> integer
+        y <- string ",y=" *> integer; b <- string ".." *> integer
+        z <- string ",z=" *> integer; c <- string ".." *> integer
         -- convert (offset,offset) to (offset,size
         pure (Box (XYZ x y z) (XYZ (a-x+1) (b-y+1) (c-z+1)), v)
 
