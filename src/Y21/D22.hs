@@ -21,10 +21,13 @@ rebootSteps =
         -- convert (offset,offset) to (offset,size
         pure (Box (XYZ x y z) (XYZ (a-x+1) (b-y+1) (c-z+1)), v)
 
+volume :: Tree XYZ Int Bool -> Int
+volume = sum . fmap (xyzFold (*) . size . fst) . filter snd . toList
+
 solve :: ([(Box XYZ Int, Bool)] -> [(Box XYZ Int, Bool)]) -> String -> Int
 solve f =
-      sum . fmap (xyzFold (*) . size . fst) . filter snd . toList   -- volume of True
-    . foldl' (\t (s,v) -> set v s t) (mkTree False)                 -- set
+      volume
+    . foldl' (\t (s,v) -> set v s t) (mkTree False)
     . f
     . parseOrDie rebootSteps
 
