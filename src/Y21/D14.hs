@@ -4,6 +4,7 @@ import qualified Data.Map.Strict as M
 
 import           Imports
 import           Parser
+import           Util            (divvy2)
 
 type Elem = Char
 type Poly = [Elem]
@@ -44,7 +45,7 @@ solve n =
     rules2map = M.fromList . fmap (\(Rule ab@(Pair a b) r) -> (ab, [Pair a r, Pair r b]))
 
     poly2map :: Poly -> Map Pair Int
-    poly2map poly = M.fromListWith (+) $ (\(a:b:_) -> (Pair a b, 1)) <$> divvy 2 1 (poly <> "$")
+    poly2map poly = M.fromListWith (+) $ (\(a,b) -> (Pair a b, 1)) <$> divvy2 1 (poly <> "$")
 
     score :: Map Pair Int -> Int
     score =

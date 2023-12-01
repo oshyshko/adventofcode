@@ -4,6 +4,7 @@ import qualified Data.HashMap.Strict as M
 
 import           Imports
 import           Parser
+import           Util                (divvy2)
 
 type Guest = String
 type Attr = ((Guest, Guest), Int) -- (from, to), attractiveness)
@@ -40,8 +41,8 @@ maxHappiness ms =
     table2happiness :: [Guest] -> Int
     table2happiness guests =
           guests ++ take 1 guests -- wrap around one guest
-        & divvy 2 1
-        & map (\[a,b] -> fta ! (a,b) + fta ! (b,a))
+        & divvy2 1
+        & map (\(a,b) -> fta ! (a,b) + fta ! (b,a))
         & sum
 
     -- like Data.HashMap.Strict.!, but prints missing key in case of error
