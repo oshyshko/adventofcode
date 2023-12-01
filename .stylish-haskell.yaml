@@ -373,4 +373,5 @@ language_extensions:
 - TupleSections
 - TypeApplications
 - TypeFamilies
+- TypeOperators
 - ViewPatterns
