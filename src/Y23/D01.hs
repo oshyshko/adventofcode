@@ -2,15 +2,15 @@ module Y23.D01 where
 
 import           Imports
 
--- 1abc2        -> 12
--- pqr3stu8vwx  -> 38
+-- "1abc2"        -> 12
+-- "pqr3stu8vwx"  -> 38
 readFirstAndLastDigit :: String -> Int
 readFirstAndLastDigit = read . (\s -> [head s, last s]) . filter isDigit
 
--- two1nine     -> 29
--- eightwothree -> 83
--- eighthree    -> 83 (sliding window)
--- sevenine     -> 79 (sliding window)
+-- "two1nine"     -> "2wo19ine"
+-- "eightwothree" -> "8igh2wo3hree"
+-- "eighthree"    -> "8igh3hree"    (sliding window)
+-- "sevenine"     -> "7eve9ine"     (sliding window)
 replaceOneToNineNumeralsWithDigits :: String -> String
 replaceOneToNineNumeralsWithDigits =
     concatMap tryReplace . takeWhile (not . null) . iterate tail
