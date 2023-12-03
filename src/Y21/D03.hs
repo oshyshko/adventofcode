@@ -24,7 +24,7 @@ bits2int =
 
 dominating :: (Int -> Int -> Bool) -> [Bit] -> Bit
 dominating cmp xs =
-    let (zs,os) = partition (== False) xs
+    let (zs,os) = partition not xs
     in cmp (length zs) (length os)
 
 solve1 :: String -> Int

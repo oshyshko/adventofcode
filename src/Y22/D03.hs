@@ -5,8 +5,8 @@ import           Imports
 
 priority :: Char -> Int
 priority x
-    | 'a' <= x && x <= 'z' =  1 + fromEnum x - fromEnum 'a'
-    | 'A' <= x && x <= 'Z' = 27 + fromEnum x - fromEnum 'A'
+    | isAsciiLower x =  1 + fromEnum x - fromEnum 'a'
+    | isAsciiUpper x = 27 + fromEnum x - fromEnum 'A'
     | otherwise = error $ "Unexpected item: " ++ show x
 
 intersection :: [String] -> Char

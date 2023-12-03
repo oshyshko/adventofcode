@@ -40,9 +40,10 @@ import           Data.Bifunctor          (bimap, first, second)
 import           Data.Bit                (Bit (..), unBit)
 import           Data.Bool               (bool)
 import           Data.Char               (chr, digitToInt, intToDigit,
-                                          isAlphaNum, isAsciiLower, isDigit,
-                                          isLower, isSpace, isUpper, ord,
-                                          toLower, toUpper)
+                                          isAlphaNum, isAsciiLower,
+                                          isAsciiUpper, isDigit, isLower,
+                                          isSpace, isUpper, ord, toLower,
+                                          toUpper)
 import           Data.Either             (partitionEithers)
 import           Data.Foldable           (find, foldl', foldlM, maximumBy,
                                           minimumBy)

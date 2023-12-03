@@ -23,10 +23,10 @@ parseMapStartEnd =
   where
     cost :: Char -> Height
     cost h
-        | 'a' <= h && h <= 'z' = fromIntegral $ ord h - ord 'a'
-        | 'S' == h             = cost 'a'
-        | 'E' == h             = cost 'z'
-        | otherwise            = error $ "Unexpected height: " ++ show h
+        | isAsciiLower h = fromIntegral $ ord h - ord 'a'
+        | 'S' == h       = cost 'a'
+        | 'E' == h       = cost 'z'
+        | otherwise      = error $ "Unexpected height: " ++ show h
 
 minScore :: Vec2 Height -> XY -> XY -> Maybe Int
 minScore Vec2{wh,vec} start goal =
