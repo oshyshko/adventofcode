@@ -9,6 +9,7 @@ module Imports
     , module Data.Bit
     , module Data.Bool
     , module Data.Char
+    , module Data.Either
     , module Data.Foldable
     , module Data.Function
     , module Data.Functor
@@ -42,6 +43,7 @@ import           Data.Char               (chr, digitToInt, intToDigit,
                                           isAlphaNum, isAsciiLower, isDigit,
                                           isLower, isSpace, isUpper, ord,
                                           toLower, toUpper)
+import           Data.Either             (partitionEithers)
 import           Data.Foldable           (find, foldl', foldlM, maximumBy,
                                           minimumBy)
 import           Data.Function           (fix, on, (&))

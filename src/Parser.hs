@@ -2,6 +2,7 @@ module Parser
     ( module Control.Applicative
     , module Text.Parsec
     , module Text.Parsec.String
+    , getSourceRowCol
     , eol
     , integer
     , natural
@@ -11,12 +12,17 @@ module Parser
     ) where
 
 import           Control.Applicative ((<|>))
+import           Data.Functor        ((<&>))
 import qualified Text.Parsec         as P
 import           Text.Parsec         (between, char, count, digit, endBy,
-                                      endBy1, hexDigit, letter, many, many1,
-                                      manyTill, noneOf, oneOf, option, sepBy,
-                                      sepEndBy, string, try, (<?>))
+                                      endBy1, getParserState, hexDigit, letter,
+                                      many, many1, manyTill, noneOf, oneOf,
+                                      option, sepBy, sepEndBy, sourceColumn,
+                                      sourceLine, statePos, string, try, (<?>))
 import           Text.Parsec.String  (Parser)
+
+getSourceRowCol :: Parser (P.Column, P.Line)
+getSourceRowCol = getParserState <&> statePos <&> \p -> (sourceLine p, sourceColumn p)
 
 eol :: Parser String
 eol =   try (string "\n\r")
