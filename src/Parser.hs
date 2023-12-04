@@ -2,8 +2,8 @@ module Parser
     ( module Control.Applicative
     , module Text.Parsec
     , module Text.Parsec.String
-    , getSourceRowCol
     , eol
+    , getSourceRowCol
     , integer
     , natural
     , pad
