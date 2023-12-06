@@ -67,6 +67,7 @@ import qualified Y23.D02
 import qualified Y23.D03
 import qualified Y23.D04
 import qualified Y23.D05
+import qualified Y23.D06
 
 import qualified Data.Map.Strict as M
 
