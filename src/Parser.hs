@@ -2,6 +2,7 @@ module Parser
     ( module Control.Applicative
     , module Text.Parsec
     , module Text.Parsec.String
+    , endByEol
     , eol
     , getSourceRowCol
     , integer
@@ -9,6 +10,7 @@ module Parser
     , pad
     , padded
     , parseOrDie
+    , sepByEol
     ) where
 
 import           Control.Applicative ((<|>))
@@ -29,6 +31,12 @@ eol =   try (string "\n\r")
     <|> try (string "\r\n")
     <|>      string "\n"
     <|>      string "\r"
+
+endByEol :: Parser a -> Parser [a]
+endByEol = (`endBy` eol)
+
+sepByEol :: Parser a -> Parser [a]
+sepByEol = (`sepBy` eol)
 
 natural :: Read a => Parser a
 natural = read <$> many1 digit
