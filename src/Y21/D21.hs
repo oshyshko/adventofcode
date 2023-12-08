@@ -36,12 +36,14 @@ tick rollSum State{aLoc,bLoc,aScore,bScore,aNext} =
 
 solve1 :: String -> Int
 solve1 s =
-    let (a,b)     = parseOrDie playerLocations s
-    in fix3 0 (cycle [(1::Int)..100]) (State a b 0 0 True)
-        \loop rollCount (r0:r1:r2:diceSeqRem) state@State{aScore,bScore} ->
-            if | aScore >= 1000 -> rollCount * bScore
-               | bScore >= 1000 -> rollCount * aScore
-               | otherwise      -> loop (3 + rollCount) diceSeqRem (tick (r0 + r1 + r2) state)
+    let (a,b) = parseOrDie playerLocations s
+    in fix3 0 (cycle [(1::Int)..100]) (State a b 0 0 True) f
+  where
+    f loop rollCount (r0:r1:r2:diceSeqRem) state@State{aScore,bScore}
+        | aScore >= 1000 = rollCount * bScore
+        | bScore >= 1000 = rollCount * aScore
+        | otherwise      = loop (3 + rollCount) diceSeqRem (tick (r0 + r1 + r2) state)
+    f _ _ _ _ = shouldNeverReachHere
 
 solve2 :: String -> Int
 solve2 s =
