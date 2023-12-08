@@ -4,7 +4,11 @@ import           Imports
 import           Parser
 
 cardsAndBids :: Parser [(String, Int)]
-cardsAndBids = endByEol $ (,) <$> count 5 (oneOf "23456789TJQKA" ) <* char ' ' <*> natural
+cardsAndBids =
+    cardAndBid `endBy` eol
+  where
+    cardAndBid = (,) <$> count 5 (oneOf "23456789TJQKA") <* char ' ' <*> natural
+
 
 groupStrength :: [Int] -> Int
 groupStrength g =
@@ -19,11 +23,11 @@ solve cardStrength handStrength =
     . fmap (\(i,(_,bid)) -> i * bid)
     . zip [(1::Int)..]
     . sortOn fst
-    . fmap (\(c,b) -> ((handStrength c, fmap cardStrength c),b) )
+    . fmap (\(c,b) -> ((handStrength c, fmap cardStrength c), b))
     . parseOrDie cardsAndBids
 
 mkCardStrength :: String -> Char -> Int
-mkCardStrength cardOrder c = fromJust $ lookup c (zip cardOrder [(2 :: Int)..])
+mkCardStrength cardOrder c = fromJust . lookup c $ zip cardOrder [(2 :: Int)..]
 
 mkGroup :: String -> [Int]
 mkGroup = sortOn negate . fmap length . group . sort
@@ -35,8 +39,8 @@ solve2 :: String -> Int
 solve2 =
     solve
         (mkCardStrength "J23456789TQKA")
-        (\hand ->
+        (groupStrength . \hand ->
             let (jokers,handNoJs) = partition (== 'J') hand
-            in groupStrength $ case mkGroup handNoJs of
+            in case mkGroup handNoJs of
                 []     -> [5]
                 (x:xs) -> (x + length jokers):xs)

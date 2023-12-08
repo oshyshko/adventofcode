@@ -3,11 +3,13 @@ module Geom.Box where
 import           Geom.Point (Point)
 import qualified Geom.Point as P
 
--- p = point, e.g. XY, XYZ
+-- p = point, e.g. X, XY, XYZ
 -- c = component, e.g. Int
 data Box p c where
-    Box :: (Point p c, Show p, Num c, Ord c, Integral c)
-        => p -> p -> Box p c
+    Box :: (Point p c, Show p, Num c, Ord c, Integral c) =>
+        { offset :: p
+        , size   :: p
+        } -> Box p c
 
 instance Eq (Box p c) where
   (Box ao as) == (Box bo bs) = ao == bo && as == bs
@@ -40,11 +42,3 @@ intersection (Box ao as) (Box bo bs) =
 
 center :: forall p c. Box p c -> p
 center (Box o s) = o + P.map @p @c (`quot` (2 :: c)) s
-
-{-# INLINE offset #-}
-offset :: Box p c -> p
-offset (Box o _ ) = o
-
-{-# INLINE size #-}
-size :: Box p c -> p
-size (Box _ s) = s
