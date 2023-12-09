@@ -5,20 +5,20 @@ import qualified Data.Map.Strict          as M
 
 import           Imports
 import           Parser
-import           Util
 
+type Node = String
 data Turn = L | R deriving Show
 
 data Instructions = Instructions
-    { turns   :: [Turn]
-    , network :: [(String, (String, String))]
+    { turns       :: [Turn]
+    , node2nextLR :: Map Node (Node, Node)
     } deriving Show
 
 instructions :: Parser Instructions
 instructions =
     Instructions
         <$> many1 turn <* eol <* eol
-        <*> n2nn `endBy` eol
+        <*> (M.fromList <$> n2nn `endBy` eol)
   where
     turn = (L <$ char 'L') <|> (R <$ char 'R')
     node = count 3 alphaNum
@@ -29,25 +29,22 @@ instructions =
             <*> (padded node <* char ')'))
 
 stepsToEnd :: String -> (String -> Bool) -> Instructions -> Int
-stepsToEnd start isEnd Instructions{turns,network} =
-    let node2nextLR = M.fromList network
-    in fix2 start (zip [1..] $ cycle turns)
-        \loop node ((i,turn):ts) ->
-            let (l,r) = node2nextLR M.! node
-                nextNode = case turn of
-                    L -> l
-                    R -> r
-            in if isEnd nextNode
-                then i
-                else loop nextNode ts
+stepsToEnd start isEnd Instructions{turns,node2nextLR} =
+    length . takeWhile (not . isEnd) . scanl nextNode start $ cycle turns
+  where
+    nextNode node turn =
+          node2nextLR M.! node
+        & case turn of
+            L -> fst
+            R -> snd
 
 solve1 :: String -> Int
 solve1 = stepsToEnd "AAA" (== "ZZZ") . parseOrDie instructions
 
 solve2 :: String -> Int
 solve2 s =
-    let ins@Instructions{network} = parseOrDie instructions s
-    in    fmap fst network
+    let ins@Instructions{node2nextLR} = parseOrDie instructions s
+    in    M.keys node2nextLR
         & filter ("A" `isSuffixOf`)                                 -- all starts
         & fmap (\start -> stepsToEnd start ("Z" `isSuffixOf`) ins)
         & foldl' lcm 1                                              -- where all converge
