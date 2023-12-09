@@ -2,7 +2,6 @@ module Parser
     ( module Control.Applicative
     , module Text.Parsec
     , module Text.Parsec.String
-    , endByEol
     , eol
     , getSourceRowCol
     , integer
@@ -10,17 +9,17 @@ module Parser
     , pad
     , padded
     , parseOrDie
-    , sepByEol
     ) where
 
 import           Control.Applicative ((<|>))
 import           Data.Functor        ((<&>))
 import qualified Text.Parsec         as P
-import           Text.Parsec         (between, char, count, digit, endBy,
-                                      endBy1, getParserState, hexDigit, letter,
-                                      many, many1, manyTill, noneOf, oneOf,
-                                      option, sepBy, sepEndBy, sourceColumn,
-                                      sourceLine, statePos, string, try, (<?>))
+import           Text.Parsec         (alphaNum, between, char, count, digit,
+                                      endBy, endBy1, getParserState, hexDigit,
+                                      letter, lower, many, many1, manyTill,
+                                      noneOf, oneOf, option, sepBy, sepEndBy,
+                                      sourceColumn, sourceLine, statePos,
+                                      string, try, upper, (<?>))
 import           Text.Parsec.String  (Parser)
 
 getSourceRowCol :: Parser (P.Column, P.Line)
@@ -31,12 +30,6 @@ eol =   try (string "\n\r")
     <|> try (string "\r\n")
     <|>      string "\n"
     <|>      string "\r"
-
-endByEol :: Parser a -> Parser [a]
-endByEol = (`endBy` eol)
-
-sepByEol :: Parser a -> Parser [a]
-sepByEol = (`sepBy` eol)
 
 natural :: Read a => Parser a
 natural = read <$> many1 digit
