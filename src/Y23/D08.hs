@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 module Y23.D08 where
 
 import qualified Data.Map.Strict          as M
