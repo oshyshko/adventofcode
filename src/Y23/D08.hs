@@ -27,7 +27,7 @@ instructions =
             <$> (char '(' *> padded node <* char ',')
             <*> (padded node <* char ')'))
 
-stepsToEnd :: String -> (String -> Bool) -> Instructions -> Int
+stepsToEnd :: Node -> (Node -> Bool) -> Instructions -> Int
 stepsToEnd start isEnd Instructions{turns,node2nextLR} =
     length . takeWhile (not . isEnd) . scanl nextNode start $ cycle turns
   where
