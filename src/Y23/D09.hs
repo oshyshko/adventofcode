@@ -1,7 +1,6 @@
 module Y23.D09 where
 
-import           Imports
-import           Util
+import           Util (divvy2)
 
 -- 0 3 6 9 12 15
 -- 1 3 6 10 15 21
@@ -18,5 +17,5 @@ diffs =
     . iterate (fmap (uncurry subtract) . divvy2 1)
 
 solve1, solve2 :: String -> Int
-solve1 = sum . fmap (sum                 . fmap last           . diffs) . parse -- trailing
-solve2 = sum . fmap (foldl' (flip (-)) 0 . fmap head . reverse . diffs) . parse -- leading
+solve1 = sum . fmap (sum         . fmap last . diffs) . parse
+solve2 = sum . fmap (foldr (-) 0 . fmap head . diffs) . parse
