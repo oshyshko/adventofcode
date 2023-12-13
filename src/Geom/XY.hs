@@ -2,7 +2,11 @@ module Geom.XY where
 
 import           Geom.Point
 
-data XY = XY Int Int deriving (Eq, Ord, Bounded)
+data XY = XY
+    { getX :: Int
+    , getY :: Int
+    } deriving (Eq, Ord, Bounded)
+
 type X = Int
 type Y = Int
 
@@ -33,12 +37,6 @@ instance Point XY Int where
     append  = xyAppend
     foldMap = xyFoldMap
 
-getX :: XY -> Int
-getX (XY x _) = x
-
-getY :: XY -> Int
-getY (XY _ y) = y
-
 xyMap :: (Int -> Int) -> XY -> XY
 xyMap f (XY x y) = XY (f x) (f y)
 
@@ -59,3 +57,6 @@ i2xy (XY w _) i = XY (rem i w) (quot i w)
 
 xy2i :: WH -> XY -> XYI
 xy2i (XY w _) (XY x y) = y * w + x
+
+distanceManhattan :: XY -> XY -> Int
+distanceManhattan = Geom.Point.distanceManhattan

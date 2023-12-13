@@ -1,5 +1,6 @@
 module Parser
     ( module Control.Applicative
+    , module Data.Functor
     , module Text.Parsec
     , module Text.Parsec.String
     , eol
@@ -12,7 +13,7 @@ module Parser
     ) where
 
 import           Control.Applicative ((<|>))
-import           Data.Functor        ((<&>))
+import           Data.Functor        (($>), (<&>))
 import qualified Text.Parsec         as P
 import           Text.Parsec         (alphaNum, between, char, count, digit,
                                       endBy, endBy1, getParserState, hexDigit,
