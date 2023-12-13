@@ -7,6 +7,7 @@ import qualified Geom.Point      as P
 import           Geom.XYZ
 import           Imports
 import           Parser
+import           Util            (tuples2)
 
 type RegionId = Int
 type Coord    = Int
@@ -54,16 +55,10 @@ diffsProducts xs = diffs xs <&> \(XYZ x y z) -> abs $ x * y * z
 intersectionCount :: Ord a => Set a -> [a] -> Int
 intersectionCount a b = S.size a - S.size (foldl' (flip S.delete) a b)
 
--- > uniquePairs [1..4]
--- [(1,2), (1,3), (1,4), (2,3), (2,4), (3,4)]
-uniquePairs :: [a] -> [(a,a)]
-uniquePairs []     = []
-uniquePairs (x:xs) = ((x,) <$> xs) <> uniquePairs xs
-
 findLinks :: [Region] ->  Map RegionId [RegionId]
 findLinks rs =
       fmap (\r -> (r, diffsProducts (beacons r))) rs
-    & uniquePairs
+    & tuples2
     & concatMap (\((arid, api), (brid, bpi)) ->
         let c = intersectionCount (S.fromList api) bpi
         in  [ (c, regionId arid, regionId brid)

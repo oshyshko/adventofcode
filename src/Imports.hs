@@ -1,5 +1,6 @@
 module Imports
-    ( module Control.Applicative
+    ( module Combinatorics
+    , module Control.Applicative
     , module Control.Arrow
     , module Control.Exception
     , module Control.Monad
@@ -29,6 +30,7 @@ module Imports
     , module Text.Printf
     ) where
 
+import           Combinatorics           (tuples)
 import           Control.Applicative     (liftA2, (<|>))
 import           Control.Arrow           ((&&&))
 import           Control.Exception       (SomeException, catch, evaluate)

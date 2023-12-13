@@ -56,11 +56,6 @@ character = Character
     <*> (string "Damage:"     *> pad *> natural <* eol)
     <*> (string "Armor:"      *> pad *> natural <* eol)
 
-combs :: Int -> [a] -> [[a]]
-combs 0 _      = [[]]
-combs _ []     = []
-combs m (x:xs) = map (x:) (combs (m-1) xs) ++ combs m xs
-
 playerDefeatsBoss :: Character -> Character -> Bool
 playerDefeatsBoss
     (Character playerHp playerDamage playerArmor)
@@ -80,9 +75,9 @@ playerBaseHp = 100
 loadouts :: [Item] -> [[Item]]
 loadouts items =
     [ weapon ++ armor ++ rings
-    | weapon <- [1]    >>= flip combs (keep Weapon) --   1 weapon
-    , armor  <- [0..1] >>= flip combs (keep Armor)  -- 0-1 armor
-    , rings  <- [0..2] >>= flip combs (keep Ring)   -- 0-2 rings
+    | weapon <- [1]    >>= flip tuples (keep Weapon) --   1 weapon
+    , armor  <- [0..1] >>= flip tuples (keep Armor)  -- 0-1 armor
+    , rings  <- [0..2] >>= flip tuples (keep Ring)   -- 0-2 rings
     ]
   where
     keep c = filter (\Item{itemClass} -> itemClass == c) items

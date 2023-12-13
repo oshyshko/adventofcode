@@ -16,6 +16,7 @@ library:
   - base
   - bitvec
   - bytestring
+  - combinatorial
   - containers
   - cryptohash-md5
   - deepseq

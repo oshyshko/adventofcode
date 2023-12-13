@@ -27,11 +27,20 @@ fix2 a b loop = fix loop a b
 fix3 :: a -> b -> c -> ((a -> b -> c -> d) -> a -> b -> c -> d) -> d
 fix3 a b c loop = fix loop a b c
 
--- divvy
-divvy2 :: Int -> [a] -> [(a, a)]
-divvy2 n xs = divvy 2 n xs & fmap \case
+tuplify2 :: [[a]] -> [(a,a)]
+tuplify2 = fmap \case
     [a,b] -> (a,b)
-    _     -> error "Should never reach here"
+    _     -> shouldNeverReachHere
+
+-- > divvy2 1 [1..5]
+-- [(1,2), (2,3), (3,4), (4,5)]
+divvy2 :: Int -> [a] -> [(a,a)]
+divvy2 n = tuplify2 . divvy 2 n
+
+-- > tuples2 [1..4]
+-- [(1,2), (1,3), (1,4), (2,3), (2,4), (3,4)]
+tuples2 :: [a] -> [(a,a)]
+tuples2 = tuplify2 . tuples 2
 
 -- trace
 tr :: Show a => String -> a -> a

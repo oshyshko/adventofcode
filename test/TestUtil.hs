@@ -5,7 +5,17 @@ import           Test.Hspec
 import           Util
 
 spec :: Spec
-spec =
+spec = do
+    it "divvy2" $ do
+        divvy2 @Int 0 []     `shouldBe` []
+        divvy2 @Int 1 []     `shouldBe` []
+        divvy2 @Int 1 [1..3] `shouldBe` [(1,2), (2,3)]
+        divvy2 @Int 2 [1..3] `shouldBe` [(1,2)]
+
+    it "tuples2" $ do
+        tuples2 @Int []     `shouldBe` []
+        tuples2 @Int [1..3] `shouldBe` [(1,2), (1,3), (2,3)]
+
     it "size2humanSize" $
         size2humanSize . fst <$> sizeHumanSizes
             `shouldBe` snd <$> sizeHumanSizes
