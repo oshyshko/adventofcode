@@ -13,10 +13,9 @@ type H = Int
 type D = Int
 
 instance Show XYZ where
-    show (XYZ x y z) =
-        if x == y && y == z
-            then show x
-            else "(" <> show x <> "," <> show y <> "," <> show z <> ")"
+    show (XYZ x y z)
+        | x == y && y == z = show x
+        | otherwise = "(" <> show x <> "," <> show y <> "," <> show z <> ")"
 
 instance Num XYZ where
     (XYZ x y z) + (XYZ a b c) = XYZ (x + a)    (y + b)    (z + c)

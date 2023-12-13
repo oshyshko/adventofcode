@@ -1,8 +1,8 @@
 module Y23.D03 where
 
+import           Geom.XY
 import           Imports
 import           Parser
-import           Geom.XY
 
 data Part   = Part   { partId  ::Int,  xy::XY, wh::WH } deriving Show
 data Symbol = Symbol { symbolId::Char, xy::XY         } deriving Show

@@ -17,10 +17,9 @@ type H = Int
 type XYI = Int
 
 instance Show XY where
-    show (XY x y) =
-        if x == y
-            then show x
-            else "(" <> show x <> "," <> show y <> ")"
+    show (XY x y)
+        | x == y = show x
+        | otherwise = "(" <> show x <> "," <> show y <> ")"
 
 instance Num XY where
     (XY x y) + (XY a b) = XY (x + a)    (y + b)

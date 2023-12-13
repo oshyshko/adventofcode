@@ -1,7 +1,7 @@
 module Y23.D06 where
 
-import Parser
-import Imports
+import           Imports
+import           Parser
 
 -- Time:      7  15   30
 -- Distance:  9  40  200
@@ -14,7 +14,7 @@ waysToWin :: Int -> Int -> Int
 waysToWin t d =
       [0 :: Int .. t]
     & fmap (\x -> x * (t - x))
-    & filter (>d)
+    & filter (> d)
     & length
 
 solve1 :: String -> Int
