@@ -19,6 +19,8 @@ import qualified Y21.TestD19
 import qualified Y21.TestD20
 import qualified Y21.TestD22
 
+import qualified Y23.TestD12
+
 main :: IO ()
 main = hspec $ do
     context "Geom.Box"      Geom.TestBox.spec

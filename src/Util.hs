@@ -43,11 +43,17 @@ tuples2 :: [a] -> [(a,a)]
 tuples2 = tuplify2 . tuples 2
 
 -- trace
-tr :: Show a => String -> a -> a
-tr s x = Trace.trace (s ++ "=" ++ show x) x
+tr :: String -> a -> a
+tr = Trace.trace
 
-trace :: String -> a -> a
-trace = Trace.trace
+tr_ :: String -> a -> a
+tr_ _ = id
+
+trl :: Show a => String -> a -> a
+trl s x = Trace.trace (s ++ "=" ++ show x) x
+
+trl_ :: String -> a -> a
+trl_ _ = id
 
 traceShow :: Show a => a -> b -> b
 traceShow = Trace.traceShow
@@ -58,7 +64,7 @@ traceShowId = Trace.traceShowId
 traceTime :: NFData a => String -> a -> a
 traceTime s f = unsafePerformIO $ do
     (a, millis) <- timeOf (pure f)
-    pure $ trace (s <> show millis) a
+    pure $ tr (s <> show millis) a
 
 timeOf :: NFData a => IO a -> IO (a, Integer)
 timeOf ioa = do
