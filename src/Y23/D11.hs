@@ -20,7 +20,7 @@ findSkipped xs =
     in S.toList $ S.fromList [S.findMin s .. S.findMax s] S.\\ s
 
 solve :: Int -> String -> Int
-solve n s =
+solve growBy s =
     let xys             = parseOrDie stars s
         skippedXs       = findSkipped $ fmap getX xys
         skippedYs       = findSkipped $ fmap getY xys
@@ -29,9 +29,9 @@ solve n s =
             length $ filter (betweenAB ax bx) skippedXs
                   <> filter (betweenAB ay by) skippedYs
     in    tuples2 xys
-        & fmap (\(a, b) -> distanceManhattan a b + n * expansionsBetween a b)
+        & fmap (\(a, b) -> distanceManhattan a b + growBy * expansionsBetween a b)
         & sum
 
 solve1, solve2 :: String -> Int
-solve1 = solve 1
-solve2 = solve $ 1000000 - 1
+solve1 = solve $ 2       - 1    -- 1 -> 2
+solve2 = solve $ 1000000 - 1    -- 1 -> 1000000
