@@ -3,10 +3,13 @@ module SysInfo
        , SysInfo(..)
        ) where
 
-import qualified Data.Version   as V
-import qualified System.Info    as SI
-import           System.Process (readProcessWithExitCode)
-import           Text.Read      (readMaybe)
+import qualified Data.Version       as V
+import           System.Environment (getExecutablePath)
+import qualified System.Info        as SI
+import           System.IO          (IOMode (ReadMode), hClose, hFileSize,
+                                     openBinaryFile)
+import           System.Process     (readProcessWithExitCode)
+import           Text.Read          (readMaybe)
 
 import           Imports
 
@@ -21,6 +24,7 @@ data SysInfo = SysInfo
     , ramClock     :: Maybe Int
     , compiler     :: Maybe String
     , compilerArch :: Maybe String
+    , binarySize   :: Maybe Integer
     } deriving Show
 
 mkEmptySysInfo :: SysInfo
@@ -35,14 +39,22 @@ mkEmptySysInfo = SysInfo
     , ramClock     = Nothing
     , compiler     = Just $ SI.compilerName ++ "-" ++ V.showVersion SI.fullCompilerVersion
     , compilerArch = Just SI.arch
+    , binarySize   = Nothing
     }
 
 getSysInfo :: IO SysInfo
-getSysInfo =
-    let os = toLower <$> SI.os in
-    if | "darwin" `isPrefixOf` os -> getMac
-       | "mingw"  `isPrefixOf` os -> getWin
-       | otherwise                -> getLin
+getSysInfo = do
+    let os = toLower <$> SI.os
+    r <- if | "darwin" `isPrefixOf` os -> getMac
+            | "mingw"  `isPrefixOf` os -> getWin
+            | otherwise                -> getLin
+
+    selfSize <- bracket
+        (getExecutablePath >>= flip openBinaryFile ReadMode)
+        (hClose)
+        hFileSize
+
+    pure $ r { binarySize = Just selfSize }
 
 -- Platform: darwin, x86_64, v10.15.7, MacBookPro12,1
 -- CPU:      Intel(R) Core(TM) i7-5557U CPU @ 3.10GHz, 2 cores

@@ -29,6 +29,7 @@ library:
   - parsec
   - primitive
   - psqueues
+  - safe-exceptions
   - scientific
   - split
   - strict-tuple

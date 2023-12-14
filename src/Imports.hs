@@ -3,6 +3,7 @@ module Imports
     , module Control.Applicative
     , module Control.Arrow
     , module Control.Exception
+    , module Control.Exception.Safe
     , module Control.Monad
     , module Control.Monad.IO.Class
     , module Control.Monad.Primitive
@@ -33,7 +34,8 @@ module Imports
 import           Combinatorics           (tuples)
 import           Control.Applicative     (liftA2, (<|>))
 import           Control.Arrow           ((&&&))
-import           Control.Exception       (SomeException, catch, evaluate)
+import           Control.Exception       (evaluate)
+import           Control.Exception.Safe  (SomeException, bracket, catch)
 import           Control.Monad           (forM, forM_, guard, join, replicateM,
                                           unless, when, (<=<), (>=>))
 import           Control.Monad.IO.Class  (MonadIO, liftIO)
@@ -65,7 +67,8 @@ import           Data.List               (delete, dropWhileEnd, elemIndex,
 import           Data.List.Split         (chunksOf, divvy, splitOn, splitWhen)
 import           Data.Map.Strict         (Map)
 import           Data.Maybe              (catMaybes, fromJust, fromMaybe,
-                                          listToMaybe, mapMaybe, maybeToList)
+                                          isJust, listToMaybe, mapMaybe,
+                                          maybeToList)
 import           Data.Set                (Set)
 import           Data.Tuple.Strict       (T1 (..), T2 (..), T3 (..), T4 (..),
                                           T5 (..), T6 (..), T7 (..), T8 (..),

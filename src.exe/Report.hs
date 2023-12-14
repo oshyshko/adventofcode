@@ -73,4 +73,5 @@ showSysInfo SysInfo{..} =
                         , fm $ show <$> ramClock, "MHz"
         , "\nCompiler: ", fm compiler, " ("
                         , fm compilerArch, ")"
+        , "\nBinary:   ", fm $ show <$> binarySize, " bytes"
         ]
