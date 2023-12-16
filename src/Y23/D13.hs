@@ -23,8 +23,8 @@ images =
     line = many1 ((Bit True <$ char '#') <|> (Bit False <$ char '.'))
 
 -- diifsVert (wh m) (m V.!) -> [2,11,13,16,0,11,8,7]
-diifsVert :: Eq a => XY -> (XY -> a) -> [Int]
-diifsVert (XY w h) getXY =
+diffsVert :: Eq a => XY -> (XY -> a) -> [Int]
+diffsVert (XY w h) getXY =
     foldl1' (zipWith (+)) $
         [0..h-1] <&> \y ->
             [1..w-1] <&> \x ->
@@ -41,8 +41,8 @@ solve targetDiff s =
   where
     diifsHoriVert :: Image -> [Either Int Int]          -- Either Cols Rows
     diifsHoriVert m = catMaybes
-         [ fmap (Left  . (1 +)) . elemIndex targetDiff $ diifsVert (         wh m) ( m V.!          )
-         , fmap (Right . (1 +)) . elemIndex targetDiff $ diifsVert (xySwap $ wh m) ((m V.!) . xySwap)
+         [ fmap (Left  . (1 +)) . elemIndex targetDiff $ diffsVert (         wh m) ( m V.!          )
+         , fmap (Right . (1 +)) . elemIndex targetDiff $ diffsVert (xySwap $ wh m) ((m V.!) . xySwap)
          ]
 
 solve1, solve2 :: String -> Int
