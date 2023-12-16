@@ -57,5 +57,8 @@ i2xy (XY w _) i = XY (rem i w) (quot i w)
 xy2i :: WH -> XY -> XYI
 xy2i (XY w _) (XY x y) = y * w + x
 
+xySwap :: XY -> XY
+xySwap (XY x y) = XY y x
+
 distanceManhattan :: XY -> XY -> Int
 distanceManhattan = Geom.Point.distanceManhattan
