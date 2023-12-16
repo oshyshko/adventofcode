@@ -67,6 +67,6 @@ jobs:
         - name: Compress binary
           uses: svenstaro/upx-action@v2
           with:
-              file: ${{ env.BINARY }}
+              files: ${{ env.BINARY }}
               strip: true
               args: --ultra-brute
