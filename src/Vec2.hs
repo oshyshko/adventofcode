@@ -26,8 +26,7 @@ instance (VU.Unbox a, Show a) => Show (Vec2 a) where
 
 showBits :: Vec2 Bit -> String
 showBits =
-        ("\n" <> )
-      . concatMap ((++ "\n") . unwords . fmap showBit)
+        concatMap ((++ "\n") . unwords . fmap showBit)
       . toList
   where
     showBit = \case

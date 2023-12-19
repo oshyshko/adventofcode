@@ -8,14 +8,18 @@ import           Numeric               (showFFloat)
 
 import           Imports
 
-replaceAll :: Eq a => [a] -> [a] -> [a] -> [a]
-replaceAll from to = intercalate to . splitOn from
-
 -- Examples:
 -- s <- readInput "Y15.D01"
 -- Y15.D14.solve1 <$> readInput "Y15.D14"
 readInput :: String -> IO String
 readInput name = readFile $ "res/" ++ replaceAll "." "/" (take 7 name) ++ ".txt"
+
+-- lists
+replaceAll :: Eq a => [a] -> [a] -> [a] -> [a]
+replaceAll from to = intercalate to . splitOn from
+
+countElem :: Eq a => a -> [a] -> Int
+countElem i = length . filter (i==)
 
 -- flipped fixes -- number means "number of args" passed to "loop"
 fix1 :: a -> ((a -> b) -> a -> b) -> b

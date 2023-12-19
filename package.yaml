@@ -114,11 +114,14 @@ default-extensions:
 - FlexibleContexts
 - FlexibleInstances
 - GADTs
+- ImportQualifiedPost
 - LambdaCase
 - MultiParamTypeClasses
 - MultiWayIf
 - NamedFieldPuns
+- NumericUnderscores
 - OverloadedStrings
+- PatternSynonyms
 - QuasiQuotes
 - RankNTypes
 - RecordWildCards

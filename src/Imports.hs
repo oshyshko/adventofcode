@@ -35,7 +35,8 @@ import           Combinatorics           (tuples)
 import           Control.Applicative     (liftA2, (<|>))
 import           Control.Arrow           ((&&&))
 import           Control.Exception       (evaluate)
-import           Control.Exception.Safe  (SomeException, bracket, catch)
+import           Control.Exception.Safe  (SomeException, bracket, catch,
+                                          finally)
 import           Control.Monad           (forM, forM_, guard, join, replicateM,
                                           unless, when, (<=<), (>=>))
 import           Control.Monad.IO.Class  (MonadIO, liftIO)
@@ -60,15 +61,15 @@ import           Data.Int                (Int16, Int32, Int64, Int8)
 import           Data.IntMap.Strict      (IntMap)
 import           Data.List               (delete, dropWhileEnd, elemIndex,
                                           findIndex, foldl1', group,
-                                          intercalate, isInfixOf, isPrefixOf,
-                                          isSuffixOf, nub, partition,
-                                          permutations, sort, sortBy, sortOn,
-                                          tails, transpose)
+                                          intercalate, intersperse, isInfixOf,
+                                          isPrefixOf, isSuffixOf, nub,
+                                          partition, permutations, sort, sortBy,
+                                          sortOn, tails, transpose)
 import           Data.List.Split         (chunksOf, divvy, splitOn, splitWhen)
 import           Data.Map.Strict         (Map)
 import           Data.Maybe              (catMaybes, fromJust, fromMaybe,
-                                          isJust, listToMaybe, mapMaybe,
-                                          maybeToList)
+                                          isJust, isNothing, listToMaybe,
+                                          mapMaybe, maybeToList)
 import           Data.Set                (Set)
 import           Data.Tuple.Strict       (T1 (..), T2 (..), T3 (..), T4 (..),
                                           T5 (..), T6 (..), T7 (..), T8 (..),
