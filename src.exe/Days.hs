@@ -61,6 +61,7 @@ import qualified Y22.D11
 import qualified Y22.D12
 import qualified Y22.D13
 import qualified Y22.D14
+import qualified Y22.D15
 
 import qualified Y23.D01
 import qualified Y23.D02
@@ -77,8 +78,10 @@ import qualified Y23.D12
 import qualified Y23.D13
 import qualified Y23.D14
 import qualified Y23.D15
+import qualified Y23.D19
 
 import qualified Data.Map.Strict as M
+
 
 import qualified DaysTH
 import           Types (DayPrefix, Day(..))
