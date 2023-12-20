@@ -24,7 +24,7 @@ import           Text.Parsec         (alphaNum, between, char, count, digit,
 import           Text.Parsec.String  (Parser)
 
 getSourceRowCol :: Parser (P.Column, P.Line)
-getSourceRowCol = getParserState <&> statePos <&> \p -> (sourceLine p, sourceColumn p)
+getSourceRowCol = (\p -> (sourceLine p, sourceColumn p)) . statePos <$> getParserState
 
 eol :: Parser String
 eol =   try (string "\n\r")

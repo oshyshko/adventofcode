@@ -17,9 +17,9 @@ type Image = Vec2 Bit
 -- #.#.##.#.
 images :: Parser [Image]
 images =
-    (V.fromList <$> image) `sepBy` eol
+    image `sepBy` eol
   where
-    image = line `endBy` eol
+    image = V.fromList <$> line `endBy` eol
     line = many1 ((Bit True <$ char '#') <|> (Bit False <$ char '.'))
 
 -- diffsVert (wh m) (m V.!) -> [2,11,13,16,0,11,8,7]

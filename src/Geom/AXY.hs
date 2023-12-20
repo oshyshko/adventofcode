@@ -1,7 +1,5 @@
 module Geom.AXY where
 
-import           Imports
-
 data XY a   = XY   a a           deriving (Show, Functor, Foldable)
 data Line a = Line (XY a) (XY a) deriving (Show, Functor, Foldable)
 

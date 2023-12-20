@@ -46,6 +46,13 @@ divvy2 n = tuplify2 . divvy 2 n
 tuples2 :: [a] -> [(a,a)]
 tuples2 = tuplify2 . tuples 2
 
+insert :: Eq a => (a, b) -> [(a, b)] -> [(a, b)]
+insert ab       []            = [ab]
+insert ab@(a,b) (x@(xa,_):xs) =
+    if xa == a
+        then (a,b) : xs
+        else x : insert ab xs
+
 -- trace
 tr :: String -> a -> a
 tr = Trace.trace

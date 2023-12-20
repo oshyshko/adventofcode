@@ -1,7 +1,5 @@
 module Geom.AXYZ where
 
-import           Imports
-
 data XYZ a = XYZ a a a deriving (Eq, Ord, Show, Functor, Foldable)
 
 instance Applicative XYZ where

@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wno-ambiguous-fields #-}
 module Y21.D02 where
 
 import           Imports
