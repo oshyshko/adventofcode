@@ -1,78 +1,119 @@
 module Geom.Spatial where
 
-import           Geom.Box   (Box (..), center, intersection)
-import           Geom.Point (Point)
-import qualified Geom.Point as P
-import           Geom.XY    (XY (..))
-import           Geom.XYZ   (XYZ (..))
-import           Imports
+import           Data.Foldable (minimumBy)
+import           Data.Function (on, (&))
+import           Data.List     (sortBy)
 
+import           Geom.Range    (Range (..))
+import qualified Geom.Range    as R
+import           Geom.Point    (Point, distanceManhattan)
+import           Geom.XY       (XY (..))
+import           Geom.XYZ      (XYZ (..))
+
+-- r = region (phantom), e.g. Range
 -- p = coordinate, e.g. XY, XYZ
--- c = component, e.g. Int
 -- v = value, e.g. Bool, Int
-data Tree p c v where
-    Leaf  :: v                 -> Tree p c v
-    Split :: p -> [Tree p c v] -> Tree p c v
+data Tree r p v where
+    Leaf  :: v                 -> Tree r p v
+    Split :: p -> [Tree r p v] -> Tree r p v
     deriving (Eq, Show)
 
-class (Point p c, Show p, Ord c, Integral c) => Spatial p c where
-    children    :: Int
-    corners     :: Box p c -> [p]
-    onCorner    :: Box p c -> p -> Bool
-    split       :: Box p c -> p -> [Box p c]
+-- r = region, e.g. Range
+-- p = coordinate, e.g. XY, XYZ, Int
+class Region r p where
+    center       :: r -> p
+    intersection :: r -> r -> Maybe r
+    bounds       :: r
+    distance     :: p -> p -> Int
+    corners      :: r -> [p]
+    onCorner     :: r -> p -> Bool
+    split        :: r -> p -> [r]
+    splitLength  :: Int
 
-instance Spatial Int Int where
-    children                = 2
-    corners     (Box o s)   = [o, o + s]
-    onCorner    (Box o s) x = o == x || x == (o + s)
-    split       (Box o s) r = [Box o (r - o), Box r (o + s - r)]
+instance Region (Range Int Int) Int where
+    center                  = R.center
+    intersection            = R.intersection
+    bounds                  = rangeBounds
+    distance                = distanceManhattan
 
-instance Spatial XY Int where
-    children = 4
+    corners     (Range o s)   = [o, o + s]
+    onCorner    (Range o s) x = o == x || x == (o + s)
+    splitLength               = 2
+    split       (Range o s) r = [Range o (r - o), Range r (o + s - r)]
 
-    corners (Box (XY x y) (XY w h)) =
+instance Region (Range XY Int) XY where
+    center                  = R.center
+    intersection            = R.intersection
+    bounds                  = rangeBounds
+    distance                = distanceManhattan
+
+    corners (Range (XY x y) (XY w h)) =
         XY <$> [x, x + w] <*>  [y, y + h]
 
-    onCorner (Box o@(XY x y) s) (XY a b) =
-        let (XY x' y') = o + s
-        in     (x == a || a == x')
-            && (y == b || b == y')
+    onCorner (Range o@(XY ox oy) s) (XY x y) =
+        let (XY ox' oy') = o + s
+        in     (x == ox || x == ox')
+            && (y == oy || y == oy')
 
-    split (Box a@(XY ax ay) as) r@(XY rx ry) =
+    splitLength = 4
+
+    split (Range a@(XY ax ay) as) r@(XY rx ry) =
         let (XY bw bh) = r - a
             (XY pw ph) = a + as - r
-        in  [ Box @XY @Int (XY x y) (XY w h)
+        in  [ Range @XY (XY x y) (XY w h)
             | (x,w) <- [(ax,bw), (rx,pw)]
             , (y,h) <- [(ay,bh), (ry,ph)]
             ]
 
-instance Spatial XYZ Int where
-    children = 8
+instance Region (Range XYZ Int) XYZ where
+    center                  = R.center
+    intersection            = R.intersection
+    bounds                  = rangeBounds
+    distance                = distanceManhattan
 
-    corners (Box (XYZ x y z) (XYZ w h d)) =
+    corners (Range (XYZ x y z) (XYZ w h d)) =
         [ XYZ x' y' z'
         | x' <- [x, x + w]
         , y' <- [y, y + h]
         , z' <- [z, z + d]
         ]
 
-    onCorner (Box a@(XYZ ax ay az) as) (XYZ x y z) =
+    onCorner (Range a@(XYZ ax ay az) as) (XYZ x y z) =
         let (XYZ ax' ay' az') = a + as
         in     (ax == x || x == ax')
             && (ay == y || y == ay')
             && (az == z || z == az')
 
-    split (Box o@(XYZ ax ay az) s) r@(XYZ rx ry rz) =
+    splitLength = 8
+
+    split (Range o@(XYZ ax ay az) s) r@(XYZ rx ry rz) =
         let (XYZ bw bh bd) = r - o
             (XYZ pw ph pd) = o + s - r
-        in  [ Box @XYZ @Int (XYZ x y z) (XYZ w h d)
+        in  [ Range @XYZ (XYZ x y z) (XYZ w h d)
             | (x,w) <- [(ax,bw), (rx,pw)]
             , (y,h) <- [(ay,bh), (ry,ph)]
             , (z,d) <- [(az,bd), (rz,pd)]
             ]
 
-mkTree :: forall p c v. v -> Tree p c v
+mkTree :: forall r p v. v -> Tree r p v
 mkTree = Leaf
+
+-- +---------+
+-- |         |
+-- |  +-.-+  |    <- outerCenter
+-- |  |   |  |
+-- |  I---+  |
+-- O---------+
+{-# INLINE bestSplitCenter #-}
+bestSplitCenter :: forall r p . (Region r p) => r -> r -> p
+bestSplitCenter a b =
+    let aCenter = center @r @p a
+    in    corners @r @p b
+        & filter (not . onCorner @r @p a)
+        & fmap (\p -> (distance @r @p aCenter p, p)) -- the most close to outer center
+        & sortBy (compare `on` fst)
+        & minimumBy (compare `on` fst)
+        & snd
 
 --      /+---++---Z  o + s
 --    /+ |   ||   |
@@ -85,59 +126,43 @@ mkTree = Leaf
 -- o
 --
 {-# INLINE set #-}
-set :: forall p c v . (Spatial p c, Eq v)
-    => v -> Box p c -> Tree p c v -> Tree p c v               -- new-value, new-box, source
+set :: forall r p v . (Region r p, Eq v, Eq r)
+    => v -> r -> Tree r p v -> Tree r p v
 set newValue =
-    go (bounds @p @c)
+    go (bounds @r @p)
   where
     {-# INLINE go #-}
-    go :: Box p c -> Box p c -> Tree p c v -> Tree p c v
-    go outer inner t = case t of
-        Leaf oldValue ->
+    go :: r -> r -> Tree r p v -> Tree r p v
+    go outer inner = \case
+        t@(Leaf oldValue) ->
             if outer == inner || oldValue == newValue
                 then Leaf newValue
                 else go outer inner $ Split
-                    (bestSplitCenter outer inner)
-                    (replicate (children @p @c) t)
+                    (bestSplitCenter @r outer inner)
+                    (replicate (splitLength @r @p) t)
 
-        Split p os -> Split p (zipWith (update inner) os $ split @p @c outer p)
+        Split p os -> Split p (zipWith (update inner) os $ split @r @p outer p)
 
     {-# INLINE update #-}
-    update :: Box p c -> Tree p c v -> Box p c -> Tree p c v
+    update :: r -> Tree r p v -> r -> Tree r p v
     update inner t s =
-        intersection @p @c s inner
+        intersection @r @p s inner
             & maybe t (\overlap -> go s overlap t)
 
--- +---------+
--- |         |
--- |  +-.-+  |    <- outerCenter
--- |  |   |  |
--- |  I---+  |
--- O---------+
-{-# INLINE bestSplitCenter #-}
-bestSplitCenter :: forall p c . (Spatial p c) => Box p c -> Box p c -> p
-bestSplitCenter a b =
-    let aCenter = center @p @c a
-    in    corners @p @c b
-        & filter (not . onCorner @p @c a)
-        & fmap (\p -> (P.distanceManhattan @p @c aCenter p, p)) -- the most close to outer center
-        & sortBy (compare `on` fst)
-        & minimumBy (compare `on` fst)
-        & snd
-
 {-# INLINE toList #-}
-toList :: forall p c v. Spatial p c => Tree p c v -> [(Box p c, v)]
+toList :: forall r p v. Region r p => Tree r p v -> [(r, v)]
 toList =
-    go (bounds @p @c)
+    go (bounds @r @p)
   where
     {-# INLINE go #-}
-    go :: Box p c -> Tree p c v -> [(Box p c, v)]
+    go :: r -> Tree r p v -> [(r, v)]
     go outer = \case
         Leaf v     -> [(outer, v)]
-        Split r os -> concat $ zipWith go (split @p @c outer r) os
+        Split r os -> concat $ zipWith go (split @r @p outer r) os
 
-{-# INLINE bounds #-}
-bounds :: forall p c. (Point p c, Integral c) => Box p c
-bounds = Box
-    (fromIntegral $ minBound @Int `quot` 4)
-    (fromIntegral $ maxBound @Int `quot` 2)
+-- TODO remove?
+{-# INLINE rangeBounds #-}
+rangeBounds :: forall p c. (Point p c, Integral c, Bounded c) => Range p c
+rangeBounds = Range
+    (fromIntegral $ minBound @c `quot` 4)
+    (fromIntegral $ maxBound @c `quot` 2)

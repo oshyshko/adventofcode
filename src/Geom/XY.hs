@@ -33,8 +33,9 @@ instance Num XY where
 instance Point XY Int where
     map     = xyMap
     fold    = xyFold
-    append  = xyAppend
+    zipWith = xyZipWith
     foldMap = xyFoldMap
+    foldZip = xyFoldZip
 
 xyMap :: (Int -> Int) -> XY -> XY
 xyMap f (XY x y) = XY (f x) (f y)
@@ -42,14 +43,17 @@ xyMap f (XY x y) = XY (f x) (f y)
 xyBimap ::  (Int -> Int -> Int) -> XY -> XY -> XY
 xyBimap f (XY x y) (XY a b) = XY (f x a) (f y b)
 
+xyZipWith :: (Int -> Int -> Int) -> XY -> XY -> XY
+xyZipWith f (XY x y) (XY a b) = XY (f x a) (f y b)
+
 xyFold :: (Int -> Int -> Int) -> XY -> Int
 xyFold f (XY x y) = f x y
 
-xyAppend :: (Int -> Int -> Int) -> XY -> XY -> XY
-xyAppend f (XY x y) (XY a b) = XY (f x a) (f y b)
-
 xyFoldMap :: (v -> v -> v) -> (Int -> v) -> XY -> v
 xyFoldMap f g (XY x y) = g x `f` g y
+
+xyFoldZip :: (v -> v -> v) -> (Int -> Int -> v) -> XY -> XY -> v
+xyFoldZip f z (XY x y) (XY a b) = f (z x a) (z y b)
 
 i2xy :: WH -> XYI -> XY
 i2xy (XY w _) i = XY (rem i w) (quot i w)
