@@ -20,7 +20,7 @@ patternsAndCounts =
         <*> (padded natural `sepBy` char ',')
 
 -- see Y23.TestD12
-startsWith :: Pattern -> Int -> Bool -> Bool
+startsWith :: Pattern -> Int -> Bool -> Bool                        -- haystack -> #-count -> terminal?
 startsWith _     (-1) False = True
 startsWith _       0  True  = True
 startsWith []      _  _     = False
@@ -31,8 +31,8 @@ startsWith (p:ps)  n  t
     | otherwise             = False
 
 arrangementCount :: Pattern -> [Int] -> Int
-arrangementCount pattern is =
-    result $ go mkCache (pattern, is)
+arrangementCount pat is =
+    result $ go mkCache (pat, is)
   where
     go :: (k ~ (Pattern, [Int]), r ~ Int) => Cache k r -> k -> Cached k r
     go c    (p,[])   = Cached c (if '#' `notElem` p then 1 else 0)  -- needles=[] --> +1 result
@@ -51,7 +51,7 @@ data Cache k r = Cache
     { k2r :: Map k r }
 
 data Cached k r = Cached
-    { cache :: Cache k r
+    { cache  :: Cache k r
     , result :: r }
 
 mkCache :: Cache k r
