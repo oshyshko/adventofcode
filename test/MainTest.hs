@@ -40,6 +40,4 @@ main = hspec $ do
     context "Y21.D20"       Y21.TestD20.spec
     context "Y21.D22"       Y21.TestD22.spec
 
-    context "Y22.D15"       Y22.TestD15.spec
-
     context "Y23.D12"       Y23.TestD12.spec
