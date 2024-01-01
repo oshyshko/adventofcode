@@ -19,10 +19,7 @@ ops =
 
 -- rn=1,cm-,qp=3,cm=2,qp-,pc=4,ot=9,ab=5,pc-,pc=6,ot=7
 hash :: String -> Int
-hash =
-    foldl' go 0
-  where
-    go h x = (h + ord x) * 17 `rem` 256
+hash = foldl' (\h x -> (h + ord x) * 17 `rem` 256) 0
 
 solve1 :: String -> Int
 solve1 = sum . fmap hash . splitOn "," . head . lines
