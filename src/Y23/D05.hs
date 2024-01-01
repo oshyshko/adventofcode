@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Fuse concatMap/fmap" #-}
 module Y23.D05 where
 
 import           Imports

@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Fuse foldr/fmap" #-}
 module Y23.D09 where
 
 import           Util (divvy2)

@@ -29,7 +29,7 @@ solve1 :: String -> Int
 solve1 =
       sum
     . fmap gameId
-    . filter (and . fmap hasEnough . concat . rounds)
+    . filter (all (all hasEnough) . rounds)
     . parseOrDie games
   where
     -- 12 red cubes, 13 green cubes, and 14 blue cubes

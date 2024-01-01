@@ -26,7 +26,7 @@ solve1 :: String -> Int
 solve1 input =
     let (parts,symbols) = parseOrDie partsAndSymbols input
     in    parts
-        & filter (\p -> or $ containsOrTouches p <$> symbols)
+        & filter (\p -> any (containsOrTouches p) symbols)
         & fmap partId
         & sum
 

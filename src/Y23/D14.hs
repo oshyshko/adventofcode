@@ -43,7 +43,7 @@ findPrefixAndRepeat =
     . flip scanl ([], Nothing) \(as,_) x ->
           x `elemIndex` as
         & maybe (x:as, Nothing) \i ->
-            let rs = drop (length as - i - 1) (reverse $ as)
+            let rs = drop (length as - i - 1) (reverse as)
             in (reverse $ drop (length rs) as, Just rs)
 
 mkNth :: ([a], [a]) -> Int -> a

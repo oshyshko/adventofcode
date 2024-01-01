@@ -51,7 +51,7 @@ getSysInfo = do
 
     selfSize <- bracket
         (getExecutablePath >>= flip openBinaryFile ReadMode)
-        (hClose)
+        hClose
         hFileSize
 
     pure $ r { binarySize = Just selfSize }

@@ -93,10 +93,9 @@ main = do
 
             Report.printFooter dayPrefix2results =<< SysInfo.getSysInfo
 
-            let allAnswersCorrect = and $ dayPrefix2results <&> \(dayPrefix,results) ->
-                    let expected = mod2answers M.!? Report.dayPrefixToModuleName dayPrefix
-                        actual   = Just (results <&> output)
-                    in expected == actual
+            let allAnswersCorrect = dayPrefix2results & all \(dayPrefix,results) ->
+                    mod2answers M.!? Report.dayPrefixToModuleName dayPrefix -- expected
+                        == Just (results <&> output)                        -- actual
 
             unless allAnswersCorrect exitFailure
 
