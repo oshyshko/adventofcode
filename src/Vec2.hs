@@ -16,18 +16,17 @@ data Vec2 a where
 deriving instance Eq a => Eq (Vec2 a)
 
 instance (VU.Unbox a, Show a) => Show (Vec2 a) where
-  show v@Vec2{vec} =
-    let maxWidth = maximum . fmap (length . show) . V.toList $ vec
-        showCell = printf ("%" ++ show maxWidth ++ "s") . show
-    in  ("\n" <> )
-      . concatMap ((++ "\n") . unwords . fmap showCell)
-      . toList
-      $ v
+    show v@Vec2{vec} =
+        let maxWidth = maximum . fmap (length . show) . V.toList $ vec
+            showCell = printf ("%" ++ show maxWidth ++ "s") . show
+        in  ("\n" <> )
+          . concatMap ((++ "\n") . unwords . fmap showCell)
+          . toList
+          $ v
 
 showBits :: Vec2 Bit -> String
 showBits =
-        concatMap ((++ "\n") . unwords . fmap showBit)
-      . toList
+    concatMap ((++ "\n") . unwords . fmap showBit) . toList
   where
     showBit = \case
         Bit True  -> "#"
