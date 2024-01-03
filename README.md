@@ -5,7 +5,7 @@ Haskell solutions for http://adventofcode.com/
 ## Running
 
 ```
-$ ./scripts/build-exec.sh fast
+$ ./scripts/build-exec.sh
 -----------+-----------------------+- part 1 ---------------------+- part 2 ---------------------
  day       | answers               |    time allocs maxhea maxmem |    time allocs maxhea maxmem
 -----------+-----------------------+------------------------------+------------------------------
@@ -58,7 +58,7 @@ $ ./scripts/build-exec.sh fast
 
 To run tasks with a particular prefix:
 ```
-$ ./scripts/build-exec.sh Y15.D06M
+$ ./scripts/build-exec.sh Y15.D06M alts
 -----------+-----------------------+- part 1 ---------------------+- part 2 ---------------------
  day       | answers               |    time allocs maxhea maxmem |    time allocs maxhea maxmem
 -----------+-----------------------+------------------------------+------------------------------

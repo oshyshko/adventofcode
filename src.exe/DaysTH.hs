@@ -24,17 +24,17 @@ days = do
 extractDays :: SourcePath -> Q [Exp]
 extractDays s = do
     -- TODO report missing imports (enumerate and compare against solversFnNames)
-    s2sn <- TH.runIO $ benchSuffixToSolverFnNames s
+    s2sn <- TH.runIO $ altSuffixToSolverFnNames s
 
     forM (M.toList s2sn) (uncurry (solverRow moduleName))
   where
     moduleName = (takeFileName . takeDirectory $ s) ++ "." ++ takeBaseName s
 
-solverRow :: ModuleName -> BenchSuffix -> [SolverFnName] -> Q Exp
-solverRow moduleName benchSuffix solverFnNames =
+solverRow :: ModuleName -> AltSuffix -> [SolverFnName] -> Q Exp
+solverRow moduleName altSuffix solverFnNames =
     [| Day
-        $(return . LitE . StringL $ moduleName ++ benchSuffix)
-        $(return $ ConE $ TH.mkName (show (not $ null benchSuffix)))
+        $(return . LitE . StringL $ moduleName ++ altSuffix)
+        $(return $ ConE $ TH.mkName (show (not $ null altSuffix)))
         $(ListE <$> forM solverFnNames (callF moduleName))
         |]
 
@@ -78,10 +78,10 @@ applyAdapter t msn = case t of
     die            = error $ "Couldn't make an adapter for solver " <> show msn <> " of type: " ++ show t
     dieTop         = error $ "Couldn't make an adapter for solver (via top) " <> show msn <> " of type: " ++ show t
 
--- > benchSuffixToSolverFnNames "src/Y15/D06.hs"
+-- > altSuffixToSolverFnNames "src/Y15/D06.hs"
 -- fromList [("",["solve1","solve2"]),("AI",["solve1AI","solve2AI"]), ...]
-benchSuffixToSolverFnNames :: SourcePath -> IO (Map BenchSuffix [SolverFnName])
-benchSuffixToSolverFnNames p =
+altSuffixToSolverFnNames :: SourcePath -> IO (Map AltSuffix [SolverFnName])
+altSuffixToSolverFnNames p =
     readFile p <&>
     --   M.elems
       M.map sort

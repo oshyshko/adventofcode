@@ -46,16 +46,16 @@ main = do
             -- select day(s)
             -- TODO refactor: use some args library?
             let daysPred = case args of
-                    ["fast"]     -> (\Day{benchmark}           -> not benchmark)
+                    ["alts"]     -> (\Day{runAlts}              -> runAlts)
                     []           -> const True
-                    [x]          -> (\Day{dayPrefix}           -> x `isPrefixOf` dayPrefix)
-                    [x, "fast"]  -> (\Day{dayPrefix,benchmark} -> x `isPrefixOf` dayPrefix && not benchmark)
+                    [x]          -> (\Day{dayPrefix}            -> x `isPrefixOf` dayPrefix)
+                    [x, "alts"]  -> (\Day{dayPrefix,runAlts}    -> x `isPrefixOf` dayPrefix && runAlts)
                     _            -> error $ "Don't know how to interpret args: " ++ show args
                                         ++ "\nExamples:"
                                         ++ "\n./scripts/build-exec.sh"
-                                        ++ "\n./scripts/build-exec.sh fast"
+                                        ++ "\n./scripts/build-exec.sh alts"
                                         ++ "\n./scripts/build-exec.sh Y15"
-                                        ++ "\n./scripts/build-exec.sh Y15 fast"
+                                        ++ "\n./scripts/build-exec.sh Y15 alts"
                                         ++ "\ncat res/Y15/D05.txt | ./scripts/build-exec.sh runday Y15.D05 0"
                                         ++ "\ncat res/Y15/D05.txt | ./scripts/build-exec.sh runday Y15.D05 0 +RTS -t -s -RTS"
 

@@ -10,13 +10,13 @@ type SolverIndex            = Int                   -- 0, 1
 type Solver                 = Input -> IO AnswerStr -- (return . show . Y15.D01.solve1)
 
 type SourcePath             = FilePath              -- "src/Y15/D01.hs"
-type BenchSuffix            = String                -- "", "VS"
+type AltSuffix              = String                -- "", "VS"
 type SolverFnName           = String                -- "solve1", "solve2VS"
 type ModuleNameSolverFnName = String                -- "Y15.D01.solve1"
 
 data Day = Day
     { dayPrefix :: DayPrefix
-    , benchmark :: Bool
+    , runAlts   :: Bool
     , solvers   :: [Solver]
     }
 

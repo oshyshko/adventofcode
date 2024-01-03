@@ -56,7 +56,7 @@ jobs:
           run: ${{ env.STACK }} test
 
         - name: Run
-          run: ${{ env.BINARY }}
+          run: ${{ env.BINARY }} alts
 
         - name: Install hlint
           run: ${{ env.STACK }} install hlint
