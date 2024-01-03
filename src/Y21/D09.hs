@@ -16,7 +16,7 @@ neighbors = [XY (-1) 0, XY 1 0, XY 0 (-1), XY 0 1]
 
 atMaybe :: Vec2 Height -> XY -> Maybe Height
 atMaybe v xy =
-    V.atMaybe v xy >>= \h ->
+    v V.!? xy >>= \h ->
         if h == '9' then Nothing else Just h
 
 lowPoint :: Vec2 Height -> XY -> Bool

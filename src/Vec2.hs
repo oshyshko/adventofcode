@@ -47,7 +47,6 @@ freeze MVec2{wh,vec} = Vec2 wh <$> V.freeze vec
 toList :: VU.Unbox a => Vec2 a -> [[a]]
 toList (Vec2 (XY w _) vec) = chunksOf w (VU.toList vec)
 
-{-# INLINE[1] fromList #-}
 fromList :: (VU.Unbox a, Show a) => [[a]] -> Vec2 a
 fromList xs =
     -- TODO assert xs has equal lengths for all elements
@@ -61,15 +60,15 @@ fromList xs =
     | xy `notWithin` v  = error $ "Out of bounds: " ++ show xy ++ " for size " ++ show wh
     | otherwise         = (V.!) vec (xy2i wh xy)
 
-{-# INLINE[1] atMaybe #-}
-atMaybe :: Vec2 v -> XY -> Maybe v
-atMaybe v@(Vec2 wh vec) xy
+{-# INLINE[1] (!?) #-}
+(!?) :: Vec2 v -> XY -> Maybe v
+(!?) v@(Vec2 wh vec) xy
     | xy `notWithin` v  = Nothing
     | otherwise         = Just $ (V.!) vec (xy2i wh xy)
 
 {-# INLINE[1] getOr #-}
 getOr :: v -> Vec2 v -> XY -> v
-getOr orV v xy = fromMaybe orV $ atMaybe v xy
+getOr orV v xy = fromMaybe orV $ v !? xy
 
 {-# INLINE[1] findIndex #-}
 findIndex :: (v -> Bool) -> Vec2 v -> Maybe XY
