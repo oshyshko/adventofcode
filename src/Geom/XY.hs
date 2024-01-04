@@ -2,6 +2,8 @@ module Geom.XY where
 
 import           Geom.Point
 
+-- NOTE: adding {-# UNPACK #-} to getX/getY doesn't reduce heap usage. Also in ghci.
+--       probably because of -funbox-small-strict-fields enabled by -O (and -O2)
 data XY = XY
     { getX :: Int
     , getY :: Int
@@ -15,6 +17,12 @@ type W = Int
 type H = Int
 
 type XYI = Int
+
+pattern U, D, L, R :: XY
+pattern U = XY   0 (-1)
+pattern D = XY   0   1
+pattern L = XY (-1)  0
+pattern R = XY   1   0
 
 instance Show XY where
     show (XY x y)

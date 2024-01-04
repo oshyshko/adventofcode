@@ -7,23 +7,22 @@ import           Util
 import qualified Vec2            as V
 import           Vec2            (Vec2)
 
-type Cell  = Char
-type Board = Vec2 Cell
+type Cell = Char
+type Grid = Vec2 Cell
+type Dir  = XY
 
-data Dir = U | D | L | R deriving (Show, Eq, Ord)
-
-parse :: String -> (Board, XY)                                              -- (board, start)
+parse :: String -> (Grid, XY)                                              -- (board, start)
 parse s =
     let board = V.fromList $ lines s
     in (board, fromJust $ V.findIndex (== 'S') board)
 
-tryFourLoops :: Board -> XY -> [[(XY, Dir)]]
+tryFourLoops :: Grid -> XY -> [[(XY, Dir)]]
 tryFourLoops board start =
     filter isLoop $ fmap walk [R,D,U,L,error "Ran out of directions. Invalid input?"]
   where
     isLoop :: [(XY,Dir)] -> Bool
     isLoop path =
-        last path & \(xy,d) -> xy + dir2xy d == start
+        last path & \(xy,d) -> xy + d == start
     walk :: Dir -> [(XY, Dir)]
     walk d =
           iterate nextLinkAndDir (start, Just d)
@@ -32,7 +31,7 @@ tryFourLoops board start =
     nextLinkAndDir :: (XY, Maybe Dir) -> (XY, Maybe Dir)
     nextLinkAndDir (_, Nothing) = error "Should never reach here"
     nextLinkAndDir (prevXy, Just moveDxy) =
-        let currentXy = prevXy + dir2xy moveDxy
+        let currentXy = prevXy + moveDxy
             nextDxy   = nextDelta moveDxy (board V.! currentXy)
         in (currentXy,nextDxy)
     nextDelta :: Dir -> Cell -> Maybe Dir
@@ -41,12 +40,7 @@ tryFourLoops board start =
         D -> fmap ([L, R, D] !!) . (`elemIndex` "JL|")
         L -> fmap ([D, U, L] !!) . (`elemIndex` "FL-")
         R -> fmap ([D, U, R] !!) . (`elemIndex` "7J-")
-    dir2xy :: Dir -> XY
-    dir2xy = \case
-        U -> XY   0  (-1)
-        D -> XY   0    1
-        L -> XY (-1)   0
-        R -> XY   1    0
+        _ -> shouldNeverReachHere
 
 solve1 :: String -> Int
 solve1 = (`div` 2) . length . head . uncurry tryFourLoops . parse

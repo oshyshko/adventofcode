@@ -5,8 +5,10 @@ set -xue
 # jump to project directory
 cd "$(dirname $0)/../"
 
-stack --work-dir .stack-work-profile build --executable-profiling --no-library-profiling
-stack --work-dir .stack-work-profile exec  --executable-profiling --no-library-profiling \
+# stack --work-dir .stack-work-profile build --executable-profiling --no-library-profiling
+# stack --work-dir .stack-work-profile exec  --executable-profiling --no-library-profiling \
+stack --work-dir .stack-work-profile build --executable-profiling
+stack --work-dir .stack-work-profile exec  --executable-profiling \
    -- adventofcode-exe +RTS \
    -xc \
    -p  \

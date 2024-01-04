@@ -54,6 +54,9 @@ fromList xs =
         (XY (length . head $ xs) (length xs))
         (VU.fromList . concat $ xs)
 
+generate :: (VU.Unbox a, Show a) => WH -> (XY -> a) -> Vec2 a
+generate wh@(XY w h) f = Vec2 {wh, vec = VU.generate (w * h) (f . i2xy wh)}
+
 {-# INLINE[1] (!) #-}
 (!) :: Vec2 v -> XY -> v
 (!) v@(Vec2 wh vec) xy
