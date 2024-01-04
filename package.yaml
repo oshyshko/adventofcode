@@ -23,6 +23,7 @@ library:
   - directory
   - exceptions
   - filepath
+  - ghc-compact
   - hashable
   - hspec # needed to make Atom happy
   - mtl

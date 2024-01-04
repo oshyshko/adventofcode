@@ -3,6 +3,7 @@ module Util where
 import           Control.DeepSeq       (NFData, force)
 import           Data.Time.Clock.POSIX (getPOSIXTime)
 import qualified Debug.Trace           as Trace
+import           GHC.Compact           (compact, compactSize)
 import           GHC.IO                (unsafePerformIO)
 import           Numeric               (showFFloat)
 
@@ -98,3 +99,6 @@ size2humanSize i =
 
 shouldNeverReachHere :: a
 shouldNeverReachHere = error "should never reach here"
+
+sizeOfCompacted :: a -> IO Word
+sizeOfCompacted x = compact x >>= compactSize
