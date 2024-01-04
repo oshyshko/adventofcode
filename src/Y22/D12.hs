@@ -38,7 +38,7 @@ minScore Vec2{wh,vec} start goal =
     neighbors :: XY -> [XYI]
     neighbors xy =
         [ nXyi
-        | d <- [XY 0 (-1), XY 0 1, XY (-1) 0, XY 1 0]
+        | d <- udlr
         , let nXy@(XY nx ny) = xy + d
         , let (XY w h ) = wh
         , nx >= 0 && ny >= 0 && nx < w && ny < h

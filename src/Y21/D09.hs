@@ -11,9 +11,6 @@ type Height = Char
 parse :: String -> Vec2 Height
 parse = V.fromList . lines
 
-neighbors :: [XY]
-neighbors = [XY (-1) 0, XY 1 0, XY 0 (-1), XY 0 1]
-
 atMaybe :: Vec2 Height -> XY -> Maybe Height
 atMaybe v xy =
     v V.!? xy >>= \h ->
@@ -22,7 +19,7 @@ atMaybe v xy =
 lowPoint :: Vec2 Height -> XY -> Bool
 lowPoint v xy =
     atMaybe v xy & maybe False \c ->
-        all (maybe True (c <) . atMaybe v . (+ xy)) neighbors
+        all (maybe True (c <) . atMaybe v . (+ xy)) udlr
 
 lowPoints :: Vec2 Height -> [(XY, Height)]
 lowPoints v =
@@ -39,7 +36,7 @@ basins v =
         | S.member xy s = s
         | otherwise = atMaybe v xy & \case
             Nothing -> s
-            Just _  -> foldl' (\ss -> flood ss . (+ xy)) (S.insert xy s) neighbors
+            Just _  -> foldl' (\ss -> flood ss . (+ xy)) (S.insert xy s) udlr
 
 solve1, solve2 :: String -> Int
 solve1 = sum . fmap ((+1) . digitToInt . snd) . lowPoints . parse

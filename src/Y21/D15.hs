@@ -20,7 +20,7 @@ parse = V.fromList . fmap (fmap $ fromIntegral . digitToInt) . lines
 neighbors :: WH -> XY -> [XYI]
 neighbors wh@(XY w h) xy =
     [ xy2i wh nXy
-    | d <- [XY 0 (-1), XY 0 1, XY (-1) 0, XY 1 0]
+    | d <- udlr
     , let nXy@(XY nx ny) = xy + d
     , nx >= 0 && ny >= 0 && nx < w && ny < h                            -- keep traversable ones only
     ]

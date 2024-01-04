@@ -24,6 +24,10 @@ pattern D = XY   0   1
 pattern L = XY (-1)  0
 pattern R = XY   1   0
 
+{-# INLINE[1] udlr #-}
+udlr :: [XY]
+udlr = [U,D,L,R]
+
 instance Show XY where
     show (XY x y)
         | x == y = show x
