@@ -39,12 +39,12 @@ fillAndCount sxy sd v@Vec2{wh} =
                             then loop open                              -- skip seen dir
                             else do                                     -- visit new dir
                                 MV.write visited xy (sInsert d dirs)
-                                loop (mkSteps xy d c ++ open)
+                                loop (nextSteps xy d c ++ open)
 
         MV.foldl' (\a x -> a + if x == 0 then 0 else 1) 0 visited
   where
-    mkSteps :: XY -> Dir -> Cell -> [(XY, Dir)]
-    mkSteps xy d = \case
+    nextSteps :: XY -> Dir -> Cell -> [(XY, Dir)]
+    nextSteps xy d = \case
         '.'  ->                          [(xy+d,d)]
         '-'  -> if d == L || d == R then [(xy+d,d)] else [(xy,L), (xy,R)]
         '|'  -> if d == U || d == D then [(xy+d,d)] else [(xy,U), (xy,D)]
@@ -53,17 +53,10 @@ fillAndCount sxy sd v@Vec2{wh} =
         _    -> shouldNeverReachHere
 
     -- set replacements
-    sEmpty :: Dirs
-    sEmpty = B.zeroBits
-
-    sInsert :: Dir -> Dirs -> Dirs
-    sInsert d dirs = B.setBit dirs (dir2index d)
-
-    sMember :: Dir -> Dirs -> Bool
-    sMember d dirs = B.testBit dirs (dir2index d)
-
-    dir2index :: Dir -> Int
-    dir2index = \case U->0; D->1; L->2; R->4; _->shouldNeverReachHere
+    sEmpty          = B.zeroBits @Word8
+    sInsert d dirs  = B.setBit dirs (dir2index d)
+    sMember d dirs  = B.testBit dirs (dir2index d)
+    dir2index       = \case U->0; D->1; L->2; R->4; _->shouldNeverReachHere
 
 solve1 :: String -> Int
 solve1 = fillAndCount 0 R . parse
