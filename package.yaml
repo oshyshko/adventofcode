@@ -37,6 +37,7 @@ library:
   - time
   - unordered-containers
   - vector
+  - vector-th-unbox
 
 executables:
   adventofcode-exe:

@@ -35,29 +35,28 @@ main :: IO ()
 main = do
     args <- getArgs
     case args of
-        -- TODO refactor: encode dayNs in a type?
-        ["runday", moduleName, dayNs] ->
-            case M.lookup moduleName Days.moduleName2day of
-                Nothing           -> error $ "Couldn't find day for prefix" ++ moduleName ++ ", solver " ++ dayNs
-                Just Day{solvers} ->
-                    getContents >>= (solvers !! read dayNs) >>= putStr
+        -- TODO refactor: encode part1or2 in a type?
+        ["exec", moduleName, part1or2] -> readInput moduleName >>= runDay moduleName part1or2 >>= putStrLn
+        ["pipe", moduleName, part1or2] -> getContents          >>= runDay moduleName part1or2 >>= putStr
 
         _ -> do
             -- select day(s)
             -- TODO refactor: use some args library?
             let daysPred = case args of
-                    ["alts"]     -> (\Day{runAlts}              -> runAlts)
-                    []           -> const True
-                    [x]          -> (\Day{dayPrefix}            -> x `isPrefixOf` dayPrefix)
-                    [x, "alts"]  -> (\Day{dayPrefix,runAlts}    -> x `isPrefixOf` dayPrefix && runAlts)
+                    ["alts"]     -> const True
+                    []           -> \Day{runAlts}           ->                             not runAlts
+                    [x]          -> \Day{dayPrefix,runAlts} -> x `isPrefixOf` dayPrefix && not runAlts
+                    [x, "alts"]  -> \Day{dayPrefix}         -> x `isPrefixOf` dayPrefix
                     _            -> error $ "Don't know how to interpret args: " ++ show args
                                         ++ "\nExamples:"
-                                        ++ "\n./scripts/build-exec.sh"
-                                        ++ "\n./scripts/build-exec.sh alts"
-                                        ++ "\n./scripts/build-exec.sh Y15"
-                                        ++ "\n./scripts/build-exec.sh Y15 alts"
-                                        ++ "\ncat res/Y15/D05.txt | ./scripts/build-exec.sh runday Y15.D05 0"
-                                        ++ "\ncat res/Y15/D05.txt | ./scripts/build-exec.sh runday Y15.D05 0 +RTS -t -s -RTS"
+                                        ++ "\n                      ./scripts/build-exec.sh"
+                                        ++ "\n                      ./scripts/build-exec.sh alts"
+                                        ++ "\n                      ./scripts/build-exec.sh Y15"
+                                        ++ "\n                      ./scripts/build-exec.sh Y15 alts"
+                                        ++ "\n                      ./scripts/build-exec.sh exec Y15.D05 0"
+                                        ++ "\n                      ./scripts/build-exec.sh exec Y15.D05 0 +RTS -t -s -RTS"
+                                        ++ "\ncat res/Y15/D05.txt | ./scripts/build-exec.sh pipe Y15.D05 0"
+                                        ++ "\ncat res/Y15/D05.txt | ./scripts/build-exec.sh pipe Y15.D05 0 +RTS -t -s -RTS"
 
             let daysSelected :: [Day] = filter daysPred $ M.elems Days.moduleName2day
 
@@ -77,13 +76,13 @@ main = do
                 Report.printDayPrefix dayPrefix
                 hFlush stdout
 
-                results <- forM [0,1] $ \solverIndex -> do
-                    runDay input dayPrefix solverIndex >>= \case
+                results <- forM [1,2] $ \part1or2 -> do
+                    pipeDay dayPrefix part1or2 input >>= \case
                         -- TODO 1. correctly present error (Left) and continue with the rest of days
                         -- TODO 2. find a better way to remove RTS part that starts with " [("
                         Left err -> error $
-                                "solver with index "
-                                ++ show solverIndex ++ " failed: "
+                                "solver for part "
+                                ++ show part1or2 ++ " failed: "
                                 ++ (unlines . takeWhile (\e -> not $ " [(" `isPrefixOf` e) . lines $ err)
                         Right r -> pure r
 
@@ -99,12 +98,18 @@ main = do
 
             unless allAnswersCorrect exitFailure
 
-runDay :: Input -> DayPrefix -> SolverIndex -> IO (Either String RunResult)
-runDay input dayPrefix solverIndex = do
+runDay :: ModuleName -> String -> Input -> IO String
+runDay moduleName part1or2 input =
+    case M.lookup moduleName Days.moduleName2day of
+        Nothing           -> error $ "Couldn't find day for prefix" ++ moduleName ++ ", solver for part " ++ part1or2
+        Just Day{solvers} -> input & (solvers !! (read part1or2 - 1))
+
+pipeDay :: DayPrefix -> Part1or2 -> Input -> IO (Either String RunResult)
+pipeDay dayPrefix part1or2 input = do
     selfPath <- getExecutablePath
     (e, out, err) <- readProcessWithExitCode
         selfPath
-        ["runday", dayPrefix, show solverIndex, "+RTS", "-t", "--machine-readable", "-RTS"]
+        ["pipe", dayPrefix, show part1or2, "+RTS", "-t", "--machine-readable", "-RTS"]
         input
 
     case e of

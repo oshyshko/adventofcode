@@ -13,6 +13,10 @@ import           System.FilePath     (takeBaseName, takeDirectory, takeFileName,
 import           Imports
 import           Types
 
+-- TODO test has wrong type for solve1/2
+-- TODO test doesn't have solve1/2
+-- TODO test has no answer -- at compile-time?
+
 -- [| [Day] |]
 days :: Q Exp
 days = do
@@ -43,7 +47,7 @@ callF moduleName solverFnName = do
     let msn = moduleName ++ "." ++ solverFnName
 
     solver <- TH.lookupValueName msn
-        <&> fromMaybe (error $ "Couldn't lookup solver: " ++ show msn)
+        <&> fromMaybe (error $ "Did you forget to add to 'Days.hs' line: import qualified " ++ moduleName)
 
     VarI _ t _ <- TH.reify solver
 

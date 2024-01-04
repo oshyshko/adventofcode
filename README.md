@@ -56,7 +56,7 @@ $ ./scripts/build-exec.sh
  Compiler: ghc-9.0 (x86_64)
  ```
 
-To run tasks with a particular prefix:
+To run tasks with a particular prefix (also to include alternative solvers):
 ```
 $ ./scripts/build-exec.sh Y15.D06M alts
 -----------+-----------------------+- part 1 ---------------------+- part 2 ---------------------
@@ -75,24 +75,16 @@ $ ./scripts/build-exec.sh Y15.D06M alts
 
 ## Running a solver using stdin/stdout
 ```bash
-$ cat res/Y15/D01.txt | ./scripts/build-exec.sh runday Y15.D01 0
-  ^^^^^^^^^^^^^^^^^^^                                            - input
-                                                       ^^^^^^^   - year + day
-                                                               ^ - solver index (0 or 1)
+$ ./scripts/build-exec.sh exec Y15.D01 1
+                               ^^^^^^^   - year + day
+                                       ^ - part (1 or 2)
 <prints result to stdout>
-```
 
-## Running on Raspberry Pi
-
-In `stack.yaml` replace line `resolver: ...` with:
-```
-resolver: lts-13.11
-jobs: 1
-```
-
-Then run with:
-```
-$ ./scripts/build-exec.sh
+$ cat res/Y15/D01.txt | ./scripts/build-exec.sh pipe Y15.D01 1
+  ^^^^^^^^^^^^^^^^^^^                                          - input
+                                                     ^^^^^^^   - year + day
+                                                             ^ - part (1 or 2)
+<prints result to stdout>
 ```
 
 ## Running on Windows

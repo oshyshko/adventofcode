@@ -6,7 +6,7 @@ type AnswerStr              = String
 
 type DayPrefix              = String                -- "Y15.D01", "Y15.D06VU"
 type ModuleName             = String                -- "Y15.D01", "Y15.D06"
-type SolverIndex            = Int                   -- 0, 1
+type Part1or2               = Int                   -- 1, 2
 type Solver                 = Input -> IO AnswerStr -- (return . show . Y15.D01.solve1)
 
 type SourcePath             = FilePath              -- "src/Y15/D01.hs"
