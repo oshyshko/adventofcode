@@ -5,16 +5,9 @@ set -xue
 # jump to project directory
 cd "$(dirname $0)/../"
 
-# stack --work-dir .stack-work-profile build --executable-profiling --no-library-profiling
-# stack --work-dir .stack-work-profile exec  --executable-profiling --no-library-profiling \
-stack --work-dir .stack-work-profile build --executable-profiling
-stack --work-dir .stack-work-profile exec  --executable-profiling \
-   -- adventofcode-exe +RTS \
-   -xc \
-   -p  \
-   -hy \
-   -s  \
-   --RTS $@
+stack --work-dir .stack-work-profile build --profile
+stack --work-dir .stack-work-profile exec  --profile \
+   -- adventofcode-exe +RTS -xc -p -hy -s --RTS $@
 
 # see https://downloads.haskell.org/~ghc/latest/docs/html/users_guide/profiling.html
 # -xc  -- Show current cost centre stack on raising an exception
