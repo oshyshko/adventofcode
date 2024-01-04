@@ -35,6 +35,9 @@ showBits =
 map :: (VU.Unbox a, VU.Unbox b, Show b) => (a -> b) -> Vec2 a -> Vec2 b
 map f Vec2{wh,vec} = Vec2 wh (V.map f vec)
 
+foldl' :: (a -> b -> a) -> a -> Vec2 b -> a
+foldl' f acc Vec2{vec} = V.foldl' f acc vec
+
 ifoldl' :: (a -> XY -> b -> a) -> a -> Vec2 b -> a
 ifoldl' f acc Vec2{wh,vec} = V.ifoldl' (\a i b -> f a (i2xy wh i) b) acc vec
 

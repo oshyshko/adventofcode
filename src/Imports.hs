@@ -7,6 +7,7 @@ module Imports
     , module Control.Monad
     , module Control.Monad.IO.Class
     , module Control.Monad.Primitive
+    , module Control.Monad.ST
     , module Data.Bifunctor
     , module Data.Bit
     , module Data.Bool
@@ -41,6 +42,7 @@ import           Control.Monad           (forM, forM_, guard, join, replicateM,
                                           unless, when, (<=<), (>=>))
 import           Control.Monad.IO.Class  (MonadIO, liftIO)
 import           Control.Monad.Primitive (PrimMonad (..))
+import           Control.Monad.ST        (ST, runST)
 import           Data.Bifunctor          (bimap, first, second)
 import           Data.Bit                (Bit (..), unBit)
 import           Data.Bool               (bool)

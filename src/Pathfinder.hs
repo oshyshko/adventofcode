@@ -1,6 +1,5 @@
 module Pathfinder where
 
-import           Control.Monad.ST            (ST, runST)
 import qualified Data.IntMap.Strict          as M
 import qualified Data.IntPSQ                 as Q
 import qualified Data.STRef                  as S

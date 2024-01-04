@@ -43,3 +43,6 @@ replicate wh@(XY w h) v = MVec2 wh <$> VUM.replicate (w * h) v
 within, notWithin :: XY -> MVec2 m v -> Bool
 within    (XY x y) (MVec2 (XY w h) _) = x >= 0 && y >= 0 && x < w && y < h
 notWithin (XY x y) (MVec2 (XY w h) _) = x < 0 || y < 0 || x >= w || y >= h
+
+foldl' :: (a -> b -> a) -> a -> MVec2 m b -> m a
+foldl' f acc MVec2{vec} = VUM.foldl' f acc vec
