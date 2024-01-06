@@ -1,13 +1,15 @@
 module Geom.XY where
 
+import           Data.Hashable (Hashable)
+import           GHC.Generics  (Generic)
+
 import           Geom.Point
 
 -- NOTE: adding {-# UNPACK #-} to getX/getY doesn't reduce heap usage. Also in ghci.
---       probably because of -funbox-small-strict-fields enabled by -O (and -O2)
 data XY = XY
     { getX :: Int
     , getY :: Int
-    } deriving (Eq, Ord, Bounded)
+    } deriving (Eq, Ord, Bounded, Generic)
 
 type X = Int
 type Y = Int
@@ -27,6 +29,8 @@ pattern R = XY   1   0
 {-# INLINE[1] udlr #-}
 udlr :: [XY]
 udlr = [U,D,L,R]
+
+instance Hashable XY
 
 instance Show XY where
     show (XY x y)

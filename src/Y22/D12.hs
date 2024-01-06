@@ -4,7 +4,7 @@ import qualified Data.Vector.Generic as VG
 
 import           Geom.XY
 import           Imports
-import qualified Pathfinder
+import qualified Pathfinder          as P
 import qualified Vec2                as V
 import           Vec2                (Vec2 (..))
 
@@ -30,11 +30,15 @@ parseMapStartEnd =
 
 minScore :: Vec2 Height -> XY -> XY -> Maybe Int
 minScore Vec2{wh,vec} start goal =
-    Pathfinder.minScoreMVector (VG.length vec) (neighbors . i2xy wh) at (const 1) (xy2i wh start) (xy2i wh goal)
+    P.minScoreMVector
+        (VG.length vec)
+        (P.World
+            { neighbors = neighbors . i2xy wh
+            , cost      = \_ _ -> 1 })
+        (xy2i wh start)
+        (xy2i wh goal)
   where
     -- TODO consider reducing value lookups by merging 'at' with 'neighbors`
-    at :: XYI -> Height
-    at = (vec VG.!)
     neighbors :: XY -> [XYI]
     neighbors xy =
         [ nXyi
@@ -53,7 +57,8 @@ solve1 s =
 
 solve2 :: String -> Int
 solve2 s =
-    parseMapStartEnd s & \(v@Vec2{wh,vec},_,goal) ->
-          VG.ifoldl' (\a i b -> if b == 0 then i:a else a) [] vec   -- starting points
-        & mapMaybe (\start -> minScore v (i2xy wh start) goal)
-        & minimum
+      parseMapStartEnd s
+    & \(v@Vec2{wh,vec},_,goal) ->
+        VG.ifoldl' (\a i b -> if b == 0 then i:a else a) [] vec   -- starting points
+    & mapMaybe (\start -> minScore v (i2xy wh start) goal)
+    & minimum
