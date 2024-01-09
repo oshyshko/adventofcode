@@ -4,18 +4,18 @@ import qualified Data.Bits as B
 
 import           Geom.XY
 import           Imports
-import           MVec2     (MVec2 (..))
-import qualified MVec2     as MV
 import           Util
 import qualified Vec2      as V
 import           Vec2      (Vec2 (..))
+import qualified Vec2M     as VM
+import           Vec2M     (Vec2M (..))
 
 type Cell = Char
 type Grid = Vec2 Cell
 type Dir  = XY
 type Dirs = Word8
 
-type GridDirs m = MVec2 m Dirs
+type GridDirs m = Vec2M m Dirs
 
 -- .|...\....
 -- |.-.\.....
@@ -27,21 +27,21 @@ parse = V.fromList . lines
 fillAndCount :: XY -> Dir -> Grid -> Int
 fillAndCount sxy sd v@Vec2{wh} =
     runST $ do
-        visited <- MV.replicate wh sEmpty
+        visited <- VM.replicate wh sEmpty
         fix1 [(sxy,sd)] \loop -> \case
             [] -> pure ()
-            ((xy,d):open) ->
-                (v V.!? xy) & \case
+            (xy,d):open ->
+                v V.!? xy & \case
                     Nothing -> loop open                                -- skip out of bounds
                     Just c -> do
-                        dirs <- MV.read visited xy
+                        dirs <- VM.read visited xy
                         if d `sMember` dirs
                             then loop open                              -- skip seen dir
                             else do                                     -- visit new dir
-                                MV.write visited xy (sInsert d dirs)
+                                VM.write visited xy (sInsert d dirs)
                                 loop (nextSteps xy d c ++ open)
 
-        MV.foldl' (\a x -> a + if x == 0 then 0 else 1) 0 visited
+        VM.foldl' (\a x -> a + if x == 0 then 0 else 1) 0 visited
   where
     nextSteps :: XY -> Dir -> Cell -> [(XY, Dir)]
     nextSteps xy d = \case
