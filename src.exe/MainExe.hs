@@ -48,15 +48,19 @@ main = do
                     [x]          -> \Day{dayPrefix,runAlts} -> x `isPrefixOf` dayPrefix && not runAlts
                     [x, "alts"]  -> \Day{dayPrefix}         -> x `isPrefixOf` dayPrefix
                     _            -> error $ "Don't know how to interpret args: " ++ show args
+                                        ++ "\n"
                                         ++ "\nExamples:"
                                         ++ "\n                      ./scripts/build-exec.sh"
                                         ++ "\n                      ./scripts/build-exec.sh alts"
                                         ++ "\n                      ./scripts/build-exec.sh Y15"
                                         ++ "\n                      ./scripts/build-exec.sh Y15 alts"
-                                        ++ "\n                      ./scripts/build-exec.sh exec Y15.D05 0"
-                                        ++ "\n                      ./scripts/build-exec.sh exec Y15.D05 0 +RTS -t -s -RTS"
-                                        ++ "\ncat res/Y15/D05.txt | ./scripts/build-exec.sh pipe Y15.D05 0"
-                                        ++ "\ncat res/Y15/D05.txt | ./scripts/build-exec.sh pipe Y15.D05 0 +RTS -t -s -RTS"
+                                        ++ "\n"
+                                        ++ "\nExamples (individual parts):"
+                                        ++ "\n                      ./scripts/build-exec.sh exec Y15.D05 1"
+                                        ++ "\n                      ./scripts/build-exec.sh exec Y15.D05 2 +RTS -t -s -RTS"
+                                        ++ "\ncat res/Y15/D05.txt | ./scripts/build-exec.sh pipe Y15.D05 1"
+                                        ++ "\ncat res/Y15/D05.txt | ./scripts/build-exec.sh pipe Y15.D05 2 +RTS -t -s -RTS"
+                                        ++ "\n"
 
             let daysSelected :: [Day] = filter daysPred $ M.elems Days.moduleName2day
 
