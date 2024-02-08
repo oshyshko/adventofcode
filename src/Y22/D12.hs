@@ -28,26 +28,28 @@ parseMapStartEnd =
         | 'E' == h       = cost 'z'
         | otherwise      = error $ "Unexpected height: " ++ show h
 
+{-# INLINE[1] minScore #-}
 minScore :: Vec2 Height -> XY -> XY -> Maybe Int
 minScore Vec2{wh,vec} start goal =
-    P.minScoreMVector
+    P.minScoreVec
         (VG.length vec)
-        (P.World
+        P.Config
             { neighbors = neighbors . i2xy wh
-            , cost      = \_ _ -> 1 })
-        (xy2i wh start)
-        (xy2i wh goal)
+            , cost      = \_ _ -> 1
+            , remaining = Nothing
+            , start     = xy2i wh start
+            , goal      = (== xy2i wh goal)
+            }
   where
     -- TODO consider reducing value lookups by merging 'at' with 'neighbors`
     neighbors :: XY -> [XYI]
-    neighbors xy =
+    neighbors p =
         [ nXyi
         | d <- udlr
-        , let nXy@(XY nx ny) = xy + d
-        , let (XY w h ) = wh
-        , nx >= 0 && ny >= 0 && nx < w && ny < h
+        , let nXy@(XY nx ny) = p + d
+        , nx >= 0 && ny >= 0 && nx < getX wh && ny < getY wh
         , let nXyi = xy2i wh nXy
-        , (vec VG.! nXyi - 1) <= vec VG.! xy2i wh xy
+        , (vec VG.! nXyi - 1) <= vec VG.! xy2i wh p
         ]
 
 solve1 :: String -> Int

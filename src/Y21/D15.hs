@@ -36,12 +36,33 @@ atTiled Vec2{wh,vec} wht i =
         & (+) (fromIntegral $ x `div` w + y `div` h)                    -- add tile value
         & pred & (`mod` 9) & succ                                       -- wrap around
 
-solve1, solve2, solve1MI, solve2MI, solve1MS, solve2MS :: String -> Int
-solve1   = (\v@Vec2{wh,vec} ->                            fromJust $ P.minScoreMVector (        VG.length vec) (P.World (neighbors wh  . i2xy wh)  (\_ -> fromIntegral . at v)         ) 0 (        VG.length vec - 1)) <$> parse
-solve2   = (\v@Vec2{wh,vec} -> let wht = xyMap (*5) wh in fromJust $ P.minScoreMVector (5 * 5 * VG.length vec) (P.World (neighbors wht . i2xy wht) (\_ -> fromIntegral . atTiled v wht)) 0 (5 * 5 * VG.length vec - 1)) <$> parse
+{-# INLINE[1] config1 #-}
+config1 :: Vec2 Risk -> P.Config XYI Word16
+config1 v@Vec2{wh,vec} =
+    P.Config
+        { neighbors = neighbors wh . i2xy wh
+        , cost      = \_ -> fromIntegral . at v
+        , remaining = Nothing -- Just $ fromIntegral . distanceManhattan wh . i2xy wh -- NOTE: produces garbage
+        , start     = 0
+        , goal      = (== VG.length vec - 1)
+        }
 
-solve1MI = (\v@Vec2{wh,vec} ->                            fromJust $ P.minScoreIntMap                          (P.World (neighbors wh  . i2xy wh)  (\_ -> fromIntegral . at v)         ) 0 (        VG.length vec - 1)) <$> parse
-solve2MI = (\v@Vec2{wh,vec} -> let wht = xyMap (*5) wh in fromJust $ P.minScoreIntMap                          (P.World (neighbors wht . i2xy wht) (\_ -> fromIntegral . atTiled v wht)) 0 (5 * 5 * VG.length vec - 1)) <$> parse
+{-# INLINE[1] config2 #-}
+config2 :: Vec2 Risk -> P.Config XYI Word16
+config2 v@Vec2{wh,vec} =
+    let wht = xyMap (*5) wh
+    in P.Config
+        { neighbors = neighbors wht . i2xy wht
+        , cost      = \_ -> fromIntegral . atTiled v wht
+        , remaining = Nothing -- Just $ fromIntegral . distanceManhattan wh . i2xy wh -- NOTE: produces garbage
+        , start     = 0
+        , goal      = (== 5 * 5 * VG.length vec - 1)
+        }
 
-solve1MS = (\v@Vec2{wh,vec} ->                            fromJust $ P.minScoreMap                             (P.World (neighbors wh  . i2xy wh)  (\_ -> fromIntegral . at v)         ) 0 (        VG.length vec - 1)) <$> parse
-solve2MS = (\v@Vec2{wh,vec} -> let wht = xyMap (*5) wh in fromJust $ P.minScoreMap                             (P.World (neighbors wht . i2xy wht) (\_ -> fromIntegral . atTiled v wht)) 0 (5 * 5 * VG.length vec - 1)) <$> parse
+solve1, solve2, solve1MS, solve2MS, solve1MI, solve2MI :: String -> Int
+solve1   = (\v -> fromIntegral . fromJust . P.minScoreVec         (VG.length (vec v)) . config1 $ v) <$> parse
+solve2   = (\v -> fromIntegral . fromJust . P.minScoreVec (5 * 5 * VG.length (vec v)) . config2 $ v) <$> parse
+solve1MS =        fromIntegral . fromJust . P.minScore                                . config1      <$> parse
+solve2MS =        fromIntegral . fromJust . P.minScore                                . config2      <$> parse
+solve1MI =        fromIntegral . fromJust . P.minScoreInt                             . config1      <$> parse
+solve2MI =        fromIntegral . fromJust . P.minScoreInt                             . config2      <$> parse

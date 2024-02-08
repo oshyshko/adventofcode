@@ -18,8 +18,8 @@ module Imports
     , module Data.Functor
     , module Data.Functor.Identity
     , module Data.HashMap.Strict
-    , module Data.Int
     , module Data.Hashable
+    , module Data.Int
     , module Data.IntMap.Strict
     , module Data.List
     , module Data.List.Split
@@ -28,6 +28,7 @@ module Imports
     , module Data.Set
     , module Data.Tuple.Strict
     , module Data.Word
+    , module GHC.Generics
     , module System.IO
     , module Text.Printf
     ) where
@@ -77,5 +78,6 @@ import           Data.Tuple.Strict       (T1 (..), T2 (..), T3 (..), T4 (..),
                                           T5 (..), T6 (..), T7 (..), T8 (..),
                                           scurry, sfst, ssnd, sswap, suncurry)
 import           Data.Word               (Word16, Word32, Word64, Word8)
+import           GHC.Generics            (Generic)
 import           System.IO               (hFlush, stdout)
 import           Text.Printf             (printf)
