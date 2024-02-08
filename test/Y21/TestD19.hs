@@ -1,9 +1,8 @@
-{-# LANGUAGE QuasiQuotes #-}
 module Y21.TestD19 where
 
 import qualified Data.Map.Strict as M
 import qualified Data.Set        as S
-import           Data.String.QQ
+import           Data.String.QQ  (s)
 import           Test.Hspec
 
 import           Geom.XYZ
