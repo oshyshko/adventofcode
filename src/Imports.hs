@@ -26,6 +26,7 @@ module Imports
     , module Data.Map.Strict
     , module Data.Maybe
     , module Data.Set
+    , module Data.STRef
     , module Data.Tuple.Strict
     , module Data.Word
     , module GHC.Generics
@@ -43,7 +44,7 @@ import           Control.Monad           (forM, forM_, guard, join, replicateM,
                                           unless, when, (<=<), (>=>))
 import           Control.Monad.IO.Class  (MonadIO, liftIO)
 import           Control.Monad.Primitive (PrimMonad (..))
-import           Control.Monad.ST        (ST, runST)
+import           Control.Monad.ST        (ST, fixST, runST)
 import           Data.Bifunctor          (bimap, first, second)
 import           Data.Bit                (Bit (..), unBit)
 import           Data.Bool               (bool)
@@ -74,6 +75,8 @@ import           Data.Maybe              (catMaybes, fromJust, fromMaybe,
                                           isJust, isNothing, listToMaybe,
                                           mapMaybe, maybeToList)
 import           Data.Set                (Set)
+import           Data.STRef              (STRef, modifySTRef, modifySTRef',
+                                          newSTRef, readSTRef, writeSTRef)
 import           Data.Tuple.Strict       (T1 (..), T2 (..), T3 (..), T4 (..),
                                           T5 (..), T6 (..), T7 (..), T8 (..),
                                           scurry, sfst, ssnd, sswap, suncurry)
