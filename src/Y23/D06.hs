@@ -1,6 +1,5 @@
 module Y23.D06 where
 
-import           Imports
 import           Parser
 
 -- Time:      7  15   30
@@ -12,10 +11,10 @@ timesAndDistances =
 
 waysToWin :: Int -> Int -> Int
 waysToWin t d =
-      [0 :: Int .. t]
-    & fmap (\x -> x * (t - x))
-    & filter (> d)
-    & length
+    let sqDis :: Float = sqrt . fromIntegral $ t * t - 4 * d
+        x1 = (fromIntegral t + sqDis) / 2
+        x2 = (fromIntegral t - sqDis) / 2
+    in 1 + (floor x1  - ceiling x2)
 
 solve1 :: String -> Int
 solve1 =
