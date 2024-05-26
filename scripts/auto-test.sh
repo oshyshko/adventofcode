@@ -10,7 +10,7 @@ cd "$(dirname $0)/../"
 # - in command line - use ./scripts/auto-test.sh '--match "/Y21.D22/"'
 
 # taken from https://www.parsonsmatt.org/2018/05/19/ghcid_for_the_win.html
-ghcid -W \
+ghcid \
     --command "stack ghci adventofcode:lib adventofcode:test:spec" \
     --test "Main.main" \
     --setup ":set args $@"
