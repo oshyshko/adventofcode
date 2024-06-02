@@ -63,30 +63,21 @@ getSysInfo = do
 --
 getMac :: IO SysInfo
 getMac = do
-    osA  <- execM "uname -m"                           <&> (headM . lines =<<)
-    osV  <- execM "sw_vers -productVersion"            <&> (headM . lines =<<)
-    hwM  <- execM "sysctl -n hw.model"                 <&> (headM . lines =<<)
-    cpuC <- execM "sysctl -n hw.physicalcpu"           <&> (readMaybe =<<)
-    cpuM <- execM "sysctl -n machdep.cpu.brand_string" <&> (headM . lines =<<)
-    ramT <- execM "sysctl -n hw.memsize"               <&> (readMaybe =<<)
-    ramC <- execM "system_profiler SPMemoryDataType"   <&> fmap
-          (read     -- TODO refactor, take into account parsing errors
-        . last
-        . init
-        . splitOn " "
-        . head
+    osArch      <- execM "uname -m"                           <&> (headM . lines =<<)
+    osVersion   <- execM "sw_vers -productVersion"            <&> (headM . lines =<<)
+    hwModel     <- execM "sysctl -n hw.model"                 <&> (headM . lines =<<)
+    cpuCores    <- execM "sysctl -n hw.physicalcpu"           <&> (readMaybe =<<)
+    cpuModel    <- execM "sysctl -n machdep.cpu.brand_string" <&> (headM . lines =<<)
+    ramTotal    <- execM "sysctl -n hw.memsize"               <&> (readMaybe =<<)
+    ramClock    <- execM "system_profiler SPMemoryDataType"   <&>
+        -- TODO refactor, take into account parsing errors
+        ( fmap (read . last . init . splitOn " ")
+        . headM
         . filter (\x -> "Speed: " `isInfixOf` x)
-        . lines)
+        . lines =<<)
 
     return $ mkEmptySysInfo
-        { osArch       = osA
-        , osVersion    = osV
-        , hwModel      = hwM
-        , cpuCores     = cpuC
-        , cpuModel     = cpuM
-        , ramTotal     = ramT
-        , ramClock     = ramC
-        }
+        { osArch, osVersion, hwModel, cpuCores, cpuModel, ramTotal, ramClock }
 
 -- Platform: mingw32, x86_64, v10.0.17763, NUC7JYB
 -- CPU:      Intel(R) Pentium(R) Silver J5005 CPU @ 1.50GHz, 4 cores
