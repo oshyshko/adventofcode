@@ -167,10 +167,14 @@ tryOrNothing ioa =
         (\(_ :: SomeException) -> return Nothing)
 
 execM :: FilePath -> IO (Maybe String)
-execM cmd = tryOrNothing $
-        (\(_, out, _) -> out)
-            <$> readProcessWithExitCode c args ""
-    where c:args = words cmd
+execM cmd =
+    case words cmd of
+        c:args ->
+            tryOrNothing $
+                (\(_, out, _) -> out)
+                    <$> readProcessWithExitCode c args ""
+        _ -> error $ "Expected at 1+ elements in `cmd`, but got: " <> cmd
+
 
 -- readFileM :: FilePath -> IO (Maybe String)
 -- readFileM path = tryOrNothing $ readFile path
